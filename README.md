@@ -6,6 +6,7 @@ selected OSM keys to specific columns for each layer in the database. For this p
 
 For example:
 
+```
 @tracks, lines, type, bridge
 bridge == 'yes' { store bridge 'true' ; continue ; }
 highway == 'tertiary' { store type 'primary' }
@@ -16,6 +17,7 @@ highway == 'unclassified' { store type 'secondary' }
 highway == 'track' && tracktype== 'grade4'  && ( smoothness == 'very bad' || smoothness == 'horrible' ) { store type 'tertiary' }
 highway == 'track' && tracktype== 'grade5' { store type 'tertiary' }
 highway == 'track' { store type 'secondary' }
+```
 
 defines a layer (sqlite geometry table) named "tracks" of geometry type "lines" with columns "type" and "bridge" and populated according to the rules given below.
 
