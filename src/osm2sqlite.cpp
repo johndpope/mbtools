@@ -1,6 +1,8 @@
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
+
 #include <iomanip>
 
 #include <MapFile.h>
@@ -21,12 +23,14 @@ struct Rule {
 struct Layer {
     string name_ ;
     string geom_ ;
+    string srid_ ;
     vector<string> tags_, types_ ;
     vector<Rule> rules_ ;
 };
 
-struct LayerConfig {
+struct MapConfig {
    vector<Layer> layers_ ;
+   Dictionary pragmas_, resources_ ;
 };
 
 struct Action {
@@ -39,38 +43,32 @@ struct NodeRuleMap {
     vector<int> matched_rules_ ;
 };
 
-string insertFeatureSQL(const vector<string> &tags, const vector<string> &tag_types, const string &layerName, const string &geomCmd)
-{
-    string sql ;
 
-    // collect tags
 
-    sql = "INSERT INTO " ;
-    sql += layerName ;
-    sql += "(geom" ;
+static void split_line(const string &src, vector<string> &tokens) {
 
-    for(int j=0 ; j<tags.size() ; j++ )
-    {
-        sql += ',' ;
-        sql += tags[j] ;
-    }
+    using boost::tokenizer;
+    using boost::escaped_list_separator;
 
-    sql += ") VALUES (" + geomCmd ;
-    for(int j=0 ; j<tags.size() ; j++ ) {
+    typedef tokenizer<escaped_list_separator<char> > stokenizer;
 
-        if ( tag_types[j] == "dict" )
-            sql += ",(SELECT id FROM __dictionary__ WHERE key=?)" ;
-        else
-            sql += ",?" ;
+    stokenizer tok(src, escaped_list_separator<char>("\\", " ,\t",   "\"'"));
 
-    }
-    sql += ");" ;
-
-    return sql ;
-
+    for( stokenizer::iterator beg = tok.begin(); beg!=tok.end(); ++beg)
+        if ( !beg->empty() ) tokens.push_back(*beg) ;
 }
 
-bool parseConfigFile(const string &fileName, LayerConfig &cfg)
+static void split_at_colon(const string &src, string &arg1, string &arg2, const string &def = string())
+{
+    vector<string> sub_tokens ;
+    boost::split( sub_tokens, src , boost::is_any_of(" :"), boost::token_compress_on);
+
+    arg1 = sub_tokens[0] ;
+    if ( sub_tokens.size() == 2 ) arg2 = sub_tokens[1]  ;
+    else arg2 = def ;
+}
+
+bool parseConfigFile(const string &fileName, MapConfig &cfg)
 {
     ifstream strm(fileName.c_str()) ;
     if ( !strm ) {
@@ -90,42 +88,71 @@ bool parseConfigFile(const string &fileName, LayerConfig &cfg)
         else if ( line.at(0) == '@')
         {
             vector<string> tokens ;
-            boost::split( tokens, line, boost::is_any_of(","), boost::token_compress_on );
 
-            if ( tokens.size() < 3 )
+            split_line(line, tokens) ;
+
+            if ( tokens[0] == "@layer") {
+
+                if ( tokens.size() < 3 )
+                {
+                    cerr << "Error parsing layer definition in " << fileName << " not enough arguments (line: " << count << ")" ;
+                    return false ;
+                }
+
+                // parse layer info
+
+                Layer layer ;
+
+                layer.name_ = boost::trim_copy(tokens[1]) ; // name
+
+                // geometry type (points, lines, polygons) and srid
+
+                split_at_colon(tokens[2], layer.geom_, layer.srid_, "4326") ;
+
+                // parse columns (in the form <column_name>:<column_type>)
+
+                for(int j=3 ; j<tokens.size() ; j++ )
+                {
+                    string tag, type ;
+                    split_at_colon(tokens[j], tag, type, "text") ;
+
+                    layer.tags_.push_back(tag) ;
+                    layer.types_.push_back(type) ;
+                }
+
+                cfg.layers_.push_back(layer) ;
+
+            }
+            else if ( tokens[0] == "@pragma" )
             {
-                cerr << "Error parsing " << fileName << " not enough arguments (line: " << count << ")" ;
-                return false ;
+                if ( tokens.size() < 3 )
+                {
+                    cerr << "Error parsing pragma declaration in " << fileName << " not enough arguments (line: " << count << ")" ;
+                    return false ;
+                }
+
+                string key = tokens[1] ;
+                string val = tokens[2] ;
+
+                cfg.pragmas_.add(key, val) ;
+            }
+            else if ( tokens[0] == "@resource" )
+            {
+                if ( tokens.size() != 3 )
+                {
+                    cerr << "Error parsing resource declaration in " << fileName << " not enough arguments (line: " << count << ")" ;
+                    return false ;
+                }
+
+                string key = tokens[1] ;
+                string val = tokens[2] ;
+
+                cfg.resources_.add(key, val) ;
+
             }
 
-            // parse layer info
-
-            Layer layer ;
-
-            layer.name_ = boost::trim_copy(tokens[0].substr(1)) ; // name
-            layer.geom_ = boost::trim_copy(tokens[1]) ;           // geometry type (points, lines, polygons)
-
-            // parse columns (in the form <column_name>:<column_type>)
-
-            for(int j=2 ; j<tokens.size() ; j++ )
-            {
-                const string &tag = tokens[j] ;
-
-                vector<string> sub_tokens ;
-                boost::split( sub_tokens, tag , boost::is_any_of(":"), boost::token_compress_on);
-
-                layer.tags_.push_back(boost::trim_copy(sub_tokens[0])) ; // column name
-
-                if ( sub_tokens.size() == 2 )
-                    layer.types_.push_back(boost::trim_copy(sub_tokens[1]))  ;
-                else
-                    layer.types_.push_back("text") ;
-            }
-
-            cfg.layers_.push_back(layer) ;
 
         }
-
         else // rules
         {
             if ( cfg.layers_.empty() )
@@ -278,8 +305,11 @@ bool addOSMLayerPoints(MapFile &mf, OSM::Document &doc, const Layer &layer,
 
     SQLite::Transaction trans(con) ;
 
-    SQLite::Command cmd(con, insertFeatureSQL(layer.tags_, layer.types_, layer.name_)) ;
-    SQLite::Command cmd_dict(con, "INSERT OR IGNORE INTO __dictionary__ (key) VALUES (?)") ;
+    string geoCmd = "Transform(?," + layer.srid_ + ")" ;
+    SQLite::Command cmd(con, mf.insertFeatureSQL(layer.tags_, layer.types_,  layer.name_, geoCmd)) ;
+
+    string sql = "INSERT OR IGNORE INTO " + mf.dictionary_table_name_ + " (key) VALUES (?)" ;
+    SQLite::Command cmd_dict(con, sql) ;
 
     for(int i=0 ; i<node_idxs.size() ; i++ )
     {
@@ -349,11 +379,12 @@ bool addOSMLayerPOIs(MapFile &mf, OSM::Document &doc, const Layer &layer,
     string sql = "INSERT INTO " ;
     sql += layer.name_ + "_text (docid, content) VALUES(?, ?)" ;
 
-    SQLite::Command cmd1(con, insertFeatureSQL(layer.tags_, layer.types_, layer.name_)) ;
+    string geoCmd = "Transform(?," + layer.srid_ + ")" ;
+    SQLite::Command cmd1(con, mf.insertFeatureSQL(layer.tags_, layer.types_, layer.name_, geoCmd)) ;
     SQLite::Command cmd2(con, sql) ;
-    SQLite::Command cmd_dict(con, "INSERT OR IGNORE INTO __dictionary__ (key) VALUES (?)") ;
+    sql = "INSERT OR IGNORE INTO " + mf.dictionary_table_name_ + " (key) VALUES (?)" ;
+    SQLite::Command cmd_dict(con, sql) ;
 
-    int counter = 0 ;
     bool cont ;
 
     for(int i=0 ; i<node_idxs.size() ; i++ )
@@ -437,8 +468,10 @@ bool addOSMLayerLines(MapFile &mf, OSM::Document &doc, const Layer &layer,
 
     SQLite::Transaction trans(con) ;
 
-    SQLite::Command cmd(con, insertFeatureSQL(layer.tags_, layer.types_, layer.name_, "CompressGeometry(?)")) ;
-    SQLite::Command cmd_dict(con, "INSERT OR IGNORE INTO __dictionary__ (key) VALUES (?)") ;
+    string geoCmd = "CompressGeometry(Transform(?," + layer.srid_ + "))" ;
+    SQLite::Command cmd(con, mf.insertFeatureSQL(layer.tags_, layer.types_, layer.name_, geoCmd)) ;
+    string sql = "INSERT OR IGNORE INTO " + mf.dictionary_table_name_ + " (key) VALUES (?)" ;
+    SQLite::Command cmd_dict(con, sql) ;
 
     int k=0 ;
     bool cont ;
@@ -563,10 +596,10 @@ bool addOSMLayerPolygons(MapFile &mf, const OSM::Document &doc, const Layer &lay
 
     SQLite::Transaction trans(con) ;
 
-    SQLite::Command cmd(con, insertFeatureSQL(layer.tags_, layer.types_, layer.name_, "CompressGeometry(ST_BuildArea(?))")) ;
-    SQLite::Command cmd_dict(con, "INSERT OR IGNORE INTO __dictionary__ (key) VALUES (?)") ;
-
-    bool cont ;
+    string geoCmd = "CompressGeometry(Transform(ST_BuildArea(?)," + layer.srid_ + "))" ;
+    SQLite::Command cmd(con, mf.insertFeatureSQL(layer.tags_, layer.types_, layer.name_,  geoCmd)) ;
+    string sql = "INSERT OR IGNORE INTO " + mf.dictionary_table_name_ + " (key) VALUES (?)" ;
+    SQLite::Command cmd_dict(con, sql) ;
 
     for( int i=0 ; i< poly_idxs.size() ; i++ )
     {
@@ -627,21 +660,39 @@ bool addOSMLayerPolygons(MapFile &mf, const OSM::Document &doc, const Layer &lay
 
 bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> &osmFiles, bool overwrite, bool append)
 {
-    LayerConfig cfg ;
+    MapConfig cfg ;
     if ( !parseConfigFile(configFile, cfg) ) return false ;
 
+    m.dictionary_table_name_ = cfg.pragmas_.get("dictionary_table_name", m.dictionary_table_name_);
+    m.view_suffix_ = cfg.pragmas_.get("view_table_suffix", m.view_suffix_);
+    m.geometry_column_name_ = cfg.pragmas_.get("geometry_column", m.geometry_column_name_);
+    string table_prefix = cfg.pragmas_.get("table_prefix", "") ;
+
     m.createDictionary(overwrite) ;
+    m.createResourcesTable(append) ;
+
+    DictionaryIterator it(cfg.resources_) ;
+
+    while ( it )
+    {
+        m.addResource(it.key(), it.value()) ;
+        ++it ;
+    }
 
     for(int j=0 ; j<cfg.layers_.size() ; j++)
     {
         const Layer &layer = cfg.layers_[j] ;
 
-        if ( ! m.createLayerTable(layer.name_, layer.geom_, "geom", layer.tags_, layer.types_, overwrite, append) ) {
+        if ( ! m.createLayerTable(table_prefix + layer.name_,
+                                  layer.geom_,
+                                  layer.srid_,
+                                  m.geometry_column_name_,
+                                  layer.tags_, layer.types_, overwrite, append) ) {
             cerr << "Failed to create layer " << layer.name_ << ", skipping" ;
             continue ;
         }
 
-        if ( layer.geom_ == "pois" && ! m.createPOITable(layer.name_, overwrite, append) ) {
+        if ( layer.geom_ == "pois" && ! m.createPOITable(cfg.pragmas_.get("table_prefix", "") + layer.name_, overwrite, append) ) {
             cerr << "Failed to create POI layer " << layer.name_ << ", skipping" ;
             continue ;
         }
@@ -747,8 +798,6 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
                     {
 
                         if ( !layer.rules_[r].condition_->eval(ctx).toBoolean() ) continue ;
-
-
 
                         processSetTagActions(layer.rules_[r], ctx, &way) ;
 

@@ -19,6 +19,7 @@ SET ( OSM2SQLITE_SOURCES
 	OsmDocument.cpp
 	OsmPolygon.cpp
 	MapFile.cpp
+	Resources.cpp
 
 	Dictionary.cpp
 	XmlReader.cpp

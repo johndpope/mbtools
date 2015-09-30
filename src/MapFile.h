@@ -4,6 +4,8 @@
 #include <Database.h>
 #include <Dictionary.h>
 
+#include <boost/filesystem.hpp>
+
 #include <map>
 
 
@@ -92,6 +94,7 @@ public:
     bool hasLayer(const std::string &layerName);
 
     bool createLayerTable(const string &layerName, const string &layerType,
+                          const string &layerSrid,
                           const string &geomColumn,
                           const std::vector<string> &tags,
                           const std::vector<string> &tag_types,
@@ -102,22 +105,34 @@ public:
                           bool ovewrite,
                           bool append);
 
+    bool createResourcesTable(bool append) ;
+
+    bool addResource(const string &key, const boost::filesystem::path &filePath) ;
+
     bool createDictionary(bool overwrite) ;
+
+    std::string insertFeatureSQL(const std::vector<string> &tags, const std::vector<string> &types, const std::string &layerName,
+                                 const std::string &geomCmd = "?") ;
+
 
 private:
 
     bool hasTable(const std::string &tableName);
 
+
+
 private:
 
     SQLite::Database *db_ ;
 
-    string fileName ;
+    string fileName_ ;
+
+public:
+    string view_suffix_, dictionary_table_name_, geometry_column_name_ ;
 
 };
 
 
-std::string insertFeatureSQL(const std::vector<string> &tags, const std::vector<string> &types, const std::string &layerName, const std::string &geomCmd = "?") ;
 
 
 

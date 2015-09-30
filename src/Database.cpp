@@ -95,6 +95,8 @@ void Statement::clear()
      if ( sqlite3_reset(handle) != SQLITE_OK ) throw Exception(con.handle);
 
      if ( sqlite3_clear_bindings(handle) != SQLITE_OK ) throw Exception(con.handle);
+
+     last_arg_idx = 0 ;
 }
 
 void Statement::finalize() {

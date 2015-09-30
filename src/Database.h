@@ -30,7 +30,7 @@ typedef boost::shared_ptr<Connection> ConnectionPtr ;
 class Database: boost::noncopyable {
 public:
 
-    Database(const std::string &fname, size_t pool_size = 10) ;
+    Database(const std::string &fname, size_t pool_size = 1) ;
     ~Database() ;
 
     Connection *connect();
