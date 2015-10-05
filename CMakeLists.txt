@@ -8,7 +8,7 @@ INCLUDE(FindThirdParty)
 
 ADD_SUBDIRECTORY(src)
 
-IF ( WIN32 )
-INCLUDE(Package)
-ENDIF ( WIN32 )
+#IF ( WIN32 )
+#INCLUDE(Package)
+#ENDIF ( WIN32 )
 
