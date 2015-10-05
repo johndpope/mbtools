@@ -8,7 +8,7 @@
 using namespace std ;
 namespace fs = boost::filesystem ;
 
-static string read_file( const string &fileName, uint &sizeOrig, bool compressFile = true)
+static string read_file( const string &fileName, size_t &sizeOrig, bool compressFile = true)
 {
     ifstream ifs(fileName.c_str(), ios::in | ios::binary | ios::ate );
 
@@ -100,7 +100,7 @@ bool MapFile::addResource(const string &key, const fs::path &filePath)
         string key = it.key() ;
         string file_path = it.value() ;
 
-        uint sz ;
+        size_t sz ;
         string content = read_file(file_path, sz) ;
 
         stmt.bind(key) ;
