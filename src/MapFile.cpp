@@ -21,7 +21,7 @@ class SpatialLiteSingleton
 private:
 
     SpatialLiteSingleton () {
-        spatialite_init(true);
+        spatialite_init(false);
     };
 
     ~SpatialLiteSingleton () {
