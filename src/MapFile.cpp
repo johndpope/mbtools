@@ -325,7 +325,7 @@ bool MapFile::createLayerTable(const std::string &layerName, const string &layer
 
             sqls << "CREATE VIEW " << layerName << view_suffix_ << " AS SELECT gid as ROWID," ;
 
-            uint counter = 1 ;
+            size_t counter = 1 ;
 
             for( int i=0 ; i<tags.size() ; i++ )
             {
