@@ -1,16 +1,9 @@
 %{
-/*
- * AT&T lex can't handle this lexer due to lex bugs.  It works with flex
- * 2.3.7, pclex 2.0.5, and MKS lex 3.1a.
- */
 #include <OsmRuleScanner.h>
 #include <OsmRuleParser.h>
 
-#include <osm_parser.hpp>
+#include <parser/osm_parser.hpp>
 #include <string.h>
-
-
-
 %}
 
 %option debug noyywrap

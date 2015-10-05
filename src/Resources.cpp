@@ -58,15 +58,25 @@ static string read_file( const string &fileName, uint &sizeOrig, bool compressFi
 void get_file_list(const string &key, const fs::path &filePath, Dictionary &files)
 {
 
-    fs::directory_iterator end_itr;
+    string prefix ;
 
-    for (fs::directory_iterator itr(filePath); itr != end_itr; ++itr)
+    if ( !key.empty() ) prefix = key + '/' ;
+
+    if ( fs::is_regular_file(filePath) )
     {
-        if (fs::is_regular_file(itr->path())) {
-            string current_file = itr->path().string();
-            files.add(key + '/' + itr->path().filename().string(), current_file) ;
+        files.add(prefix + filePath.filename().string(), filePath.string()) ;
+    }
+    else {
+        fs::directory_iterator end_itr;
+
+        for (fs::directory_iterator itr(filePath); itr != end_itr; ++itr)
+        {
+            if (fs::is_regular_file(itr->path())) {
+                string current_file = itr->path().string();
+                files.add(prefix + itr->path().filename().string(), current_file) ;
+            }
+            else get_file_list(prefix + itr->path().stem().string(), itr->path(), files) ;
         }
-        else get_file_list(key + '/' + itr->path().stem().string(), itr->path(), files) ;
     }
 
 }
@@ -107,4 +117,3 @@ bool MapFile::addResource(const string &key, const fs::path &filePath)
 
 }
 
-#endif

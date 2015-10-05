@@ -323,7 +323,7 @@ bool MapFile::createLayerTable(const std::string &layerName, const string &layer
         {
             stringstream sqls ;
 
-            sqls << "CREATE VIEW " << layerName << view_suffix_ << " AS SELECT gid," ;
+            sqls << "CREATE VIEW " << layerName << view_suffix_ << " AS SELECT gid as ROWID," ;
 
             uint counter = 1 ;
 

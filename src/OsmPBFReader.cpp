@@ -4,7 +4,9 @@
 #include <osmformat.pb.h>
 
 #include <fstream>
+#ifndef _WIN32
 #include <arpa/inet.h>
+#endif
 #include <zlib.h>
 
 using namespace std ;

@@ -138,16 +138,18 @@ bool parseConfigFile(const string &fileName, MapConfig &cfg)
             }
             else if ( tokens[0] == "@resource" )
             {
-                if ( tokens.size() != 3 )
+                if ( tokens.size() < 2 )
                 {
-                    cerr << "Error parsing resource declaration in " << fileName << " not enough arguments (line: " << count << ")" ;
+                    cerr << "Error parsing resource declaration in " << fileName << "(line: " << count << ")" ;
                     return false ;
                 }
 
-                string key = tokens[1] ;
-                string val = tokens[2] ;
+                string rpath = tokens[1] ;
+                string prefix ;
 
-                cfg.resources_.add(key, val) ;
+                if ( tokens.size() == 3 ) prefix = tokens[2] ;
+
+                cfg.resources_.add(rpath, prefix) ;
 
             }
 
@@ -675,7 +677,7 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
 
     while ( it )
     {
-        m.addResource(it.key(), it.value()) ;
+        m.addResource(it.value(), it.key()) ;
         ++it ;
     }
 
