@@ -1,8 +1,8 @@
-# osm2sqlite
+# osm2mbtiles
 
-The application will convert an OpenStreetMap file to an SQLite database. 
-The database is suitable for importing into applications such as QGIS by splitting data to layers and mapping 
-selected OSM keys to specific columns for each layer in the database. For this purpose the application reads a config file the defines each layer, sqlite table columns,  rules to filter raw data and actions to store data to designated layer columns.
+The application will convert an OpenStreetMap file to mbtiles format (https://www.mapbox.com/help/an-open-platform/#mbtiles). 
+The application splits data to layers and maps 
+selected OSM key/value pairs to to each layer. For this purpose the application reads a config file the defines each layer, rules to filter raw data and actions to store data to designated layer attributes.
 
 For example:
 
