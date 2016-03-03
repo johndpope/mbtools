@@ -46,22 +46,22 @@ void Parser::error(const OSM::BisonParser::location_type &loc,
 
 std::string Context::id() const {
 
-    assert(feat) ;
-    return feat->id ;
+    assert(feat_) ;
+    return feat_->id_ ;
 }
 
 bool Context::has_tag(const string &key) const
 {
-    assert(feat) ;
+    assert(feat_) ;
 
-    return feat->tags.contains(key) ;
+    return feat_->tags_.contains(key) ;
 }
 
 string Context::value(const string &key) const
 {
-    assert(feat) ;
+    assert(feat_) ;
 
-    return feat->tags.get(key) ;
+    return feat_->tags_.get(key) ;
 }
 
 
@@ -118,23 +118,23 @@ Literal BooleanOperator::eval(Context &ctx)
 {
     switch ( op ) {
         case And:
-            return ( children[0]->eval(ctx).toBoolean() && children[1]->eval(ctx).toBoolean() ) ;
+            return ( children_[0]->eval(ctx).toBoolean() && children_[1]->eval(ctx).toBoolean() ) ;
         case Or:
-            return ( children[0]->eval(ctx).toBoolean() || children[1]->eval(ctx).toBoolean() ) ;
+            return ( children_[0]->eval(ctx).toBoolean() || children_[1]->eval(ctx).toBoolean() ) ;
         case Not:
-           return !( children[0]->eval(ctx).toBoolean() ) ;
+           return !( children_[0]->eval(ctx).toBoolean() ) ;
     }
 }
 
 Literal ComparisonPredicate::eval(Context &ctx)
 {
 
-   Literal lhs = children[0]->eval(ctx) ;
-   Literal rhs = children[1]->eval(ctx) ;
+   Literal lhs = children_[0]->eval(ctx) ;
+   Literal rhs = children_[1]->eval(ctx) ;
 
    if ( lhs.isNull() || rhs.isNull() ) return false ;
 
-    switch ( op ) {
+    switch ( op_ ) {
         case Equal:
             {
                 if ( lhs.type_ == Literal::String && lhs.type_ == Literal::String )
@@ -254,32 +254,31 @@ static string globToRegex(const char *pat)
     return rx ;
 }
 
-LikeTextPredicate::LikeTextPredicate(ExpressionNode *op, const std::string &pattern_, bool is_pos):
-    ExpressionNode(op), isPos(is_pos)
+LikeTextPredicate::LikeTextPredicate(ExpressionNode *op, const std::string &pattern, bool is_pos):
+    ExpressionNode(op), is_pos_(is_pos)
 {
-
-    if ( !pattern_.empty() )
-        pattern.set_expression(globToRegex(pattern_.c_str())) ;
+    if ( !pattern.empty() )
+        pattern_ = std::regex(globToRegex(pattern.c_str())) ;
 
 }
 
 
 Literal LikeTextPredicate::eval(Context &ctx)
 {
-    Literal op = children[0]->eval(ctx) ;
+    Literal op = children_[0]->eval(ctx) ;
 
-    return boost::regex_match(op.toString(), pattern) ;
+    return std::regex_match(op.toString(), pattern_) ;
 
 }
 
 ListPredicate::ListPredicate(const string &id, ExpressionNode *op, bool is_pos):
-    id_(id), ExpressionNode(op), isPos(is_pos)
+    id_(id), ExpressionNode(op), is_pos_(is_pos)
 {
     Context ctx ;
 
-    for(int i=0 ; i<children[0]->children.size() ; i++)
+    for(int i=0 ; i<children_[0]->children_.size() ; i++)
     {
-        string lval = children[0]->children[i]->eval(ctx).toString() ;
+        string lval = children_[0]->children_[i]->eval(ctx).toString() ;
         lvals_.push_back(lval) ;
     }
 
@@ -293,27 +292,27 @@ Literal ListPredicate::eval(Context &ctx)
     string val = ctx.value(id_) ;
 
     for(int i=0 ; i<lvals_.size() ; i++)
-        if ( val == lvals_[i] ) return isPos ;
+        if ( val == lvals_[i] ) return is_pos_ ;
 
-    return !isPos ;
+    return !is_pos_ ;
 }
 
 
 Literal IsTypePredicate::eval(Context &ctx)
 {
-    assert(ctx.feat) ;
+    assert(ctx.feat_) ;
 
-    if ( keyword == "node")
+    if ( keyword_ == "node")
     {
-        return ctx.feat->type == Feature::NodeFeature ;
+        return ctx.feat_->type_ == Feature::NodeFeature ;
     }
-    else if ( keyword == "way" )
+    else if ( keyword_ == "way" )
     {
-        return ctx.feat->type == Feature::WayFeature ;
+        return ctx.feat_->type_ == Feature::WayFeature ;
     }
-    else if ( keyword == "relation" )
+    else if ( keyword_ == "relation" )
     {
-        return ctx.feat->type == Feature::RelationFeature ;
+        return ctx.feat_->type_ == Feature::RelationFeature ;
     }
 
 }
@@ -333,8 +332,8 @@ Literal Function::eval(Context &ctx)
 
 Literal BinaryOperator::eval(Context &ctx)
 {
-    Literal op1 = children[0]->eval(ctx) ;
-    Literal op2 = children[1]->eval(ctx) ;
+    Literal op1 = children_[0]->eval(ctx) ;
+    Literal op2 = children_[1]->eval(ctx) ;
 
     if ( op == '+' )
     {

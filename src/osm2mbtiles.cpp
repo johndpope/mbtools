@@ -34,13 +34,13 @@ struct MapConfig {
 };
 
 struct Action {
-    string column_ ;
+    string key_ ;
     OSM::Rule::Literal val_ ;
 };
 
 struct NodeRuleMap {
     int node_idx_ ;
-    vector<int> matched_rules_ ;
+    vector<uint> matched_rules_ ;
 };
 
 
@@ -199,14 +199,14 @@ bool processSetTagActions(const Rule &r, OSM::Rule::Context &ctx, OSM::Feature *
     {
         if ( action->cmd_ ==  OSM::Rule::Command::Add )
         {
-            node->tags.add(action->tag_, action->expression_->eval(ctx).toString()) ;
+            node->tags_.add(action->tag_, action->expression_->eval(ctx).toString()) ;
         }
         else if ( action->cmd_ == OSM::Rule::Command::Set )
         {
-            if ( node->tags.contains(action->tag_) )
-                node->tags[action->tag_] = action->expression_->eval(ctx).toString() ;
+            if ( node->tags_.contains(action->tag_) )
+                node->tags_[action->tag_] = action->expression_->eval(ctx).toString() ;
             else
-                node->tags.add(action->tag_, action->expression_->eval(ctx).toString()) ;
+                node->tags_.add(action->tag_, action->expression_->eval(ctx).toString()) ;
         }
         else if ( action->cmd_ == OSM::Rule::Command::Continue )
         {
@@ -214,7 +214,7 @@ bool processSetTagActions(const Rule &r, OSM::Rule::Context &ctx, OSM::Feature *
         }
         else if ( action->cmd_ == OSM::Rule::Command::Delete )
         {
-            node->tags.remove(action->tag_) ;
+            node->tags_.remove(action->tag_) ;
         }
 
         action = action->next_ ;
@@ -241,7 +241,7 @@ bool processStoreActions(const Rule &r, OSM::Rule::Context &ctx, OSM::Feature *n
         {
             Action act ;
 
-            act.column_ = action->tag_ ;
+            act.key_ = action->tag_ ;
             act.val_ = action->expression_->eval(ctx) ;
 
             actions.push_back(act) ;
@@ -259,16 +259,12 @@ bool processStoreActions(const Rule &r, OSM::Rule::Context &ctx, OSM::Feature *n
 
 void bindColumns(const vector<Action> &actions, const Layer &layer, SQLite::Command &cmd, SQLite::Command &cmd_dict)
 {
-    bool is_poi_layer = ( layer.geom_ == "pois" ) ;
-
     for( int i=0 ; i<actions.size() ; i++ )
     {
         const Action &act = actions[i] ;
 
-        if ( is_poi_layer && act.column_ == "content") continue ;
-
         const OSM::Rule::Literal &res = act.val_ ;
-        int column_idx = std::find(layer.tags_.begin(), layer.tags_.end(), act.column_) - layer.tags_.begin();
+        int column_idx = std::find(layer.tags_.begin(), layer.tags_.end(), act.key_) - layer.tags_.begin();
 
         if ( res.isNull() )
             cmd.bind(column_idx + 2, SQLite::Nil) ;
@@ -301,7 +297,6 @@ bool addOSMLayerPoints(MapFile &mf, OSM::Document &doc, const Layer &layer,
     unsigned char *blob;
     int blob_size;
 
-    OSM::Rule::Context ctx(&doc) ;
 
     if ( layer.geom_ != "points" ) return false ;
 
@@ -320,9 +315,9 @@ bool addOSMLayerPoints(MapFile &mf, OSM::Document &doc, const Layer &layer,
         const NodeRuleMap &nr = node_idxs[i] ;
 
         int node_idx = nr.node_idx_ ;
-        OSM::Node &node = doc.nodes[node_idx] ;
+        OSM::Node &node = doc.nodes_[node_idx] ;
 
-        ctx.set(&node) ;
+        OSM::Rule::Context ctx(&node) ;
 
         for(int j=0 ; j<nr.matched_rules_.size() ; j++ )
         {
@@ -341,7 +336,7 @@ bool addOSMLayerPoints(MapFile &mf, OSM::Document &doc, const Layer &layer,
 
         geo_pt->Srid = 4326;
 
-        gaiaAddPointToGeomColl (geo_pt, node.lon, node.lat);
+        gaiaAddPointToGeomColl (geo_pt, node.lon_, node.lat_);
 
         gaiaToSpatiaLiteBlobWkb (geo_pt, &blob, &blob_size);
 
@@ -372,7 +367,7 @@ bool addOSMLayerPOIs(MapFile &mf, OSM::Document &doc, const Layer &layer,
     unsigned char *blob;
     int blob_size;
 
-    OSM::Rule::Context ctx(&doc) ;
+
 
     if ( layer.geom_ != "pois" ) return false ;
 
@@ -394,13 +389,13 @@ bool addOSMLayerPOIs(MapFile &mf, OSM::Document &doc, const Layer &layer,
         int node_idx = node_idxs[i].first ;
         int rule_idx = node_idxs[i].second ;
 
-        OSM::Node &node = doc.nodes[node_idx] ;
+        OSM::Node &node = doc.nodes_[node_idx] ;
 
         if ( node.visited_ ) continue ;
 
-        ctx.set(&doc.nodes[node_idx]) ;
+        OSM::Rule::Context ctx(&doc.nodes_[node_idx]) ;
 
-        if ( !node.tags.empty() )
+        if ( !node.tags_.empty() )
         {
             const Rule &r = layer.rules_[rule_idx] ;
 
@@ -416,7 +411,7 @@ bool addOSMLayerPOIs(MapFile &mf, OSM::Document &doc, const Layer &layer,
 
             geo_pt->Srid = 4326;
 
-            gaiaAddPointToGeomColl (geo_pt, node.lon, node.lat);
+            gaiaAddPointToGeomColl (geo_pt, node.lon_, node.lat_);
 
             gaiaToSpatiaLiteBlobWkb (geo_pt, &blob, &blob_size);
 
@@ -429,7 +424,7 @@ bool addOSMLayerPOIs(MapFile &mf, OSM::Document &doc, const Layer &layer,
 
             for(int j=0 ; j<actions.size() ; j++ )
             {
-                 if ( actions[j].column_ == "content" )
+                 if ( actions[j].key_ == "content" )
                  {
                      cmd2.bind(1, rid) ;
                      cmd2.bind(2, actions[j].val_.toString()) ;
@@ -464,7 +459,7 @@ bool addOSMLayerLines(MapFile &mf, OSM::Document &doc, const Layer &layer,
     unsigned char *blob;
     int blob_size;
 
-    OSM::Rule::Context ctx(&doc) ;
+
 
     if ( layer.geom_ != "lines" ) return false ;
 
@@ -485,9 +480,9 @@ bool addOSMLayerLines(MapFile &mf, OSM::Document &doc, const Layer &layer,
         const NodeRuleMap &nr = way_idxs[i] ;
 
         int node_idx = nr.node_idx_ ;
-        OSM::Way &way = doc.ways[node_idx] ;
+        OSM::Way &way = doc.ways_[node_idx] ;
 
-        ctx.set(&way) ;
+        OSM::Rule::Context ctx(&way) ;
 
         for(int j=0 ; j<nr.matched_rules_.size() ; j++ )
         {
@@ -505,13 +500,13 @@ bool addOSMLayerLines(MapFile &mf, OSM::Document &doc, const Layer &layer,
         gaiaGeomCollPtr geo_line = gaiaAllocGeomColl();
         geo_line->Srid = 4326;
 
-        gaiaLinestringPtr ls = gaiaAddLinestringToGeomColl (geo_line, way.nodes.size());
+        gaiaLinestringPtr ls = gaiaAddLinestringToGeomColl (geo_line, way.nodes_.size());
 
-        for(int j=0 ; j<way.nodes.size() ; j++)
+        for(int j=0 ; j<way.nodes_.size() ; j++)
         {
-            const OSM::Node &node = doc.nodes[way.nodes[j]] ;
+            const OSM::Node &node = doc.nodes_[way.nodes_[j]] ;
 
-            gaiaSetPoint (ls->Coords, j, node.lon, node.lat);
+            gaiaSetPoint (ls->Coords, j, node.lon_, node.lat_);
         }
 
         gaiaToSpatiaLiteBlobWkb (geo_line, &blob, &blob_size);
@@ -535,7 +530,7 @@ bool addOSMLayerLines(MapFile &mf, OSM::Document &doc, const Layer &layer,
         int node_idx = nr.node_idx_ ;
         OSM::Way &way = chunk_list[i] ;
 
-        ctx.set(&way) ;
+        OSM::Rule::Context ctx(&way) ;
 
         for(int j=0 ; j<nr.matched_rules_.size() ; j++ )
         {
@@ -553,13 +548,13 @@ bool addOSMLayerLines(MapFile &mf, OSM::Document &doc, const Layer &layer,
         gaiaGeomCollPtr geo_line = gaiaAllocGeomColl();
         geo_line->Srid = 4326;
 
-        gaiaLinestringPtr ls = gaiaAddLinestringToGeomColl (geo_line, way.nodes.size());
+        gaiaLinestringPtr ls = gaiaAddLinestringToGeomColl (geo_line, way.nodes_.size());
 
-        for(int j=0 ; j<way.nodes.size() ; j++)
+        for(int j=0 ; j<way.nodes_.size() ; j++)
         {
-            const OSM::Node &node = doc.nodes[way.nodes[j]] ;
+            const OSM::Node &node = doc.nodes_[way.nodes_[j]] ;
 
-            gaiaSetPoint (ls->Coords, j, node.lon, node.lat);
+            gaiaSetPoint (ls->Coords, j, node.lon_, node.lat_);
         }
 
         gaiaToSpatiaLiteBlobWkb (geo_line, &blob, &blob_size);
@@ -590,8 +585,6 @@ bool addOSMLayerPolygons(MapFile &mf, const OSM::Document &doc, const Layer &lay
     unsigned char *blob;
     int blob_size;
 
-    OSM::Rule::Context ctx(&doc) ;
-
     if ( layer.geom_ != "polygons" ) return false ;
 
     // look for ways with same start and end point
@@ -612,7 +605,7 @@ bool addOSMLayerPolygons(MapFile &mf, const OSM::Document &doc, const Layer &lay
         int poly_idx = nr.node_idx_ ;
         OSM::Polygon &poly = polygons[poly_idx] ;
 
-        ctx.set(&poly) ;
+        OSM::Rule::Context ctx(&poly) ;
 
         for(int j=0 ; j<nr.matched_rules_.size() ; j++ )
         {
@@ -631,16 +624,16 @@ bool addOSMLayerPolygons(MapFile &mf, const OSM::Document &doc, const Layer &lay
         gaiaGeomCollPtr geo_poly = gaiaAllocGeomColl();
         geo_poly->Srid = 4326;
 
-        for(int j=0 ; j<poly.rings.size() ; j++)
+        for(int j=0 ; j<poly.rings_.size() ; j++)
         {
-            const OSM::Ring &ring = poly.rings[j] ;
-            gaiaLinestringPtr gpoly = gaiaAddLinestringToGeomColl(geo_poly,ring.nodes.size());
+            auto ring = poly.rings_[j] ;
+            gaiaLinestringPtr gpoly = gaiaAddLinestringToGeomColl(geo_poly,ring.nodes_.size());
 
-            for(int k=0 ; k<ring.nodes.size() ; k++)
+            for(int k=0 ; k<ring.nodes_.size() ; k++)
             {
-                const OSM::Node &node = doc.nodes[ring.nodes[k]] ;
+                auto node = doc.nodes_[ring.nodes_[k]] ;
 
-                gaiaSetPoint (gpoly->Coords, k, node.lon, node.lat);
+                gaiaSetPoint (gpoly->Coords, k, node.lon_, node.lat_);
             }
         }
 
@@ -712,7 +705,6 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
             continue ;
         }
 
-        OSM::Rule::Context ctx(&doc) ;
 
         cout << "Importing to database\n";
 
@@ -724,11 +716,11 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
 
             if ( layer.geom_ == "points" )
             {
-                for(int k=0 ; k<doc.nodes.size() ; k++ )
+                for(int k=0 ; k<doc.nodes_.size() ; k++ )
                 {
-                    OSM::Node &node = doc.nodes[k] ;
+                    auto node = doc.nodes_[k] ;
 
-                    ctx.set(&node) ;
+                    OSM::Rule::Context ctx(&node) ;
 
                     NodeRuleMap nr ;
 
@@ -751,9 +743,10 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
             }
             if ( layer.geom_ == "pois" )
             {
-                for(int k=0 ; k<doc.nodes.size() ; k++ )
+                for(int k=0 ; k<doc.nodes_.size() ; k++ )
                 {
-                    ctx.set(&(doc.nodes[k])) ;
+                    OSM::Rule::Context ctx(&(doc.nodes_[k])) ;
+
                     for( int r = 0 ; r < layer.rules_.size() ; r++ )
                     {
                         if ( !layer.rules_[r].condition_->eval(ctx).toBoolean() ) continue ;
@@ -762,9 +755,10 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
                     }
                 }
 
-                for(int k=0 ; k<doc.ways.size() ; k++ )
+                for(int k=0 ; k<doc.ways_.size() ; k++ )
                 {
-                    ctx.set(&(doc.ways[k])) ;
+                    OSM::Rule::Context ctx(&(doc.ways_[k])) ;
+
                     for( int r = 0 ; r < layer.rules_.size() ; r++ )
                     {
                         if ( !layer.rules_[r].condition_->eval(ctx).toBoolean() ) continue ;
@@ -778,19 +772,19 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
             }
             else if ( layer.geom_ == "lines" )
             {
-                for(int k=0 ; k<doc.ways.size() ; k++ )
+                for(int k=0 ; k<doc.ways_.size() ; k++ )
                 {
-                    OSM::Way &way = doc.ways[k] ;
+                    auto way = doc.ways_[k] ;
 
                     // deal with closed ways
 
-                    if ( way.nodes.front() == way.nodes.back() )
+                    if ( way.nodes_.front() == way.nodes_.back() )
                     {
-                        if ( way.tags.get("area") == "yes" ) continue ;
-                        if ( !way.tags.contains("highway") && !way.tags.contains("barrier") && !way.tags.contains("contour") ) continue ;
+                        if ( way.tags_.get("area") == "yes" ) continue ;
+                        if ( !way.tags_.contains("highway") && !way.tags_.contains("barrier") && !way.tags_.contains("contour") ) continue ;
                     }
 
-                    ctx.set(&way) ;
+                    OSM::Rule::Context ctx(&way) ;
 
                     NodeRuleMap nr ;
 
@@ -813,15 +807,15 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
 
                 vector<OSM::Way> chunk_list ;
 
-                for(int k=0 ; k<doc.relations.size() ; k++ )
+                for(int k=0 ; k<doc.relations_.size() ; k++ )
                 {
-                    OSM::Relation &relation = doc.relations[k] ;
+                    auto relation = doc.relations_[k] ;
 
-                    if ( relation.tags.get("type") != "route" ) continue ;
+                    if ( relation.tags_.get("type") != "route" ) continue ;
 
-                    ctx.set(&relation) ;
+                    OSM::Rule::Context ctx(&relation) ;
 
-                    vector<int> matched ;
+                    vector<uint> matched ;
 
                     for( int r = 0 ; r < layer.rules_.size() ; r++ )
                     {
@@ -835,7 +829,7 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
                     if ( matched.empty() ) continue ;
 
                     vector<OSM::Way> chunks ;
-                    if ( !makeWaysFromRelation(doc, relation, chunks) ) continue ;
+                    if ( !OSM::Document::makeWaysFromRelation(doc, relation, chunks) ) continue ;
 
                     for(int c=0 ; c<chunks.size() ; c++)
                     {
@@ -858,18 +852,18 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
 
                 // first look for multi-polygon relations
 
-                for(int k=0 ; k<doc.relations.size() ; k++ )
+                for(int k=0 ; k<doc.relations_.size() ; k++ )
                 {
-                    OSM::Relation &relation = doc.relations[k] ;
+                    OSM::Relation &relation = doc.relations_[k] ;
 
-                    string rel_type = relation.tags.get("type") ;
+                    string rel_type = relation.tags_.get("type") ;
                     if (  rel_type != "multipolygon" && rel_type != "boundary" ) continue ;
 
-                    ctx.set(&relation) ;
+                    OSM::Rule::Context ctx(&relation) ;
 
-                    vector<int> matched ;
+                    vector<uint> matched ;
 
-                    for( int r = 0 ; r < layer.rules_.size() ; r++ )
+                    for( uint r = 0 ; r < layer.rules_.size() ; r++ )
                     {
                         if ( !layer.rules_[r].condition_->eval(ctx).toBoolean() ) continue ;
 
@@ -881,7 +875,7 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
                     if ( matched.empty() ) continue ;
 
                     OSM::Polygon polygon ;
-                    if ( !makePolygonsFromRelation(doc, relation, polygon) ) continue ;
+                    if ( !OSM::Document::makePolygonsFromRelation(doc, relation, polygon) ) continue ;
 
                     NodeRuleMap nr ;
 
@@ -895,16 +889,16 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
 
                 // check simple polygons
 
-                for(int k=0 ; k<doc.ways.size() ; k++ )
+                for(int k=0 ; k<doc.ways_.size() ; k++ )
                 {
-                    OSM::Way &way = doc.ways[k] ;
+                    auto way = doc.ways_[k] ;
 
-                    if ( way.nodes.front() != way.nodes.back() ) continue ;
-                    if ( way.tags.get("area") == "no" ) continue ;
-                    if ( way.tags.contains("highway") ) continue ;
-                    if ( way.tags.contains("barrier") ) continue ;
+                    if ( way.nodes_.front() != way.nodes_.back() ) continue ;
+                    if ( way.tags_.get("area") == "no" ) continue ;
+                    if ( way.tags_.contains("highway") ) continue ;
+                    if ( way.tags_.contains("barrier") ) continue ;
 
-                    ctx.set(&way) ;
+                    OSM::Rule::Context ctx(&way) ;
 
                     NodeRuleMap nr ;
 
@@ -924,9 +918,9 @@ bool processOsmFiles(MapFile &m, const string &configFile, const vector<string> 
                     OSM::Polygon poly ;
 
                     OSM::Ring ring ;
-                    ring.nodes.insert(ring.nodes.end(), way.nodes.begin(), way.nodes.end()) ;
-                    poly.rings.push_back(ring) ;
-                    poly.tags = way.tags ;
+                    ring.nodes_.insert(ring.nodes_.end(), way.nodes_.begin(), way.nodes_.end()) ;
+                    poly.rings_.push_back(ring) ;
+                    poly.tags_ = way.tags_ ;
                     polygons.push_back(poly) ;
                     passFilterPoly.push_back(nr) ;
 

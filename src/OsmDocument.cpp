@@ -2,13 +2,15 @@
 #include "OsmRuleParser.h"
 
 #include <stdlib.h>
-#include <boost/algorithm/string.hpp>
+
 #include <iostream>
 #include <iomanip>
 #include <set>
 
 #include <XmlReader.h>
 #include <zfstream.h>
+
+#include <boost/algorithm/string.hpp>
 
 using namespace std ;
 
@@ -18,7 +20,7 @@ bool Document::readXML(istream &strm)
 {
     XmlReader rd(strm) ;
 
-    map<string, int> nodeMap, wayMap, relMap ;
+    map<string, uint> nodeMap, wayMap, relMap ;
     vector<  vector<string> > wayNodeMap, relNodeMap, relWayMap, relRelMap ;
     vector<  vector<string> > relNodeMapRole, relWayMapRole, relRelMapRole ;
 
@@ -32,39 +34,39 @@ bool Document::readXML(istream &strm)
             {
                 Node node ;
 
-                node.id = rd.attribute("id") ;
+                node.id_ = rd.attribute("id") ;
 
-                if ( node.id.empty() ) return false ;
+                if ( node.id_.empty() ) return false ;
 
-                node.lat = atof(rd.attribute("lat").c_str()) ;
-                node.lon = atof(rd.attribute("lon").c_str()) ;
+                node.lat_ = atof(rd.attribute("lat").c_str()) ;
+                node.lon_ = atof(rd.attribute("lon").c_str()) ;
 
                 while ( rd.read() )
                 {
                     if ( rd.isStartElement("tag") )
                     {
-                        string key_ = rd.attribute("k")  ;
-                        string val_ = rd.attribute("v") ;
+                        string key = rd.attribute("k")  ;
+                        string val = rd.attribute("v") ;
 
-                        node.tags[key_] = val_ ;
+                        node.tags_[key] = val ;
                     }
                     else if ( rd.isEndElement("node" ) ) break ;
                 }
 
-                nodeMap[node.id] = nodes.size() ;
-                nodes.push_back(node) ;
+                nodeMap[node.id_] = nodes_.size() ;
+                nodes_.push_back(node) ;
 
             }
             else if ( rd.nodeName() == "way" )
             {
                 Way way ;
 
-                way.id = rd.attribute("id") ;
+                way.id_ = rd.attribute("id") ;
 
                 wayNodeMap.push_back(vector<string>()) ;
                 vector<string> &map_item =  wayNodeMap.back() ;
 
-                if ( way.id.empty() ) return false ;
+                if ( way.id_.empty() ) return false ;
 
                 while ( rd.read() )
                 {
@@ -78,25 +80,25 @@ bool Document::readXML(istream &strm)
                     }
                     else if ( rd.isStartElement("tag"))
                     {
-                        string key_ = rd.attribute("k")  ;
-                        string val_ = rd.attribute("v") ;
+                        string key = rd.attribute("k")  ;
+                        string val = rd.attribute("v") ;
 
-                        way.tags[key_] = val_ ;
+                        way.tags_[key] = val ;
                     }
                     else if ( rd.isEndElement("way" ) ) break ;
                 }
 
-                wayMap[way.id] = ways.size() ;
-                ways.push_back(way) ;
+                wayMap[way.id_] = ways_.size() ;
+                ways_.push_back(way) ;
 
             }
             else if ( rd.nodeName() == "relation" )
             {
                 Relation relation ;
 
-                relation.id = rd.attribute("id") ;
+                relation.id_ = rd.attribute("id") ;
 
-                if (relation.id.empty() ) return false ;
+                if (relation.id_.empty() ) return false ;
 
                 relNodeMap.push_back(vector<string>()) ;
                 relWayMap.push_back(vector<string>()) ;
@@ -118,41 +120,41 @@ bool Document::readXML(istream &strm)
                 {
                     if ( rd.isStartElement("member") )
                     {
-                        string type_ = rd.attribute("type") ;
-                        string ref_ = rd.attribute("ref") ;
-                        string role_ = rd.attribute("role") ;
+                        string type = rd.attribute("type") ;
+                        string ref = rd.attribute("ref") ;
+                        string role = rd.attribute("role") ;
 
-                        if ( ref_.empty() || type_.empty() ) return false ;
+                        if ( ref.empty() || type.empty() ) return false ;
 
-                        if ( type_ == "node" )
+                        if ( type == "node" )
                         {
-                            node_map_item.push_back(ref_) ;
-                            node_map_role.push_back(role_) ;
+                            node_map_item.push_back(ref) ;
+                            node_map_role.push_back(role) ;
                         }
-                        else if ( type_ == "way" )
+                        else if ( type == "way" )
                         {
-                            way_map_item.push_back(ref_) ;
-                            way_map_role.push_back(role_) ;
+                            way_map_item.push_back(ref) ;
+                            way_map_role.push_back(role) ;
                         }
-                        else if ( type_ == "relation" )
+                        else if ( type == "relation" )
                         {
-                            rel_map_item.push_back(ref_) ;
-                            rel_map_role.push_back(role_) ;
+                            rel_map_item.push_back(ref) ;
+                            rel_map_role.push_back(role) ;
                         }
                     }
                     else if ( rd.isStartElement("tag"))
                     {
-                        string key_ = rd.attribute("k")  ;
-                        string val_ = rd.attribute("v") ;
+                        string key = rd.attribute("k") ;
+                        string val = rd.attribute("v") ;
 
-                        relation.tags[key_] = val_ ;
+                        relation.tags_[key] = val ;
                     }
                     else if ( rd.isEndElement("relation" ) ) break ;
 
                 }
 
-                relMap[relation.id] = relations.size() ;
-                relations.push_back(relation) ;
+                relMap[relation.id_] = relations_.size() ;
+                relations_.push_back(relation) ;
 
             }
         }
@@ -161,99 +163,91 @@ bool Document::readXML(istream &strm)
 
     // establish feature dependencies
 
-    for(int i=0 ; i<ways.size() ; i++ )
+    for(uint i=0 ; i<ways_.size() ; i++ )
     {
-        Way &way = ways[i] ;
+        Way &way = ways_[i] ;
 
         vector<string> &node_refs = wayNodeMap[i] ;
 
-        for(int j=0 ; j<node_refs.size() ; j++ )
+        for(uint j=0 ; j<node_refs.size() ; j++ )
         {
+            uint idx = nodeMap[node_refs[j]] ;
+            way.nodes_.push_back(idx) ;
 
-
-            int idx = nodeMap[node_refs[j]] ;
-            way.nodes.push_back(idx) ;
-
-            nodes[idx].ways.push_back(i) ;
+            nodes_[idx].ways_.push_back(i) ;
         }
 
     }
 
-    for(int i=0 ; i<relations.size() ; i++ )
+    for(uint i=0 ; i<relations_.size() ; i++ )
     {
-        Relation &relation = relations[i] ;
+        Relation &relation = relations_[i] ;
 
         vector<string> &node_refs = relNodeMap[i] ;
         vector<string> &node_roles = relNodeMapRole[i] ;
 
-        for(int j=0 ; j<node_refs.size() ; j++ )
+        for(uint j=0 ; j<node_refs.size() ; j++ )
         {
-            std::map<string, int>::const_iterator it = nodeMap.find(node_refs[j]) ;
+            auto it = nodeMap.find(node_refs[j]) ;
 
             if ( it != nodeMap.end() )
             {
                 int idx = (*it).second ;
-                relation.nodes.push_back(idx) ;
-                relation.nodes_role.push_back(node_roles[j]) ;
+                relation.nodes_.push_back(idx) ;
+                relation.nodes_role_.push_back(node_roles[j]) ;
 
-                nodes[idx].relations.push_back(i) ;
+                nodes_[idx].relations_.push_back(i) ;
             }
         }
 
     }
 
-    for(int i=0 ; i<relations.size() ; i++ )
+    for(uint i=0 ; i<relations_.size() ; i++ )
     {
-        Relation &relation = relations[i] ;
+        Relation &relation = relations_[i] ;
 
         vector<string> &way_refs = relWayMap[i] ;
         vector<string> &way_roles = relWayMapRole[i] ;
 
-        for(int j=0 ; j<way_refs.size() ; j++ )
+        for(uint j=0 ; j<way_refs.size() ; j++ )
         {
-            std::map<string, int>::const_iterator it = wayMap.find(way_refs[j]) ;
+            auto it = wayMap.find(way_refs[j]) ;
 
             if ( it != wayMap.end() )
             {
+                uint idx = (*it).second ;
+                relation.ways_.push_back(idx) ;
+                relation.ways_role_.push_back(way_roles[j]) ;
 
-                int idx = (*it).second ;
-                relation.ways.push_back(idx) ;
-                relation.ways_role.push_back(way_roles[j]) ;
-
-                ways[idx].relations.push_back(i) ;
+                ways_[idx].relations_.push_back(i) ;
             }
         }
-
     }
 
-    for(int i=0 ; i<relations.size() ; i++ )
+    for(uint i=0 ; i<relations_.size() ; i++ )
     {
-        Relation &relation = relations[i] ;
+        Relation &relation = relations_[i] ;
 
         vector<string> &rel_refs = relRelMap[i] ;
         vector<string> &rel_roles = relRelMapRole[i] ;
 
-        for(int j=0 ; j<rel_refs.size() ; j++ )
+        for(uint j=0 ; j<rel_refs.size() ; j++ )
         {
-            std::map<string, int>::const_iterator it = relMap.find(rel_refs[j]) ;
+            auto it = relMap.find(rel_refs[j]) ;
 
             if ( it != relMap.end() )
             {
-                int idx = relMap[rel_refs[j]] ;
-                relation.children.push_back(idx) ;
-                relation.children_role.push_back(rel_roles[j]) ;
+                uint idx = relMap[rel_refs[j]] ;
+                relation.children_.push_back(idx) ;
+                relation.children_role_.push_back(rel_roles[j]) ;
 
-                relations[idx].parents.push_back(i) ;
+                relations_[idx].parents_.push_back(i) ;
             }
         }
-
     }
 
     return true ;
-
 }
-
-
 
 
 bool Document::read(const string &fileName)
@@ -302,65 +296,65 @@ void Document::writeXML(ostream &strm)
     strm << "<?xml version='1.0' encoding='UTF-8'?>\n" ;
     strm << "<osm version='0.6' generator='JOSM'>\n" ;
 
-    for(int i=0 ; i<nodes.size() ; i++ )
+    for(int i=0 ; i<nodes_.size() ; i++ )
     {
-        const Node &node = nodes[i] ;
+        const Node &node = nodes_[i] ;
 
-        strm << '\t' << "<node id='" << node.id << "' visible='true' lat='" << setprecision(12) << node.lat <<
-            "' lon='" << setprecision(12) << node.lon  ;
+        strm << '\t' << "<node id='" << node.id_ << "' visible='true' lat='" << setprecision(12) << node.lat_ <<
+            "' lon='" << setprecision(12) << node.lon_  ;
 
-        if ( node.tags.empty() ) strm <<  "' />\n" ;
+        if ( node.tags_.empty() ) strm <<  "' />\n" ;
         else
         {
             strm << "' >\n" ;
 
-            vector<string> tags = node.tags.keys() ;
+            auto tags = node.tags_.keys() ;
 
             for( int j=0 ; j<tags.size() ; j++ )
-                strm << "\t\t" << "<tag k='" << tags[j] << "' v='" << node.tags.get(tags[j]) << "' />\n" ;
+                strm << "\t\t" << "<tag k='" << tags[j] << "' v='" << node.tags_.get(tags[j]) << "' />\n" ;
 
             strm << "\t</node>\n" ;
         }
     }
 
-    for(int i=0 ; i<ways.size() ; i++ )
+    for(int i=0 ; i<ways_.size() ; i++ )
     {
-        const Way &way = ways[i] ;
+        const Way &way = ways_[i] ;
 
-        strm << "\t<way id='" << way.id << "' action='modify' visible='true'>\n" ;
+        strm << "\t<way id='" << way.id_ << "' action='modify' visible='true'>\n" ;
 
-        vector<string> tags = way.tags.keys() ;
+        auto tags = way.tags_.keys() ;
 
         for( int j=0 ; j<tags.size() ; j++ )
-            strm << "\t\t" << "<tag k='" << tags[j] << "' v='" << way.tags.get(tags[j]) << "' />\n" ;
+            strm << "\t\t" << "<tag k='" << tags[j] << "' v='" << way.tags_.get(tags[j]) << "' />\n" ;
 
-        for(int j=0 ; j<way.nodes.size() ; j++ )
+        for(int j=0 ; j<way.nodes_.size() ; j++ )
         {
-            strm << "\t\t<nd ref='" << nodes[way.nodes[j]].id << "'/>\n" ;
+            strm << "\t\t<nd ref='" << nodes_[way.nodes_[j]].id_ << "'/>\n" ;
         }
 
         strm << "\t</way>\n" ;
     }
 
-    for(int i=0 ; i<relations.size() ; i++ )
+    for(int i=0 ; i<relations_.size() ; i++ )
     {
-        const Relation &relation = relations[i] ;
+        const Relation &relation = relations_[i] ;
 
-        strm << "\t<relation id='" << relation.id << "' action='modify' visible='true'>\n" ;
+        strm << "\t<relation id='" << relation.id_ << "' action='modify' visible='true'>\n" ;
 
-        vector<string> tags = relation.tags.keys() ;
+        auto tags = relation.tags_.keys() ;
 
         for( int j=0 ; j<tags.size() ; j++ )
-            strm << "\t\t" << "<tag k='" << tags[j] << "' v='" << relation.tags.get(tags[j]) << "' />\n" ;
+            strm << "\t\t" << "<tag k='" << tags[j] << "' v='" << relation.tags_.get(tags[j]) << "' />\n" ;
 
-        for(int j=0 ; j<relation.nodes.size() ; j++ )
+        for(int j=0 ; j<relation.nodes_.size() ; j++ )
         {
-            strm << "\t\t<member type='node' ref='" << nodes[relation.nodes[j]].id << "' role=''/>\n" ;
+            strm << "\t\t<member type='node' ref='" << nodes_[relation.nodes_[j]].id_ << "' role=''/>\n" ;
         }
 
-        for(int j=0 ; j<relation.ways.size() ; j++ )
+        for(int j=0 ; j<relation.ways_.size() ; j++ )
         {
-            strm << "\t\t<member type='way' ref='" << ways[relation.ways[j]].id << "' role=''/>\n" ;
+            strm << "\t\t<member type='way' ref='" << ways_[relation.ways_[j]].id_ << "' role=''/>\n" ;
         }
 
         strm << "\t</relation>\n" ;
@@ -368,7 +362,6 @@ void Document::writeXML(ostream &strm)
 
 
     strm << "</osm>" ;
-
 }
 
 

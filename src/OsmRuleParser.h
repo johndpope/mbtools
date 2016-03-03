@@ -10,7 +10,7 @@
 #include <sstream>
 #include <map>
 
-#include <boost/regex.hpp>
+#include <regex>
 
 namespace OSM {
 
@@ -46,14 +46,9 @@ class Context {
 
 public:
 
-    Context(const OSM::Document *doc_ = 0): doc(doc_) {}
+    Context(const OSM::Feature *f = nullptr): feat_(f) {}
 
-    void set(const OSM::Feature *f) {
-        feat = f ;
-    }
-
-    const Feature *feat ;
-    const OSM::Document *doc ;
+    const Feature *feat_ ;
 
     bool has_tag(const std::string &tag) const ;
     std::string value(const std::string &key) const ;
@@ -102,14 +97,14 @@ class ExpressionNode {
     }
 
     virtual ~ExpressionNode() {
-        std::deque<ExpressionNode *>::iterator it = children.begin() ;
-        for( ; it != children.end() ; ++it ) delete (*it) ;
+        auto it = children_.begin() ;
+        for( ; it != children_.end() ; ++it ) delete (*it) ;
     }
 
-    void appendChild(ExpressionNode *node) { children.push_back(node) ; }
-    void prependChild(ExpressionNode *node) { children.push_front(node) ; }
+    void appendChild(ExpressionNode *node) { children_.push_back(node) ; }
+    void prependChild(ExpressionNode *node) { children_.push_front(node) ; }
 
-    std::deque<ExpressionNode *> children ;
+    std::deque<ExpressionNode *> children_ ;
 
 
 };
@@ -126,12 +121,6 @@ public:
     Type cmd_ ;
     Command *next_ ;
 };
-
-class CommandList {
-public:
-    CommandList(std::vector<Command> &commands) {}
-};
-
 
 class LiteralExpressionNode: public ExpressionNode {
 public:
@@ -198,13 +187,12 @@ class ComparisonPredicate: public ExpressionNode {
 public:
     enum Type { Equal, NotEqual, Less, Greater, LessOrEqual, GreaterOrEqual } ;
 
-    ComparisonPredicate(Type op_, ExpressionNode *lhs, ExpressionNode *rhs): op(op_), ExpressionNode(lhs, rhs) {}
+    ComparisonPredicate(Type op, ExpressionNode *lhs, ExpressionNode *rhs): op_(op), ExpressionNode(lhs, rhs) {}
 
     Literal eval(Context &ctx) ;
 
 private:
-    Type op ;
-
+    Type op_ ;
 };
 
 class LikeTextPredicate: public ExpressionNode {
@@ -212,11 +200,10 @@ public:
 
     LikeTextPredicate(ExpressionNode *op, const std::string &pattern_, bool is_pos) ;
 
-
-     Literal eval(Context &ctx) ;
+    Literal eval(Context &ctx) ;
 private:
-    boost::regex pattern ;
-    bool isPos ;
+    std::regex pattern_ ;
+    bool is_pos_ ;
 
 };
 
@@ -231,20 +218,20 @@ public:
 private:
     std::string id_ ;
     std::vector<std::string> lvals_ ;
-    bool isPos ;
+    bool is_pos_ ;
 
 };
 
 class IsTypePredicate: public ExpressionNode {
 public:
 
-    IsTypePredicate(const std::string &keyword_):  keyword(keyword_) {}
+    IsTypePredicate(const std::string &keyword):  keyword_(keyword) {}
 
     Literal eval(Context &ctx) ;
 
 private:
 
-    std::string keyword ;
+    std::string keyword_ ;
 
 };
 

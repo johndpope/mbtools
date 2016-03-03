@@ -40,7 +40,7 @@ static bool read_header(BlockHeader &header_msg, ifstream &input)
 
     if ( length == 0 ) return false ;
 
-    boost::scoped_array<char> buf(new char [length]) ;
+    std::unique_ptr<char []> buf(new char [length]) ;
 
     if ( !buf || !input.read(buf.get(), length) ) return false ;
 
@@ -49,7 +49,7 @@ static bool read_header(BlockHeader &header_msg, ifstream &input)
 
 static bool read_blob(Blob &blob_msg, ifstream &input, int32_t length)
 {
-    boost::scoped_array<char> buf(new char [length]) ;
+    std::unique_ptr<char []> buf(new char [length]) ;
 
     if ( !buf || !input.read(buf.get(), length) ) return false ;
 
@@ -109,10 +109,10 @@ static bool process_osm_data_nodes(vector<Node> &nodes, map<int64_t, uint64_t> &
         nodes.push_back(Node()) ;
         Node &n = nodes.back() ;
 
-        n.id = make_id(node.id()) ;
+        n.id_ = make_id(node.id()) ;
 
-        n.lat = lat_offset + (node.lat() * granularity);
-        n.lon = lon_offset + (node.lon() * granularity);
+        n.lat_ = lat_offset + (node.lat() * granularity);
+        n.lon_ = lon_offset + (node.lon() * granularity);
 
         nodeMap.insert(make_pair(node.id(), nodes.size()-1)) ;
 
@@ -124,7 +124,7 @@ static bool process_osm_data_nodes(vector<Node> &nodes, map<int64_t, uint64_t> &
             string key = string_table.s(key_idx) ;
             string val = string_table.s(val_idx) ;
 
-            n.tags.add(key, val) ;
+            n.tags_.add(key, val) ;
         }
     }
 
@@ -152,7 +152,7 @@ static bool process_osm_data_dense_nodes(vector<Node> &nodes, map<int64_t, uint6
         deltalat += dense.lat(node_id);
         deltalon += dense.lon(node_id) ;
 
-        n.id = make_id(deltaid) ;
+        n.id_ = make_id(deltaid) ;
 
         nodeMap.insert(make_pair(deltaid, nodes.size()-1)) ;
 
@@ -166,15 +166,15 @@ static bool process_osm_data_dense_nodes(vector<Node> &nodes, map<int64_t, uint6
                 string key = string_table.s(key_idx) ;
                 string val = string_table.s(val_idx) ;
 
-                n.tags.add(key, val) ;
+                n.tags_.add(key, val) ;
 
                 l += 2;
             }
             l++ ;
         }
 
-        n.lat = lat_offset + (deltalat * granularity);
-        n.lon = lon_offset + (deltalon * granularity);
+        n.lat_ = lat_offset + (deltalat * granularity);
+        n.lon_ = lon_offset + (deltalon * granularity);
 
     }
 
@@ -194,7 +194,7 @@ static bool process_osm_data_ways(vector<Way> &ways, map<int64_t, uint64_t> &way
         ways.push_back(Way()) ;
         Way &w = ways.back() ;
 
-        w.id = make_id(way.id()) ;
+        w.id_ = make_id(way.id()) ;
 
         wayMap.insert(make_pair(way.id(), ways.size()-1)) ;
 
@@ -206,7 +206,7 @@ static bool process_osm_data_ways(vector<Way> &ways, map<int64_t, uint64_t> &way
             string key = string_table.s(key_idx) ;
             string val = string_table.s(val_idx) ;
 
-            w.tags.add(key, val) ;
+            w.tags_.add(key, val) ;
         }
 
         wayNodeMap.push_back( vector<int64_t>() ) ;
@@ -237,7 +237,7 @@ static bool process_osm_data_relations(vector<Relation> &relations, map<int64_t,
         relations.push_back(Relation()) ;
         Relation &r = relations.back() ;
 
-        r.id = make_id(relation.id()) ;
+        r.id_ = make_id(relation.id()) ;
 
         relMap.insert(make_pair(relation.id(), relations.size()-1)) ;
 
@@ -249,7 +249,7 @@ static bool process_osm_data_relations(vector<Relation> &relations, map<int64_t,
             string key = string_table.s(key_idx) ;
             string val = string_table.s(val_idx) ;
 
-            r.tags.add(key, val) ;
+            r.tags_.add(key, val) ;
         }
 
         relNodeMap.push_back( vector<int64_t>() ) ;
@@ -329,7 +329,7 @@ bool Document::readPBF(const string &fileName)
 
        size_t bsize = blob_msg.raw_size() ;
 
-       boost::scoped_array<char> bbuf(new char [bsize]) ;
+       std::unique_ptr<char []> bbuf(new char [bsize]) ;
 
        if ( !bbuf || !uncompress_blob(blob_msg, bbuf.get()) ) return false ;
 
@@ -360,10 +360,10 @@ bool Document::readPBF(const string &fileName)
                 const StringTable &string_table = pb_msg.stringtable() ;
 
 
-                if ( !process_osm_data_nodes(nodes, nodeMap, group, string_table, lat_offset, lon_offset, granularity) ) return false ;
-                if ( !process_osm_data_dense_nodes(nodes, nodeMap, group, string_table, lat_offset, lon_offset, granularity) ) return false ;
-                if ( !process_osm_data_ways(ways, wayMap, wayNodeMap, group, string_table) ) return false ;
-                if ( !process_osm_data_relations(relations, relMap, relNodeMap, relWayMap, relRelMap,
+                if ( !process_osm_data_nodes(nodes_, nodeMap, group, string_table, lat_offset, lon_offset, granularity) ) return false ;
+                if ( !process_osm_data_dense_nodes(nodes_, nodeMap, group, string_table, lat_offset, lon_offset, granularity) ) return false ;
+                if ( !process_osm_data_ways(ways_, wayMap, wayNodeMap, group, string_table) ) return false ;
+                if ( !process_osm_data_relations(relations_, relMap, relNodeMap, relWayMap, relRelMap,
                                                  roleNodeMap, roleWayMap, roleRelMap,
                                                  group, string_table) ) return false ;
            }
@@ -374,9 +374,9 @@ bool Document::readPBF(const string &fileName)
 
     // establish feature dependencies
 
-    for(int i=0 ; i<ways.size() ; i++ )
+    for(int i=0 ; i<ways_.size() ; i++ )
     {
-        Way &way = ways[i] ;
+        Way &way = ways_[i] ;
 
         vector<int64_t> &node_refs = wayNodeMap[i] ;
 
@@ -384,78 +384,78 @@ bool Document::readPBF(const string &fileName)
         {
 
             int idx = nodeMap[node_refs[j]] ;
-            way.nodes.push_back(idx) ;
+            way.nodes_.push_back(idx) ;
 
-            nodes[idx].ways.push_back(i) ;
+            nodes_[idx].ways_.push_back(i) ;
         }
 
     }
 
-    for(int i=0 ; i<relations.size() ; i++ )
+    for(int i=0 ; i<relations_.size() ; i++ )
     {
-        Relation &relation = relations[i] ;
+        Relation &relation = relations_[i] ;
 
         vector<int64_t> &node_refs = relNodeMap[i] ;
         vector<string> &node_roles = roleNodeMap[i] ;
 
         for(int j=0 ; j<node_refs.size() ; j++ )
         {
-            std::map<int64_t, uint64_t>::const_iterator it = nodeMap.find(node_refs[j]) ;
+            auto it = nodeMap.find(node_refs[j]) ;
 
             if ( it != nodeMap.end() )
             {
                 int idx = (*it).second ;
-                relation.nodes.push_back(idx) ;
-                relation.nodes_role.push_back(node_roles[j]) ;
+                relation.nodes_.push_back(idx) ;
+                relation.nodes_role_.push_back(node_roles[j]) ;
 
-                nodes[idx].relations.push_back(i) ;
+                nodes_[idx].relations_.push_back(i) ;
             }
         }
 
     }
 
-    for(int i=0 ; i<relations.size() ; i++ )
+    for(int i=0 ; i<relations_.size() ; i++ )
     {
-        Relation &relation = relations[i] ;
+        Relation &relation = relations_[i] ;
 
         vector<int64_t> &way_refs = relWayMap[i] ;
         vector<string> &way_roles = roleWayMap[i] ;
 
         for(int j=0 ; j<way_refs.size() ; j++ )
         {
-            std::map<int64_t, uint64_t>::const_iterator it = wayMap.find(way_refs[j]) ;
+            auto it = wayMap.find(way_refs[j]) ;
 
             if ( it != wayMap.end() )
             {
 
                 int idx = (*it).second ;
-                relation.ways.push_back(idx) ;
-                relation.ways_role.push_back(way_roles[j]) ;
+                relation.ways_.push_back(idx) ;
+                relation.ways_role_.push_back(way_roles[j]) ;
 
-                ways[idx].relations.push_back(i) ;
+                ways_[idx].relations_.push_back(i) ;
             }
         }
 
     }
 
-    for(int i=0 ; i<relations.size() ; i++ )
+    for(int i=0 ; i<relations_.size() ; i++ )
     {
-        Relation &relation = relations[i] ;
+        Relation &relation = relations_[i] ;
 
         vector<int64_t> &rel_refs = relRelMap[i] ;
         vector<string> &rel_roles = roleRelMap[i] ;
 
         for(int j=0 ; j<rel_refs.size() ; j++ )
         {
-            std::map<int64_t, uint64_t>::const_iterator it = relMap.find(rel_refs[j]) ;
+            auto it = relMap.find(rel_refs[j]) ;
 
             if ( it != relMap.end() )
             {
                 int idx = relMap[rel_refs[j]] ;
-                relation.children.push_back(idx) ;
-                relation.children_role.push_back(rel_roles[j]) ;
+                relation.children_.push_back(idx) ;
+                relation.children_role_.push_back(rel_roles[j]) ;
 
-                relations[idx].parents.push_back(i) ;
+                relations_[idx].parents_.push_back(i) ;
             }
         }
 

@@ -10,18 +10,16 @@
 
 namespace OSM {
 
-
 struct Feature {
 
     enum Type { NodeFeature, WayFeature, RelationFeature, PolygonFeature } ;
 
-    Feature(Type type_): type(type_), visited_(false) {}
+    Feature(Type type): type_(type), visited_(false) {}
 
-    std::string id ; // feature id
-    Dictionary tags ; // tags associated with this feature
-    Type type ; // feature type ;
+    std::string id_ ; // feature id
+    Dictionary tags_ ; // tags associated with this feature
+    Type type_ ; // feature type ;
     bool visited_ ; // used by algorithms ;
-
 };
 
 class Way ;
@@ -31,11 +29,10 @@ struct Node: public Feature {
 
     Node(): Feature(NodeFeature) {}
 
-    double lat, lon ;
+    double lat_, lon_ ;
 
-    std::vector<int> ways ;     // ways in which this nodes participates
-    std::vector<int> relations ; // relations that this node participates directly
-
+    std::vector<uint> ways_ ;      // ways in which this nodes participates
+    std::vector<uint> relations_ ; // relations that this node participates directly
 } ;
 
 
@@ -43,8 +40,8 @@ struct Way: public Feature {
 
     Way(): Feature(WayFeature) {}
 
-    std::vector<int> nodes ; // nodes corresponding to this way
-    std::vector<int> relations ; // relations that this way participates
+    std::vector<uint> nodes_ ;     // nodes corresponding to this way
+    std::vector<uint> relations_ ; // relations that this way participates
 } ;
 
 
@@ -52,26 +49,26 @@ struct Relation: public Feature {
 
     Relation(): Feature(RelationFeature) {}
 
-    std::vector<int> nodes ;     // node members
-    std::vector<int> ways ;      // way members
-    std::vector<int> children ; // relation members
+    std::vector<uint> nodes_ ;     // node members
+    std::vector<uint> ways_ ;      // way members
+    std::vector<uint> children_ ; // relation members
 
-    std::vector<std::string> nodes_role ;
-    std::vector<std::string> ways_role ;
-    std::vector<std::string> children_role ;
+    std::vector<std::string> nodes_role_ ;
+    std::vector<std::string> ways_role_ ;
+    std::vector<std::string> children_role_ ;
 
-    std::vector<int> parents ;    // parent relations
+    std::vector<uint> parents_ ;    // parent relations
 };
 
 struct Ring {
-    std::deque<int> nodes ;
+    std::deque<uint> nodes_ ;
 };
 
 struct Polygon: public Feature {
 
     Polygon(): Feature(PolygonFeature) {}
 
-    std::vector<Ring> rings ;
+    std::vector<Ring> rings_ ;
 };
 
 
@@ -95,9 +92,9 @@ public:
 
 public:
 
-    std::vector<Node> nodes ;
-    std::vector<Way> ways ;
-    std::vector<Relation> relations ;
+    std::vector<Node> nodes_ ;
+    std::vector<Way> ways_ ;
+    std::vector<Relation> relations_ ;
 
 protected:
 
@@ -107,11 +104,13 @@ protected:
     bool readPBF(const std::string &fileName) ;
     bool isPBF(const std::string &fileName) ;
 
+public:
+
+    static bool makePolygonsFromRelation(const Document &doc, const Relation &rel, Polygon &polygon) ;
+    static bool makeWaysFromRelation(const Document &doc, const Relation &rel, std::vector<Way> &ways) ;
 
 };
 
-bool makePolygonsFromRelation(const Document &doc, const Relation &rel, Polygon &polygon) ;
-bool makeWaysFromRelation(const Document &doc, const Relation &rel, std::vector<Way> &ways) ;
 
 }
 

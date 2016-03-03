@@ -1,4 +1,4 @@
-PROJECT(osm2sqlite)
+PROJECT(mbtools)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.4)
 
@@ -8,7 +8,4 @@ INCLUDE(FindThirdParty)
 
 ADD_SUBDIRECTORY(src)
 
-#IF ( WIN32 )
-#INCLUDE(Package)
-#ENDIF ( WIN32 )
 

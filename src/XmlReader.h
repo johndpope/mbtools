@@ -5,7 +5,7 @@
 #include <map>
 #include <sstream>
 
-// Simple and fact XML pull style reader
+// Simple and fast XML pull style reader
 
 class XmlReader {
 public:
@@ -35,12 +35,12 @@ public:
     /**
      * @brief get type of the current node
      */
-    NodeType nodeType() const { return currentNodeType ; }
+    NodeType nodeType() const { return current_node_type_ ; }
 
     /**
      * @brief get the name of the current node (element name or text)
      */
-    std::string nodeName() const { return currentNodeName ; }
+    std::string nodeName() const { return current_node_name_ ; }
 
     /**
      * @brief get attribute value with given name if tit exists otherwise return the default value
@@ -63,9 +63,9 @@ public:
     bool isStartElement(const std::string &name = std::string()) ;
     bool isEndElement(const std::string &name = std::string()) ;
 
-    const std::map<std::string , std::string> &attributes() const { return attrs ; }
+    const std::map<std::string , std::string> &attributes() const { return attrs_ ; }
 
-    int currentLine() const { return lineno ; }
+    int currentLine() const { return lineno_ ; }
 
 private:
 
@@ -81,16 +81,16 @@ private:
     void advance();
 
 private:
-    char *cp, *be ;
-    std::string currentNodeName ;
-    NodeType currentNodeType ;
-    char * buf ;
-    size_t buf_size ;
+    char *cp_, *be_ ;
+    std::string current_node_name_ ;
+    NodeType current_node_type_ ;
+    char * buf_ ;
+    size_t buf_size_ ;
     std::istream *strm_ ;
     FILE *fdesc_ ;
-    std::map<std::string, std::string> attrs ;
-    bool is_empty_elem ;
-    int lineno, colno ;
+    std::map<std::string, std::string> attrs_ ;
+    bool is_empty_elem_ ;
+    int lineno_, colno_ ;
 
 
 
