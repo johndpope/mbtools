@@ -11,6 +11,8 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/document.h"
 
+#include "GeomHelpers.h"
+
 using namespace std ;
 
 static void split_line(const string &src, vector<string> &tokens) {
@@ -96,21 +98,32 @@ bool MapConfig::parse(const string &fileName)
 
             layers_.push_back(layer) ;
         }
-        else if ( boost::starts_with(line, "@pragma") )
+        else if ( boost::starts_with(line, "@options") )
         {
-            vector<string> tokens ;
-            split_line(line, tokens) ;
+            rapidjson::Document jsdoc ;
+            jsdoc.Parse(line.c_str() + 9) ;
 
-            if ( tokens.size() < 3 )
-            {
-                cerr << "Error parsing pragma declaration in " << fileName << " not enough arguments (line: " << count << ")" ;
+            if ( jsdoc.HasParseError() ) {
+                cerr << "Error parsing options definition" << endl ;
                 return false ;
             }
 
-            string key = tokens[1] ;
-            string val = tokens[2] ;
+            if ( jsdoc.HasMember("name") ) name_ = jsdoc["name"].GetString() ;
+            if ( jsdoc.HasMember("description") ) description_ = jsdoc["description"].GetString() ;
+            if ( jsdoc.HasMember("attribution") ) attribution_ = jsdoc["attribution"].GetString() ;
+            if ( jsdoc.HasMember("min_zoom") ) minz_ = jsdoc["min_zoom"].GetInt() ;
+            if ( jsdoc.HasMember("max_zoom") ) maxz_ = jsdoc["max_zoom"].GetInt() ;
+            if ( jsdoc.HasMember("bbox") && jsdoc["bbox"].IsArray() && jsdoc["bbox"].Size() == 4 ) {
+                bbox_.minx_ = jsdoc["bbox"][0].GetDouble() ;
+                bbox_.miny_ = jsdoc["bbox"][1].GetDouble() ;
+                bbox_.maxx_ = jsdoc["bbox"][2].GetDouble() ;
+                bbox_.maxy_ = jsdoc["bbox"][3].GetDouble() ;
+                has_bbox_ = true ;
+                tms::latlonToMeters(bbox_.minx_, bbox_.miny_, bbox_.minx_, bbox_.miny_) ;
+                tms::latlonToMeters(bbox_.maxx_, bbox_.maxy_, bbox_.maxx_, bbox_.maxy_) ;
+            }
+            else has_bbox_= false ;
 
-            pragmas_.add(key, val) ;
         }
 
         else // rules

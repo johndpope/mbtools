@@ -6,6 +6,12 @@
 #include "OsmRuleParser.h"
 #include "OsmDocument.h"
 
+
+struct BBox {
+    double minx_, miny_, maxx_, maxy_ ;
+    uint srid_ ;
+};
+
 struct ZoomInterval {
     ZoomInterval(): min_zoom_(-1), max_zoom_(-1), simplify_threshold_(0) {}
 
@@ -53,8 +59,15 @@ struct NodeRuleMap {
 };
 
 struct MapConfig {
+    MapConfig(): minz_(10), maxz_(16), has_bbox_(false) {}
+
     std::vector<Layer> layers_ ;
-    Dictionary pragmas_ ;
+    BBox bbox_ ;
+    std::string name_ ;
+    std::string description_ ;
+    std::string attribution_ ;
+    int minz_, maxz_ ;
+    bool has_bbox_ ;
 
     bool parse(const std::string &fileName) ;
 };

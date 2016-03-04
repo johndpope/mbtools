@@ -14,10 +14,6 @@ using std::string ;
 using std::vector ;
 using std::map ;
 
-struct BBox {
-    float minx_, miny_, maxx_, maxy_ ;
-    uint srid_ ;
-};
 
 class MapFile {
 public:
