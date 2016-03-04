@@ -21,7 +21,8 @@ SET ( OSM2MBTILES_SOURCES
 	OsmDocument.cpp
 	OsmPolygon.cpp
 	MapFile.cpp
-	Resources.cpp
+	MapConfig.cpp
+
 	VectorTile.cpp
 	GeomHelpers.cpp
 
@@ -37,6 +38,7 @@ SET ( OSM2MBTILES_HEADERS
 	OsmDocument.h
 	VectorTile.h
 	MapFile.h
+	MapConfig.h
 	GeomHelpers.h
 
 	Dictionary.h

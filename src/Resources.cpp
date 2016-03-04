@@ -81,39 +81,4 @@ void get_file_list(const string &key, const fs::path &filePath, Dictionary &file
 
 }
 
-bool MapFile::addResource(const string &key, const fs::path &filePath)
-{
-    SQLite::Session session(db_) ;
-    SQLite::Connection &con = session.handle() ;
-
-    SQLite::Command stmt(con, "REPLACE INTO __resources (name,sz,data) VALUES(?,?,?)") ;
-
-    SQLite::Transaction trans(con) ;
-
-    Dictionary files ;
-    get_file_list(key, filePath, files) ;
-
-    DictionaryIterator it(files) ;
-
-    while (it)
-    {
-        string key = it.key() ;
-        string file_path = it.value() ;
-
-        size_t sz ;
-        string content = read_file(file_path, sz) ;
-
-        stmt.bind(key) ;
-        stmt.bind((int)sz) ;
-        stmt.bind(content.data(), content.size()) ;
-
-        stmt.exec() ;
-        stmt.clear() ;
-
-        ++it ;
-    }
-
-    trans.commit() ;
-
-}
 
