@@ -38,7 +38,7 @@ private:
 SpatialLiteSingleton SpatialLiteSingleton::instance_ ;
 
 
-MapFile::MapFile():  db_(0), min_zoom_(12), max_zoom_(14), geom_column_name_("geom") {}
+MapFile::MapFile():  db_(0), geom_column_name_("geom") {}
 
 MapFile::~MapFile() {
     delete db_ ;
@@ -58,8 +58,6 @@ bool MapFile::create(const std::string &name) {
         con.exec("PRAGMA synchronous=NORMAL") ;
         con.exec("PRAGMA journal_mode=WAL") ;
         con.exec("SELECT InitSpatialMetadata(1);") ;
-
-        fileName_ = name ;
 
         return true ;
     }
@@ -240,7 +238,7 @@ void bindActions(const vector<Action> &actions, SQLite::Command &cmd)
     else cmd.bind(2, kvl) ;
 }
 
-bool MapFile::addOSMLayerPoints(OSM::Document &doc, const Layer &layer,
+bool MapFile::addOSMLayerPoints(OSM::Document &doc, const ImportLayer &layer,
                        const vector<NodeRuleMap > &node_idxs)
 {
     SQLite::Database &db = handle() ;
@@ -306,7 +304,7 @@ bool MapFile::addOSMLayerPoints(OSM::Document &doc, const Layer &layer,
 }
 
 
-bool MapFile::addOSMLayerLines(OSM::Document &doc, const Layer &layer,
+bool MapFile::addOSMLayerLines(OSM::Document &doc, const ImportLayer &layer,
                       const vector<NodeRuleMap> &way_idxs,
                       vector<OSM::Way> &chunk_list,
                       const vector<NodeRuleMap > &rule_map
@@ -429,7 +427,7 @@ bool MapFile::addOSMLayerLines(OSM::Document &doc, const Layer &layer,
     return true ;
 }
 
-bool MapFile::addOSMLayerPolygons(const OSM::Document &doc, const Layer &layer,
+bool MapFile::addOSMLayerPolygons(const OSM::Document &doc, const ImportLayer &layer,
                          vector<OSM::Polygon> &polygons, const vector<NodeRuleMap > &poly_idxs)
 {
     SQLite::Database &db = handle() ;
@@ -503,7 +501,7 @@ bool MapFile::addOSMLayerPolygons(const OSM::Document &doc, const Layer &layer,
     return true ;
 }
 
-bool MapFile::processOsmFiles(const vector<string> &osmFiles, const MapConfig &cfg)
+bool MapFile::processOsmFiles(const vector<string> &osmFiles, const ImportConfig &cfg)
 {
     // read files from memory and write to spatialite database
 
@@ -521,7 +519,7 @@ bool MapFile::processOsmFiles(const vector<string> &osmFiles, const MapConfig &c
 
         for(uint j=0 ; j<cfg.layers_.size() ; j++)
         {
-            const Layer &layer = cfg.layers_[j] ;
+            const ImportLayer &layer = cfg.layers_[j] ;
 
             std::vector<NodeRuleMap> passFilterNodes, passFilterWays, passFilterPoly, passFilterRel ;
 
@@ -722,7 +720,7 @@ bool MapFile::processOsmFiles(const vector<string> &osmFiles, const MapConfig &c
 
 
 static string makeBBoxQuery(const std::string &tableName, const std::string &geomColumn,
-                              const std::string &condition, const BBox &bbox)
+                            const BBox &bbox, double tol)
 {
     stringstream sql ;
 
@@ -734,9 +732,7 @@ static string makeBBoxQuery(const std::string &tableName, const std::string &geo
     sql << bbox.minx_ << ',' << bbox.miny_ << ',' << bbox.maxx_ << ',' << bbox.maxy_ << "," << bbox.srid_ ;
     sql << ") AS _geom_ FROM " << tableName << " AS __table__";
 
-    sql << " WHERE " << condition ;
-
-    if ( !condition.empty() ) sql << " AND " ;
+    sql << " WHERE " ;
 
     sql << "__table__.ROWID IN ( SELECT ROWID FROM SpatialIndex WHERE f_table_name='" << tableName << "' AND search_frame = BuildMBR(" ;
     sql << bbox.minx_ << ',' << bbox.miny_ << ',' << bbox.maxx_ << ',' << bbox.maxy_ << "," << bbox.srid_ << "))" ;
@@ -744,37 +740,61 @@ static string makeBBoxQuery(const std::string &tableName, const std::string &geo
     return sql.str() ;
 }
 
-static Dictionary parseTags(const string &tags)
+static Dictionary decodeTags(const string &tags, Dictionary &attr)
 {
+    using boost::tokenizer;
+    using boost::escaped_list_separator;
 
+    typedef tokenizer<escaped_list_separator<char> > stokenizer;
 
+    stokenizer tok(tags, escaped_list_separator<char>("\\", "@;", "\"'"));
 
+    vector<string> tokens ;
+
+    for( stokenizer::iterator beg = tok.begin(); beg!=tok.end(); ++beg)
+        if ( !beg->empty() ) tokens.push_back(*beg) ;
+
+    for(uint i=0 ; i<tokens.size() ; i+=2)
+        attr.add(tokens[i], tokens[i+1]) ;
 }
 
-static Geometry parseGeometryBlob(gaiaGeomCollPtr geom)
-{
 
-}
-
-bool MapFile::queryTile(const MapConfig &cfg, const BBox &box, VectorTile &tile)
+bool MapFile::queryTile(const MapConfig &cfg, uint tx, uint ty, uint z, VectorTileWriter &tile)
 {
     SQLite::Session session(db_) ;
     SQLite::Connection &con = session.handle() ;
 
+    BBox box ;
+    tms::tileBounds(tx, ty, z, box.minx_, box.miny_, box.maxx_, box.maxy_) ;
+
     for ( const Layer &layer: cfg.layers_ ) {
 
-        string sql = makeBBoxQuery(layer.name_, geom_column_name_, "", box) ;
+        bool zoom_matches = false ;
+        double stol = 0 ;
+
+        for( auto iv: layer.zr_.intervals_) {
+            if ( ( iv.min_zoom_ == -1 && z <= iv.max_zoom_ ) ||
+                 ( iv.max_zoom_ == -1 && z >= iv.min_zoom_ ) ||
+                 ( z >= iv.min_zoom_ && z <= iv.max_zoom_ ) ) {
+                zoom_matches = true ;
+                stol = iv.simplify_threshold_ ;
+            }
+        }
+
+        if ( !zoom_matches ) return false ; // layer zoom range does not match
+
+        string sql = makeBBoxQuery(layer.name_, geom_column_name_,  box, stol) ;
 
  //   sql = "SELECT gid,type,state,notes, ST_Transform(geom,3857) AS _geom_ FROM tracks WHERE (\"type\"='primary') AND ROWID IN ( SELECT ROWID FROM SpatialIndex WHERE f_table_name='tracks' AND search_frame = ST_Transform(BuildMBR(2617203.848484434,4935997.538543543,2636771.727725439,4955565.417784547,3857),4326))" ;
-
-        VectorTile::Layer vt_layer ;
-        vt_layer.name_ = layer.name_ ;
 
         try {
 
             SQLite::Query q(con, sql) ;
 
             SQLite::QueryResult res = q.exec() ;
+
+            if ( res )
+                tile.beginLayer(layer.name_) ;
 
             while ( res )
             {
@@ -785,10 +805,10 @@ bool MapFile::queryTile(const MapConfig &cfg, const BBox &box, VectorTile &tile)
 
                 string tags = res.get<string>("tags") ;
 
-                VectorTile::Feature ft ;
-                ft.geom_ = parseGeometryBlob(geom) ;
-                ft.tags_ = parseTags(tags) ;
-                vt_layer.features_.push_back(ft) ;
+                Dictionary attr ;
+
+                decodeTags(tags, attr) ;
+                tile.encodeFeatures(geom, attr) ;
 
                 res.next() ;
             }
@@ -800,8 +820,7 @@ bool MapFile::queryTile(const MapConfig &cfg, const BBox &box, VectorTile &tile)
 
         }
 
-        if ( !vt_layer.features_.empty() )
-            tile.layers_.push_back(vt_layer) ;
+
     }
 
     return true ;

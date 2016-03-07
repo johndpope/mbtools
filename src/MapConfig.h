@@ -2,10 +2,8 @@
 #define __MAP_CONFIG_H__
 
 #include <vector>
-
-#include "OsmRuleParser.h"
-#include "OsmDocument.h"
-
+#include <cstdint>
+#include <string>
 
 struct BBox {
     double minx_, miny_, maxx_, maxy_ ;
@@ -33,30 +31,14 @@ struct ZoomRange {
     }
 } ;
 
-struct Rule {
-    OSM::Rule::ExpressionNode *condition_ ;
-    OSM::Rule::Command *actions_ ;
-};
 
 struct Layer {
-    Layer(): srid_("3857") {}
+    Layer() {}
+
     ZoomRange zr_ ;
     std::string name_ ;
-    std::string geom_ ;
-    std::string srid_ ;
-    std::vector<std::string> tags_, types_ ;
-    std::vector<Rule> rules_ ;
 };
 
-struct Action {
-    std::string key_ ;
-    OSM::Rule::Literal val_ ;
-};
-
-struct NodeRuleMap {
-    int node_idx_ ;
-    std::vector<uint> matched_rules_ ;
-};
 
 struct MapConfig {
     MapConfig(): minz_(10), maxz_(16), has_bbox_(false) {}

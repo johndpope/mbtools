@@ -22,6 +22,7 @@ SET ( OSM2MBTILES_SOURCES
 	OsmPolygon.cpp
 	MapFile.cpp
 	MapConfig.cpp
+	ImportConfig.cpp
 
 	VectorTile.cpp
 	GeomHelpers.cpp
@@ -39,6 +40,7 @@ SET ( OSM2MBTILES_HEADERS
 	VectorTile.h
 	MapFile.h
 	MapConfig.h
+	ImportConfig.h
 	GeomHelpers.h
 
 	Dictionary.h
@@ -48,7 +50,7 @@ SET ( OSM2MBTILES_HEADERS
 	zfstream.h
 )
 
-PROTOBUF_GENERATE_CPP(OSM_PROTO_SOURCES OSM_PROTO_HEADERS protobuf/osmformat.proto protobuf/fileformat.proto)
+PROTOBUF_GENERATE_CPP(OSM_PROTO_SOURCES OSM_PROTO_HEADERS protobuf/osmformat.proto protobuf/fileformat.proto protobuf/vector_tile.proto)
 
 FIND_PACKAGE(BISON REQUIRED)
 FIND_PACKAGE(FLEX REQUIRED)

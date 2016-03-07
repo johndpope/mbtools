@@ -3,8 +3,10 @@
 
 #include "Database.h"
 #include "Dictionary.h"
+#include "ImportConfig.h"
 #include "MapConfig.h"
 #include "VectorTile.h"
+#include "OsmDocument.h"
 
 #include <map>
 
@@ -36,32 +38,29 @@ public:
     std::string insertFeatureSQL(const std::string &layerName,
                                  const std::string &geomCmd = "?") ;
 
-    bool processOsmFiles(const vector<string> &files, const MapConfig &cfg) ;
+    bool processOsmFiles(const vector<string> &files, const ImportConfig &cfg) ;
 
 
-    bool queryTile(const MapConfig &cfg, const BBox &box, VectorTile &tile) ;
+    bool queryTile(const MapConfig &cfg, uint tx, uint ty, uint tz, VectorTileWriter &tile) ;
 
 private:
 
-    bool addOSMLayerPoints(OSM::Document &doc, const Layer &layer,
+    bool addOSMLayerPoints(OSM::Document &doc, const ImportLayer &layer,
                            const vector<NodeRuleMap > &node_idxs) ;
 
-    bool addOSMLayerLines(OSM::Document &doc, const Layer &layer,
+    bool addOSMLayerLines(OSM::Document &doc, const ImportLayer &layer,
                           const vector<NodeRuleMap> &way_idxs,
                           vector<OSM::Way> &chunk_list,
-                          const vector<NodeRuleMap > &rule_map
-                          ) ;
+                          const vector<NodeRuleMap > &rule_map) ;
 
-    bool addOSMLayerPolygons(const OSM::Document &doc, const Layer &layer,
+    bool addOSMLayerPolygons(const OSM::Document &doc, const ImportLayer &layer,
                              vector<OSM::Polygon> &polygons, const vector<NodeRuleMap > &poly_idxs) ;
 
 
     SQLite::Database *db_ ;
 
-    string fileName_ ;
-
 public:
-    uint min_zoom_, max_zoom_ ;
+
     std::string geom_column_name_ ;
 
 };

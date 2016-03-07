@@ -47,6 +47,11 @@ void pixelsToTile(double px, double py, uint &tx, uint &ty) {
     ty = int( ceil( py / float(tile_size) ) - 1 ) ;
 }
 
+void tileToPixels(uint tx, uint ty, double &px, double &py) {
+    px = tx * tile_size ;
+    py = ty * tile_size ;
+}
+
 // Returns tile for given mercator coordinates
 void metersToTile(double mx, double my, uint zoom, uint &tx, uint &ty) {
     double px, py ;

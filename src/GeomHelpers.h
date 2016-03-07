@@ -43,6 +43,8 @@ void metersToPixels(double mx, double my, uint zoom, double &px, double &py) ;
 //Returns a tile covering region in given pixel coordinates
 void pixelsToTile(double px, double py, uint &tx, uint &ty) ;
 
+void tileToPixels(uint tx, uint ty, double &px, double &py) ;
+
 // Returns tile for given mercator coordinates
 void metersToTile(double mx, double my, uint zoom, uint &tx, uint &ty) ;
 

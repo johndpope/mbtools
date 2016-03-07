@@ -15,22 +15,26 @@ void printUsageAndExit()
 
 int main(int argc, char *argv[])
 {
-    string mapFile, configFile ;
+    string mapFile, mapConfigFile, importConfigFile ;
     vector<string> osmFiles ;
 
     for( int i=1 ; i<argc ; i++ )
     {
         string arg = argv[i] ;
 
-        if ( arg == "--config" ) {
+        if ( arg == "--import" ) {
             if ( i++ == argc ) printUsageAndExit() ;
-            configFile = argv[i] ;
+            importConfigFile = argv[i] ;
+        }
+        else if ( arg == "--options" ) {
+            if ( i++ == argc ) printUsageAndExit() ;
+            mapConfigFile = argv[i] ;
         }
         else
             osmFiles.push_back(argv[i]) ;
     }
 
-    if ( configFile.empty() ||  osmFiles.empty() )
+    if ( importConfigFile.empty() ||  mapConfigFile.empty() || osmFiles.empty() )
         printUsageAndExit() ;
 
     boost::filesystem::path tmp_dir = boost::filesystem::temp_directory_path() ;
@@ -46,24 +50,31 @@ int main(int argc, char *argv[])
         exit(1) ;
     }
 
-    MapConfig cfg ;
-    if ( !cfg.parse(configFile) ) {
-        cerr << "Error parsing configuration file: " << configFile << endl ;
+    ImportConfig icfg ;
+    if ( !icfg.parse(importConfigFile) ) {
+        cerr << "Error parsing OSM import configuration file: " << importConfigFile << endl ;
         return 0 ;
     }
 
-    for( const Layer &layer: cfg.layers_)
-    {
+    MapConfig mcfg ;
+    if ( !mcfg.parse(mapConfigFile) ) {
+        cerr << "Error parsing map configuration file: " << mapConfigFile << endl ;
+        return 0 ;
+    }
+
+    for( const ImportLayer &layer: icfg.layers_)  {
         if ( ! gfile.createLayerTable(layer.name_, layer.geom_, layer.srid_ ) ) {
             cerr << "Failed to create layer " << layer.name_ << ", skipping" ;
            continue ;
         }
     }
 
-    if ( !gfile.processOsmFiles(osmFiles, cfg) ) {
+    if ( !gfile.processOsmFiles(osmFiles, icfg) ) {
         cerr << "Error while creating temporary spatialite database" << endl ;
         return 0 ;
     }
+
+
 
     cout << mapFile << endl ;
 
