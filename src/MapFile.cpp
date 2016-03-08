@@ -5,6 +5,7 @@
 #include <spatialite.h>
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include <boost/tokenizer.hpp>
 
 using namespace std;
 
@@ -208,8 +209,6 @@ static bool processStoreActions(const Rule &r, OSM::Rule::Context &ctx, OSM::Fea
             act.val_ = action->expression_->eval(ctx) ;
 
             actions.push_back(act) ;
-
-
         }
 
         action = action->next_ ;
@@ -231,7 +230,7 @@ void bindActions(const vector<Action> &actions, SQLite::Command &cmd)
         string val = act.val_.toString() ;
         string key = act.key_ ;
 
-        kvl += key + '@' + val + ';' ;
+        if ( !val.empty() ) kvl += key + '@' + val + ';' ;
     }
 
     if ( kvl.empty() ) cmd.bind(2, SQLite::Nil) ;
@@ -728,19 +727,19 @@ static string makeBBoxQuery(const std::string &tableName, const std::string &geo
 
     sql << "SELECT tags," ;
 
-    sql << "ST_Intersection(" << geomColumn << ",BuildMBR(" ;
+    sql << "ST_ForceLHR(ST_Intersection(" << geomColumn << ",BuildMBR(" ;
     sql << bbox.minx_ << ',' << bbox.miny_ << ',' << bbox.maxx_ << ',' << bbox.maxy_ << "," << bbox.srid_ ;
-    sql << ") AS _geom_ FROM " << tableName << " AS __table__";
+    sql << "))) AS _geom_ FROM " << tableName << " AS __table__";
 
     sql << " WHERE " ;
 
     sql << "__table__.ROWID IN ( SELECT ROWID FROM SpatialIndex WHERE f_table_name='" << tableName << "' AND search_frame = BuildMBR(" ;
-    sql << bbox.minx_ << ',' << bbox.miny_ << ',' << bbox.maxx_ << ',' << bbox.maxy_ << "," << bbox.srid_ << "))" ;
+    sql << bbox.minx_ << ',' << bbox.miny_ << ',' << bbox.maxx_ << ',' << bbox.maxy_ << "," << bbox.srid_ << ")) AND _geom_ NOT NULL" ;
 
     return sql.str() ;
 }
 
-static Dictionary decodeTags(const string &tags, Dictionary &attr)
+static void decodeTags(const string &tags, Dictionary &attr)
 {
     using boost::tokenizer;
     using boost::escaped_list_separator;
@@ -759,13 +758,14 @@ static Dictionary decodeTags(const string &tags, Dictionary &attr)
 }
 
 
-bool MapFile::queryTile(const MapConfig &cfg, uint tx, uint ty, uint z, VectorTileWriter &tile)
+bool MapFile::queryTile(const MapConfig &cfg, VectorTileWriter &tile) const
 {
     SQLite::Session session(db_) ;
     SQLite::Connection &con = session.handle() ;
 
-    BBox box ;
-    tms::tileBounds(tx, ty, z, box.minx_, box.miny_, box.maxx_, box.maxy_) ;
+    BBox box = tile.box();
+
+    bool has_data = false ;
 
     for ( const Layer &layer: cfg.layers_ ) {
 
@@ -773,19 +773,17 @@ bool MapFile::queryTile(const MapConfig &cfg, uint tx, uint ty, uint z, VectorTi
         double stol = 0 ;
 
         for( auto iv: layer.zr_.intervals_) {
-            if ( ( iv.min_zoom_ == -1 && z <= iv.max_zoom_ ) ||
-                 ( iv.max_zoom_ == -1 && z >= iv.min_zoom_ ) ||
-                 ( z >= iv.min_zoom_ && z <= iv.max_zoom_ ) ) {
+            if ( ( iv.min_zoom_ == -1 && tile.z() <= iv.max_zoom_ ) ||
+                 ( iv.max_zoom_ == -1 && tile.z() >= iv.min_zoom_ ) ||
+                 ( tile.z() >= iv.min_zoom_ && tile.z() <= iv.max_zoom_ ) ) {
                 zoom_matches = true ;
                 stol = iv.simplify_threshold_ ;
             }
         }
 
-        if ( !zoom_matches ) return false ; // layer zoom range does not match
+        if ( !zoom_matches ) continue ; // layer zoom range does not match
 
         string sql = makeBBoxQuery(layer.name_, geom_column_name_,  box, stol) ;
-
- //   sql = "SELECT gid,type,state,notes, ST_Transform(geom,3857) AS _geom_ FROM tracks WHERE (\"type\"='primary') AND ROWID IN ( SELECT ROWID FROM SpatialIndex WHERE f_table_name='tracks' AND search_frame = ST_Transform(BuildMBR(2617203.848484434,4935997.538543543,2636771.727725439,4955565.417784547,3857),4326))" ;
 
         try {
 
@@ -793,8 +791,10 @@ bool MapFile::queryTile(const MapConfig &cfg, uint tx, uint ty, uint z, VectorTi
 
             SQLite::QueryResult res = q.exec() ;
 
-            if ( res )
-                tile.beginLayer(layer.name_) ;
+            if ( !res ) continue ;
+
+            tile.beginLayer(layer.name_) ;
+            has_data = true ;
 
             while ( res )
             {
@@ -802,7 +802,6 @@ bool MapFile::queryTile(const MapConfig &cfg, uint tx, uint ty, uint z, VectorTi
                 const char *data = res.getBlob("_geom_", buf_size) ;
 
                 gaiaGeomCollPtr geom = gaiaFromSpatiaLiteBlobWkb ((const unsigned char *)data, buf_size);
-
                 string tags = res.get<string>("tags") ;
 
                 Dictionary attr ;
@@ -812,18 +811,19 @@ bool MapFile::queryTile(const MapConfig &cfg, uint tx, uint ty, uint z, VectorTi
 
                 res.next() ;
             }
+
+            tile.endLayer() ;
         }
         catch ( SQLite::Exception &e )
         {
             cout << e.what() << endl ;
             return false ;
-
         }
 
 
     }
 
-    return true ;
+    return has_data ;
 }
 
 

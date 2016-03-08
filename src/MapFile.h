@@ -41,7 +41,7 @@ public:
     bool processOsmFiles(const vector<string> &files, const ImportConfig &cfg) ;
 
 
-    bool queryTile(const MapConfig &cfg, uint tx, uint ty, uint tz, VectorTileWriter &tile) ;
+    bool queryTile(const MapConfig &cfg, VectorTileWriter &tile) const ;
 
 private:
 

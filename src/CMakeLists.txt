@@ -23,6 +23,7 @@ SET ( OSM2MBTILES_SOURCES
 	MapFile.cpp
 	MapConfig.cpp
 	ImportConfig.cpp
+	MBTileWriter.cpp
 
 	VectorTile.cpp
 	GeomHelpers.cpp
@@ -42,6 +43,7 @@ SET ( OSM2MBTILES_HEADERS
 	MapConfig.h
 	ImportConfig.h
 	GeomHelpers.h
+	MBTileWriter.h
 
 	Dictionary.h
 	XmlReader.h
@@ -71,5 +73,25 @@ TARGET_LINK_LIBRARIES(osm2mbtiles ws2_32)
 ENDIF( WIN32 )
 
 INSTALL(TARGETS osm2mbtiles DESTINATION bin  )
+
+###############################################################################
+
+SET ( TILESERVER_SOURCES
+	Database.cpp
+	Dictionary.cpp
+	HttpServer.cpp
+	mongoose/mongoose.c
+)
+
+SET ( TILESERVER_HEADERS
+	Database.h
+	Dictionary.h
+	HttpServer.h
+	mongoose/mongoose.h
+)
+
+ADD_EXECUTABLE(tileserver tileserver.cpp ${TILESERVER_SOURCES})
+TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl)
+
 
 

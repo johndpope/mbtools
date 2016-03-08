@@ -2,6 +2,7 @@
 
 #include "MapConfig.h"
 #include "MapFile.h"
+#include "MBTileWriter.h"
 
 #include <boost/filesystem.hpp>
 
@@ -9,13 +10,13 @@ using namespace std ;
 
 void printUsageAndExit()
 {
-    cerr << "Usage: osm2mbtiles --config <config_file> <file_name>+" << endl ;
+    cerr << "Usage: osm2mbtiles --import <config_file> --options <options_file> --out <tileset> <file_name>+" << endl ;
     exit(1) ;
 }
 
 int main(int argc, char *argv[])
 {
-    string mapFile, mapConfigFile, importConfigFile ;
+    string mapFile, mapConfigFile, importConfigFile, tileSet ;
     vector<string> osmFiles ;
 
     for( int i=1 ; i<argc ; i++ )
@@ -30,6 +31,11 @@ int main(int argc, char *argv[])
             if ( i++ == argc ) printUsageAndExit() ;
             mapConfigFile = argv[i] ;
         }
+        else if ( arg == "--out" ) {
+            if ( i++ == argc ) printUsageAndExit() ;
+            tileSet = argv[i] ;
+        }
+
         else
             osmFiles.push_back(argv[i]) ;
     }
@@ -41,7 +47,6 @@ int main(int argc, char *argv[])
     boost::filesystem::path tmp_file = boost::filesystem::unique_path("%%%%%.sqlite");
 
     mapFile = ( tmp_dir / tmp_file ).native() ;
-
 
     MapFile gfile ;
 
@@ -74,9 +79,17 @@ int main(int argc, char *argv[])
         return 0 ;
     }
 
+    MBTileWriter twriter(tileSet) ;
 
+    twriter.writeMetaData("name", mcfg.name_) ;
+    twriter.writeMetaData("version", "1.1") ;
+    twriter.writeMetaData("type", "baselayer") ;
+    twriter.writeMetaData("version", "1.1") ;
+    twriter.writeMetaData("description", mcfg.description_) ;
+    twriter.writeMetaData("attribution", mcfg.attribution_) ;
 
-    cout << mapFile << endl ;
+    twriter.writeTiles(gfile, mcfg) ;
+
 
 //    boost::filesystem::remove(mapFile) ;
 

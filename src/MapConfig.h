@@ -5,10 +5,8 @@
 #include <cstdint>
 #include <string>
 
-struct BBox {
-    double minx_, miny_, maxx_, maxy_ ;
-    uint srid_ ;
-};
+#include "GeomHelpers.h"
+
 
 struct ZoomInterval {
     ZoomInterval(): min_zoom_(-1), max_zoom_(-1), simplify_threshold_(0) {}

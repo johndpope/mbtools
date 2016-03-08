@@ -7,7 +7,7 @@ void VectorTileWriter::beginLayer(const std::string &name)
 {
     current_layer_ = tile_msg_.add_layers() ;
     current_layer_->set_name(name) ;
-    current_layer_->set_version(1) ;
+    current_layer_->set_version(2) ;
 
     key_map_.clear() ;
     value_map_.clear() ;
@@ -19,10 +19,10 @@ void VectorTileWriter::endLayer()
 
     // write key/value tables
 
-    vector<pair<string, uint>> keys(key_map_.begin(), key_map_.end()),
+    vector<pair<string, uint32_t>> keys(key_map_.begin(), key_map_.end()),
             values(value_map_.begin(), value_map_.end()) ;
 
-    auto comparator = [&] (const pair<string, uint> &a, const pair<string, uint> &b) {
+    auto comparator = [&] (const pair<string, uint32_t> &a, const pair<string, uint32_t> &b) {
         return a.second < b.second ;
     } ;
 
@@ -81,7 +81,7 @@ void VectorTileWriter::encodePointGeometry(const gaiaGeomCollPtr &geom, const Di
 
     int cx, cy ;
 
-    uint count = 0 ;
+    uint32_t count = 0 ;
 
     for( gaiaPointPtr p = geom->FirstPoint ; p != NULL ; p = p->Next )
         count ++ ;
@@ -103,7 +103,7 @@ void VectorTileWriter::addPoint(int x, int y) {
     current_feature_->add_geometry((y << 1) ^ (y  >> 31));
 }
 
-void VectorTileWriter::addGeomCmd(uint cmd, uint count) {
+void VectorTileWriter::addGeomCmd(uint32_t cmd, uint32_t count) {
     assert(current_feature_) ;
     current_feature_->add_geometry((cmd & 0x7) | (count << 3));
 }
@@ -132,7 +132,7 @@ void VectorTileWriter::encodeLineGeometry(const gaiaGeomCollPtr &geom, const Dic
 
         addGeomCmd(2, pl->Points-1) ;
 
-        for(uint count = 2 ; count < 2 * pl->Points ; count += 2) {
+        for(uint32_t count = 2 ; count < 2 * pl->Points ; count += 2) {
             int cx, cy ;
             tile_coords(pl->Coords[count], pl->Coords[count+1], cx, cy) ;
 
@@ -174,7 +174,7 @@ void VectorTileWriter::encodePolygonGeometry(const gaiaGeomCollPtr &geom, const 
 
         addGeomCmd(2, ex->Points-1) ;
 
-        for(uint count = 2 ; count < 2 * ex->Points ; count += 2) {
+        for(uint32_t count = 2 ; count < 2 * ex->Points ; count += 2) {
             int cx, cy ;
             tile_coords(ex->Coords[count], ex->Coords[count+1], cx, cy) ;
 
@@ -185,7 +185,7 @@ void VectorTileWriter::encodePolygonGeometry(const gaiaGeomCollPtr &geom, const 
             start_x = cx ; start_y = cy ;
         }
 
-        addGeomCmd(7, ex->Points-1) ;
+        addGeomCmd(7) ; // close path
 
         for( gaiaRingPtr intr = pl->Interiors ; intr != NULL ; intr = intr->Next ) {
             // moveto first point
@@ -200,7 +200,7 @@ void VectorTileWriter::encodePolygonGeometry(const gaiaGeomCollPtr &geom, const 
 
             addGeomCmd(2, intr->Points-1) ;
 
-            for(uint count = 2 ; count < 2 * intr->Points ; count += 2) {
+            for(uint32_t count = 2 ; count < 2 * intr->Points ; count += 2) {
                 int cx, cy ;
                 tile_coords(intr->Coords[count], intr->Coords[count+1], cx, cy) ;
 
@@ -211,7 +211,7 @@ void VectorTileWriter::encodePolygonGeometry(const gaiaGeomCollPtr &geom, const 
                 start_x = cx ; start_y = cy ;
             }
 
-            addGeomCmd(7, intr->Points-1) ;
+            addGeomCmd(7) ;
 
         }
 
@@ -229,7 +229,7 @@ void VectorTileWriter::setFeatureAttributes(const Dictionary &attr)
 
     while ( kit ) {
         auto ikey = key_map_.find(kit.key()) ;
-        uint count ;
+        uint32_t count ;
         if ( ikey == key_map_.end() ) {
             count = key_map_.size() ;
             key_map_.insert(make_pair(kit.key(), count)) ;

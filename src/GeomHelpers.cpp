@@ -1,5 +1,7 @@
 #include "GeomHelpers.h"
 
+#include <cmath>
+
 using namespace std ;
 namespace tms {
 
@@ -8,7 +10,7 @@ constexpr double gm_initial_resolution = 2 * M_PI * 6378137 / tile_size ;
 constexpr double gm_origin_shift = 2 * M_PI * 6378137 / 2.0 ;
 
 // Resolution (meters/pixel) for given zoom level (measured at Equator)
-double resolution(uint zoom) {
+double resolution(uint32_t zoom) {
     return gm_initial_resolution / pow(2, zoom) ;
 }
 // Converts given lat/lon in WGS84 Datum to XY in Spherical Mercator EPSG:900913
@@ -28,45 +30,45 @@ void metersToLatLon(double mx, double my, double &lat, double &lon) {
 }
 
 //Converts pixel coordinates in given zoom level of pyramid to EPSG:900913
-void pixelsToMeters(double px, double py, uint zoom, double &mx, double &my) {
+void pixelsToMeters(double px, double py, uint32_t zoom, double &mx, double &my) {
     double res = resolution( zoom ) ;
     mx = px * res - gm_origin_shift ;
     my = py * res - gm_origin_shift ;
 }
 
 //Converts EPSG:900913 to pyramid pixel coordinates in given zoom level
-void metersToPixels(double mx, double my, uint zoom, double &px, double &py) {
+void metersToPixels(double mx, double my, uint32_t zoom, double &px, double &py) {
     double res = resolution( zoom ) ;
     px = (mx + gm_origin_shift) / res ;
     py = (my + gm_origin_shift) / res ;
 }
 
 //Returns a tile covering region in given pixel coordinates
-void pixelsToTile(double px, double py, uint &tx, uint &ty) {
+void pixelsToTile(double px, double py, uint32_t &tx, uint32_t &ty) {
     tx = int( ceil( px / float(tile_size) ) - 1 ) ;
     ty = int( ceil( py / float(tile_size) ) - 1 ) ;
 }
 
-void tileToPixels(uint tx, uint ty, double &px, double &py) {
+void tileToPixels(uint32_t tx, uint32_t ty, double &px, double &py) {
     px = tx * tile_size ;
     py = ty * tile_size ;
 }
 
 // Returns tile for given mercator coordinates
-void metersToTile(double mx, double my, uint zoom, uint &tx, uint &ty) {
+void metersToTile(double mx, double my, uint32_t zoom, uint32_t &tx, uint32_t &ty) {
     double px, py ;
     metersToPixels(mx, my, zoom, px, py) ;
     pixelsToTile(px, py, tx, ty) ;
 }
 // Returns bounds of the given tile in EPSG:900913 coordinates
 
-void tileBounds(uint tx, uint ty, uint zoom, double &minx, double &miny, double &maxx, double &maxy) {
+void tileBounds(uint32_t tx, uint32_t ty, uint32_t zoom, double &minx, double &miny, double &maxx, double &maxy) {
     pixelsToMeters( tx*tile_size, ty*tile_size, zoom, minx, miny ) ;
     pixelsToMeters( (tx+1)*tile_size, (ty+1)*tile_size, zoom, maxx, maxy ) ;
 }
 
 // Returns bounds of the given tile in latutude/longitude using WGS84 datum
-void tileLatLonBounds(uint tx, uint ty, uint zoom, double &minLat, double &minLon, double &maxLat, double &maxLon) {
+void tileLatLonBounds(uint32_t tx, uint32_t ty, uint32_t zoom, double &minLat, double &minLon, double &maxLat, double &maxLon) {
 
     double minx, miny, maxx, maxy ;
     tileBounds(tx, ty, zoom, minx, miny, maxx, maxy) ;
