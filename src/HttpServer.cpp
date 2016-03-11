@@ -290,7 +290,7 @@ void HttpServerResponse::setCookie(const string &key, const string &value)
 struct HandlerInfo {
     string req_method_ ;
     boost::regex req_uri_filter_ ;
-    HttpRequestHandler *handler_ ;
+    std::shared_ptr<HttpRequestHandler> handler_ ;
 };
 
 class HttpServerImpl
@@ -767,7 +767,7 @@ int HttpServerImpl::mg_begin_request(struct mg_connection *conn)
     {
         const boost::regex &filter = it->req_uri_filter_ ;
         const string &method = it->req_method_ ;
-        HttpRequestHandler *handler = it->handler_ ;
+        std::shared_ptr<HttpRequestHandler> handler = it->handler_ ;
 
         if ( session._SERVER["REQUEST_METHOD"] == method &&
              boost::regex_match(session._SERVER.get("REQUEST_URI"),filter) )
@@ -803,10 +803,10 @@ void HttpServer::stop() {
     if ( impl_ ) impl_->stop() ;
 }
 
-void HttpServer::addHandler(HttpRequestHandler &h, const boost::regex &filter, const std::string &method )
+void HttpServer::addHandler(const std::shared_ptr<HttpRequestHandler> &h, const boost::regex &filter, const std::string &method )
 {
     HandlerInfo info ;
-    info.handler_ = &h ;
+    info.handler_ = h ;
     info.req_method_ = method ;
     info.req_uri_filter_ = filter ;
     impl_->handlers_.push_back(info) ;

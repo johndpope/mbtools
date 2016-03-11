@@ -103,7 +103,7 @@ class HttpServer
     void setAuthRealm(const std::string &realm);
 
     // add a handler for the request path that may be a regular expression
-    void addHandler(HttpRequestHandler &h, const boost::regex &req_filter, const std::string &req_method = "GET" ) ;
+    void addHandler(const std::shared_ptr<HttpRequestHandler> &h, const boost::regex &req_filter, const std::string &req_method = "GET" ) ;
 
 	// start the server
 	bool start() ;

@@ -1,4 +1,5 @@
-#include "VectorTile.h"
+#include "VectorTileWriter.h"
+
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/gzip_stream.h>
 #include <iostream>
@@ -77,6 +78,9 @@ void VectorTileWriter::encodePointGeometry(const gaiaGeomCollPtr &geom, const Di
 
     if ( geom->FirstPoint == 0 ) return ;
 
+    current_feature_ = current_layer_->add_features() ;
+    current_feature_->set_type(vector_tile::Tile_GeomType_POINT) ;
+
     int cx, cy ;
 
     uint32_t count = 0 ;
@@ -84,18 +88,14 @@ void VectorTileWriter::encodePointGeometry(const gaiaGeomCollPtr &geom, const Di
     for( gaiaPointPtr p = geom->FirstPoint ; p != NULL ; p = p->Next )
         count ++ ;
 
-    for( gaiaPointPtr p = geom->FirstPoint ; p != NULL ; p = p->Next ) {
-        current_feature_ = current_layer_->add_features() ;
-        current_feature_->set_type(vector_tile::Tile_GeomType_POINT) ;
+    addGeomCmd(1, count) ;
 
-        addGeomCmd(1) ;
+    for( gaiaPointPtr p = geom->FirstPoint ; p != NULL ; p = p->Next ) {
         tile_coords(geom->FirstPoint->X, geom->FirstPoint->Y, cx, cy) ;
         addPoint(cx, cy) ;
-
-        setFeatureAttributes(attr) ;
     }
 
-
+    setFeatureAttributes(attr) ;
 }
 
 void VectorTileWriter::addPoint(int x, int y) {
@@ -141,7 +141,6 @@ void VectorTileWriter::encodeLineGeometry(const gaiaGeomCollPtr &geom, const Dic
             ls.push_back(EncodedVertex{cx - start_x, cy - start_y}) ;
 
             start_x = cx ; start_y = cy ;
-
         }
 
         encodeRing(ls, false) ;

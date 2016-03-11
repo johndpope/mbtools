@@ -24,7 +24,7 @@ SET ( OSM2MBTILES_SOURCES
 	ImportConfig.cpp
 	MBTileWriter.cpp
 
-	VectorTile.cpp
+	VectorTileWriter.cpp
 	GeomHelpers.cpp
 
 	Dictionary.cpp
@@ -38,7 +38,7 @@ SET ( OSM2MBTILES_SOURCES
 SET ( OSM2MBTILES_HEADERS
 	OsmRuleParser.h
 	OsmDocument.h
-	VectorTile.h
+	VectorTileWriter.h
 	MapFile.h
 	MapConfig.h
 	ImportConfig.h
@@ -93,8 +93,22 @@ SET ( TILESERVER_HEADERS
 )
 
 ADD_EXECUTABLE(tileserver tileserver.cpp ${TILESERVER_SOURCES})
-TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl)
+TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z)
 
+##################################################################################3
+
+SET ( RSC_TOOL_SOURCES
+	Database.cpp
+	Dictionary.cpp
+)
+
+SET ( RSC_TOOL_HEADERS
+	Database.h
+	Dictionary.h
+)
+
+ADD_EXECUTABLE(makeres makeres.cpp ${RSC_TOOL_SOURCES})
+TARGET_LINK_LIBRARIES(makeres ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z)
 
 ##################################################################################3
 

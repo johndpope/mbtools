@@ -5,7 +5,7 @@
 #include "Dictionary.h"
 #include "ImportConfig.h"
 #include "MapConfig.h"
-#include "VectorTile.h"
+#include "VectorTileWriter.h"
 #include "OsmDocument.h"
 
 #include <map>
