@@ -1,6 +1,7 @@
 #include "VectorTile.h"
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/gzip_stream.h>
+#include <iostream>
 
 using namespace std ;
 void VectorTileWriter::beginLayer(const std::string &name)
@@ -76,9 +77,6 @@ void VectorTileWriter::encodePointGeometry(const gaiaGeomCollPtr &geom, const Di
 
     if ( geom->FirstPoint == 0 ) return ;
 
-    current_feature_ = current_layer_->add_features() ;
-    current_feature_->set_type(vector_tile::Tile_GeomType_POINT) ;
-
     int cx, cy ;
 
     uint32_t count = 0 ;
@@ -86,15 +84,18 @@ void VectorTileWriter::encodePointGeometry(const gaiaGeomCollPtr &geom, const Di
     for( gaiaPointPtr p = geom->FirstPoint ; p != NULL ; p = p->Next )
         count ++ ;
 
-    current_feature_->add_geometry((1u & 0x7) | (count << 3)) ;
-
     for( gaiaPointPtr p = geom->FirstPoint ; p != NULL ; p = p->Next ) {
+        current_feature_ = current_layer_->add_features() ;
+        current_feature_->set_type(vector_tile::Tile_GeomType_POINT) ;
+
+        addGeomCmd(1) ;
         tile_coords(geom->FirstPoint->X, geom->FirstPoint->Y, cx, cy) ;
-        current_feature_->add_geometry((cx << 1) ^ (cx  >> 31));
-        current_feature_->add_geometry((cy << 1) ^ (cy  >> 31));
+        addPoint(cx, cy) ;
+
+        setFeatureAttributes(attr) ;
     }
 
-    setFeatureAttributes(attr) ;
+
 }
 
 void VectorTileWriter::addPoint(int x, int y) {
@@ -118,33 +119,36 @@ void VectorTileWriter::encodeLineGeometry(const gaiaGeomCollPtr &geom, const Dic
     current_feature_ = current_layer_->add_features() ;
     current_feature_->set_type(vector_tile::Tile_GeomType_LINESTRING) ;
 
+    int start_x = 0, start_y = 0;
+    int cx, cy ;
+
     for( gaiaLinestringPtr pl = geom->FirstLinestring ; pl != NULL ; pl = pl->Next ) {
 
-        // moveto first point
-        addGeomCmd(1) ;
+        LinearRing ls ;
 
-        int start_x, start_y ;
-        tile_coords(pl->Coords[0], pl->Coords[1], start_x, start_y) ;
-
-        addPoint(start_x, start_y) ;
-
-        // lineto
-
-        addGeomCmd(2, pl->Points-1) ;
+        tile_coords(pl->Coords[0], pl->Coords[1], cx, cy) ;
+        ls.push_back(EncodedVertex{cx - start_x, cy - start_y}) ;
+        start_x = cx ; start_y = cy ;
 
         for(uint32_t count = 2 ; count < 2 * pl->Points ; count += 2) {
-            int cx, cy ;
+
             tile_coords(pl->Coords[count], pl->Coords[count+1], cx, cy) ;
 
             int dx = cx - start_x, dy = cy - start_y ;
 
-            addPoint(dx, dy) ;
+            if ( dx == 0 && dy == 0 ) continue ;
+
+            ls.push_back(EncodedVertex{cx - start_x, cy - start_y}) ;
 
             start_x = cx ; start_y = cy ;
+
         }
+
+        encodeRing(ls, false) ;
     }
 
     setFeatureAttributes(attr) ;
+
 }
 
 void VectorTileWriter::encodePolygonGeometry(const gaiaGeomCollPtr &geom, const Dictionary &attr) {
@@ -156,65 +160,64 @@ void VectorTileWriter::encodePolygonGeometry(const gaiaGeomCollPtr &geom, const 
     current_feature_ = current_layer_->add_features() ;
     current_feature_->set_type(vector_tile::Tile_GeomType_POLYGON) ;
 
+    int start_x = 0, start_y = 0;
+    int cx, cy ;
+
     for( gaiaPolygonPtr pl = geom->FirstPolygon ; pl != NULL ; pl = pl->Next ) {
 
         // exterior
 
+        LinearRing exr ;
+
         gaiaRingPtr ex = pl->Exterior ;
 
-        // moveto first point
-        addGeomCmd(1) ;
+        int n = ex->Points ;
 
-        int start_x, start_y ;
-        tile_coords(ex->Coords[0], ex->Coords[1], start_x, start_y) ;
+        tile_coords(ex->Coords[0], ex->Coords[1], cx, cy) ;
+        exr.push_back(EncodedVertex{cx - start_x, cy - start_y}) ;
+        start_x = cx ; start_y = cy ;
 
-        addPoint(start_x, start_y) ;
+        for(uint32_t count = 2 ; count < 2 * n ; count += 2) {
 
-        // lineto
-
-        addGeomCmd(2, ex->Points-1) ;
-
-        for(uint32_t count = 2 ; count < 2 * ex->Points ; count += 2) {
-            int cx, cy ;
             tile_coords(ex->Coords[count], ex->Coords[count+1], cx, cy) ;
 
             int dx = cx - start_x, dy = cy - start_y ;
 
-            addPoint(dx, dy) ;
+            if ( dx == 0 && dy == 0 ) continue ;
+
+            exr.push_back(EncodedVertex{dx, dy}) ;
 
             start_x = cx ; start_y = cy ;
         }
 
-        addGeomCmd(7) ; // close path
+        encodeRing(exr, true) ;
 
-        for( gaiaRingPtr intr = pl->Interiors ; intr != NULL ; intr = intr->Next ) {
-            // moveto first point
-            addGeomCmd(1) ;
+        for( uint i = 0 ; i < pl->NumInteriors ; i++ ) {
 
-            int start_x, start_y ;
-            tile_coords(intr->Coords[0], intr->Coords[1], start_x, start_y) ;
+            gaiaRingPtr intr = &(pl->Interiors[i]) ;
+            uint n = intr->Points ;
 
-            addPoint(start_x, start_y) ;
+            LinearRing ir ;
 
-            // lineto
+            tile_coords(intr->Coords[0], intr->Coords[1], cx, cy) ;
+            ir.push_back(EncodedVertex{cx - start_x, cy - start_y}) ;
+            start_x = cx ; start_y = cy ;
 
-            addGeomCmd(2, intr->Points-1) ;
-
-            for(uint32_t count = 2 ; count < 2 * intr->Points ; count += 2) {
+            for(uint32_t count = 2 ; count <2 *n ; count += 2) {
                 int cx, cy ;
                 tile_coords(intr->Coords[count], intr->Coords[count+1], cx, cy) ;
 
                 int dx = cx - start_x, dy = cy - start_y ;
 
-                addPoint(dx, dy) ;
+                if ( dx == 0 && dy == 0 ) continue ;
+
+                ir.push_back(EncodedVertex{dx, dy}) ;
 
                 start_x = cx ; start_y = cy ;
             }
 
-            addGeomCmd(7) ;
-
+            encodeRing(ir, true) ;
         }
-
     }
 
     setFeatureAttributes(attr) ;
@@ -250,4 +253,25 @@ void VectorTileWriter::setFeatureAttributes(const Dictionary &attr)
 
         ++kit ;
     }
+}
+
+void VectorTileWriter::encodeRing(const LinearRing &r, bool close)
+{
+    int n = r.size() ;
+
+    if ( n == 0 ) return ;
+
+    // moveto first point
+    addGeomCmd(1) ;
+    addPoint(r[0].x_, r[0].y_) ;
+
+    // lineto (remaining points)
+
+    addGeomCmd(2, n-1) ;
+
+    for(uint32_t count = 1 ; count < n ; count ++)
+        addPoint(r[count].x_, r[count].y_) ;
+
+    if ( close )
+        addGeomCmd(7) ; // close path
 }

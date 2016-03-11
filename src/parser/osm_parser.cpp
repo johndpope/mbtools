@@ -33,7 +33,7 @@
 
 // First part of user declarations.
 
-#line 37 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:399
+#line 37 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:399
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -47,9 +47,9 @@
 
 // User implementation prologue.
 
-#line 51 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:407
+#line 51 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:407
 // Unqualified %code blocks.
-#line 29 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:408
+#line 29 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:408
 
 
 #include <OsmRuleParser.h>
@@ -59,7 +59,7 @@ static OSM::BisonParser::symbol_type yylex(OSM::Rule::Parser &driver, OSM::Bison
 
 
 
-#line 63 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:408
+#line 63 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -143,9 +143,9 @@ static OSM::BisonParser::symbol_type yylex(OSM::Rule::Parser &driver, OSM::Bison
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 6 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:474
+#line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:474
 namespace OSM {
-#line 149 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:474
+#line 149 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:474
 
   /* Return YYSTR after stripping away unnecessary quotes and
      backslashes, so that it's suitable for yyerror.  The heuristic is
@@ -632,367 +632,367 @@ namespace OSM {
           switch (yyn)
             {
   case 2:
-#line 101 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 101 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { driver.node = yystack_[1].value.as< OSM::Rule::ExpressionNode * > () ; driver.actions = yystack_[0].value.as< OSM::Rule::Command * > () ; }
-#line 638 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 638 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 3:
-#line 106 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 106 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = yystack_[1].value.as< OSM::Rule::Command * > () ; }
-#line 644 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 644 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 4:
-#line 110 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 110 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = yystack_[0].value.as< OSM::Rule::Command * > () ;  }
-#line 650 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 650 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 5:
-#line 111 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 111 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = yystack_[1].value.as< OSM::Rule::Command * > () ; }
-#line 656 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 656 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 6:
-#line 112 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 112 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = yystack_[2].value.as< OSM::Rule::Command * > () ; yystack_[2].value.as< OSM::Rule::Command * > ()->next_ = yystack_[0].value.as< OSM::Rule::Command * > () ;}
-#line 662 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 662 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 7:
-#line 116 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 116 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Add, yystack_[2].value.as< std::string > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 668 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 668 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 8:
-#line 117 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 117 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Set, yystack_[2].value.as< std::string > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ;}
-#line 674 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 674 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 9:
-#line 118 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 118 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Delete, yystack_[0].value.as< std::string > ()) ; }
-#line 680 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 680 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 10:
-#line 119 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 119 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Store, yystack_[1].value.as< std::string > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 686 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 686 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 11:
-#line 120 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 120 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Continue) ;}
-#line 692 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 692 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 12:
-#line 129 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 129 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 698 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 698 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 13:
-#line 130 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 130 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BooleanOperator( OSM::Rule::BooleanOperator::Or, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 704 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 704 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 14:
-#line 134 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 134 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 710 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 710 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 15:
-#line 135 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 135 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BooleanOperator( OSM::Rule::BooleanOperator::And, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 716 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 716 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 16:
-#line 139 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 139 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 722 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 722 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 17:
-#line 140 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 140 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BooleanOperator( OSM::Rule::BooleanOperator::Not, yystack_[0].value.as< OSM::Rule::ExpressionNode * > (), NULL) ; }
-#line 728 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 728 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 18:
-#line 144 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 144 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 734 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 734 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 19:
-#line 145 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 145 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[1].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 740 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 740 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 20:
-#line 149 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 149 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 746 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 746 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 21:
-#line 150 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 150 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 752 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 752 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 22:
-#line 151 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 151 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 758 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 758 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 23:
-#line 152 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 152 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 764 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 764 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 24:
-#line 157 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 157 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::Equal, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 770 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 770 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 25:
-#line 158 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 158 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::NotEqual, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 776 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 776 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 26:
-#line 159 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 159 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::Less, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 782 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 782 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 27:
-#line 160 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 160 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::Greater, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 788 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 788 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 28:
-#line 161 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 161 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::LessOrEqual, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 794 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 794 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 29:
-#line 162 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 162 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::GreaterOrEqual, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 800 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 800 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 30:
-#line 166 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 166 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LikeTextPredicate(yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< std::string > (), true) ; }
-#line 806 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 806 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 31:
-#line 167 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 167 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LikeTextPredicate(yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< std::string > (), false) ; }
-#line 812 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 812 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 32:
-#line 171 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 171 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ExistsPredicate(yystack_[0].value.as< std::string > ()) ; }
-#line 818 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 818 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 33:
-#line 175 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 175 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ListPredicate(yystack_[4].value.as< std::string > (), yystack_[1].value.as< OSM::Rule::ExpressionNode * > (), true) ; }
-#line 824 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 824 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 34:
-#line 176 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 176 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ListPredicate(yystack_[5].value.as< std::string > (), yystack_[1].value.as< OSM::Rule::ExpressionNode * > (), false) ; }
-#line 830 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 830 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 35:
-#line 180 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 180 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ExpressionNode() ; yylhs.value.as< OSM::Rule::ExpressionNode * > ()->appendChild(yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 836 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 836 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 36:
-#line 181 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 181 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()->prependChild(yystack_[2].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 842 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 842 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 37:
-#line 185 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 185 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 848 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 848 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 38:
-#line 186 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 186 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('+',yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 854 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 854 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 39:
-#line 187 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 187 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('.',yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 860 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 860 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 40:
-#line 188 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 188 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('-', yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 866 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 866 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 41:
-#line 192 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 192 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 872 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 872 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 42:
-#line 193 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 193 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('*', yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 878 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 878 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 43:
-#line 194 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 194 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('/', yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 884 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 884 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 44:
-#line 198 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 198 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 890 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 890 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 45:
-#line 199 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 199 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 896 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 896 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 46:
-#line 200 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 200 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 902 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 902 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 47:
-#line 201 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 201 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[1].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 908 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 908 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 48:
-#line 205 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 205 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::Function(yystack_[2].value.as< std::string > ()) ; }
-#line 914 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 914 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 49:
-#line 206 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 206 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     {
 			yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::Function(yystack_[3].value.as< std::string > (), yystack_[1].value.as< OSM::Rule::ExpressionNode * > ()) ;
 		 }
-#line 922 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 922 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 50:
-#line 212 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 212 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ExpressionNode() ; yylhs.value.as< OSM::Rule::ExpressionNode * > ()->appendChild(yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 928 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 928 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 51:
-#line 213 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 213 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()->prependChild(yystack_[2].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 934 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 934 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 52:
-#line 217 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 217 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 940 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 940 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 53:
-#line 221 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 221 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 946 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 946 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 54:
-#line 222 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 222 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 952 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 952 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 55:
-#line 226 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 226 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LiteralExpressionNode(yystack_[0].value.as< std::string > ()) ; }
-#line 958 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 958 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 56:
-#line 227 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 227 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 964 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 964 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 57:
-#line 232 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 232 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LiteralExpressionNode(true) ; }
-#line 970 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 970 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 58:
-#line 233 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 233 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     { yylhs.value.as< OSM::Rule::ExpressionNode * > () =  new OSM::Rule::LiteralExpressionNode(false) ; }
-#line 976 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 976 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 59:
-#line 237 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 237 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     {
 		yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LiteralExpressionNode((double)yystack_[0].value.as< double > ()) ;
 	}
-#line 984 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 984 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 60:
-#line 243 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:847
+#line 243 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     {
 		yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::Attribute(yystack_[0].value.as< std::string > ()) ;
 	}
-#line 992 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 992 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 996 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 996 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -1438,10 +1438,10 @@ namespace OSM {
 #endif // YYDEBUG
 
 
-#line 6 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:1155
+#line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:1155
 } // OSM
-#line 1444 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.cpp" // lalr1.cc:1155
-#line 250 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:1156
+#line 1444 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:1155
+#line 250 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:1156
 
 #include <OsmRuleScanner.h>
 

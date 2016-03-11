@@ -21,3 +21,12 @@ set(BOOST_COMPONENTS regex filesystem system serialization)
 #ENDIF( WIN32 )
 
 FIND_PACKAGE(Boost 1.49 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+
+# Find the QtWidgets library
+find_package(Qt5Core)
+find_package(Qt5Network)
+find_package(Qt5WebKit)
+find_package(Qt5WebKitWidgets)
+find_package(Qt5Widgets)
+
+

@@ -23,7 +23,7 @@ private:
 
     SpatialLiteSingleton () {
         spatialite_init(false);
-    };
+    }
 
     ~SpatialLiteSingleton () {
         spatialite_cleanup();
@@ -763,7 +763,7 @@ bool MapFile::queryTile(const MapConfig &cfg, VectorTileWriter &tile) const
     SQLite::Session session(db_) ;
     SQLite::Connection &con = session.handle() ;
 
-    BBox box = tile.box();
+    BBox box = tile.box(16);
 
     bool has_data = false ;
 

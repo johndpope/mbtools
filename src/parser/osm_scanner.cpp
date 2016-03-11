@@ -1,6 +1,6 @@
-#line 2 "/home/malasiot/source/osm2sqlite/src/parser/osm_scanner.cpp"
+#line 2 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
 
-#line 4 "/home/malasiot/source/osm2sqlite/src/parser/osm_scanner.cpp"
+#line 4 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -612,16 +612,16 @@ static yyconst flex_int16_t yy_rule_linenum[46] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "/home/malasiot/source/osm2sqlite/src/osm.l"
-#line 2 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 1 "/home/malasiot/source/mbtools/src/osm.l"
+#line 2 "/home/malasiot/source/mbtools/src/osm.l"
 #include <OsmRuleScanner.h>
 #include <OsmRuleParser.h>
 
 #include <parser/osm_parser.hpp>
 #include <string.h>
-#line 18 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 18 "/home/malasiot/source/mbtools/src/osm.l"
 # define YY_USER_ACTION  yylloc->columns (yyleng);
-#line 625 "/home/malasiot/source/osm2sqlite/src/parser/osm_scanner.cpp"
+#line 625 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
 
 #define INITIAL 0
 
@@ -783,14 +783,14 @@ YY_DECL
 	register int yy_act;
     
 /* %% [7.0] user's declarations go here */
-#line 20 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 20 "/home/malasiot/source/mbtools/src/osm.l"
 
 
 
    yylloc->step();
 
 
-#line 794 "/home/malasiot/source/osm2sqlite/src/parser/osm_scanner.cpp"
+#line 794 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -905,200 +905,200 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 26 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 26 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_AND(*yylloc); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 27 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 27 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_AND(*yylloc) ; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 28 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 28 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_OR(*yylloc); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 29 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 29 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_OR(*yylloc); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 30 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 30 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_IN(*yylloc); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 31 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 31 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_NOT(*yylloc); }
 	YY_BREAK
 /* punctuation */
 case 7:
 YY_RULE_SETUP
-#line 35 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 35 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_ASSIGN(*yylloc) ; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 36 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_EQUAL(*yylloc) ; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 37 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 37 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_NOT_EQUAL(*yylloc) ; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 38 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 38 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_NOT_EQUAL(*yylloc) ; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 39 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 39 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_LESS_THAN(*yylloc) ; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 40 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 40 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_GREATER_THAN(*yylloc) ; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 41 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 41 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_LESS_THAN_OR_EQUAL(*yylloc) ; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 42 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 42 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_GREATER_THAN_OR_EQUAL(*yylloc) ; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 43 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 43 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_MATCHES(*yylloc) ; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 44 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 44 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_NOT_MATCHES(*yylloc) ; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 45 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 45 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_NOT(*yylloc) ; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 46 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 46 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_EXISTS(*yylloc) ; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 47 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 47 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_LPAR(*yylloc) ; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 48 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 48 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_RPAR(*yylloc) ; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 49 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 49 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_PLUS(*yylloc) ; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 50 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 50 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_MINUS(*yylloc) ; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 51 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 51 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_STAR(*yylloc) ; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 52 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 52 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_DIV(*yylloc) ; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 53 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 53 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_COMMA(*yylloc) ; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 54 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 54 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_DOT(*yylloc) ; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 55 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 55 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_LEFT_BRACE(*yylloc) ; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 56 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 56 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_RIGHT_BRACE(*yylloc) ; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 57 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 57 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_COLON(*yylloc) ; }
 	YY_BREAK
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 59 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 59 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_ADD_CMD(*yylloc) ; }
 	YY_BREAK
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 60 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 60 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_SET_CMD(*yylloc) ; }
 	YY_BREAK
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 61 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 61 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_DELETE_CMD(*yylloc) ; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 62 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 62 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_STORE_CMD(*yylloc) ; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 63 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 63 "/home/malasiot/source/mbtools/src/osm.l"
 { return OSM::BisonParser::make_CONTINUE_CMD(*yylloc) ; }
 	YY_BREAK
 case 35:
-#line 66 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 66 "/home/malasiot/source/mbtools/src/osm.l"
 case 36:
 YY_RULE_SETUP
-#line 66 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 66 "/home/malasiot/source/mbtools/src/osm.l"
 {
         return OSM::BisonParser::make_IDENTIFIER(yytext, *yylloc);
 }
 	YY_BREAK
 case 37:
-#line 71 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 71 "/home/malasiot/source/mbtools/src/osm.l"
 case 38:
-#line 72 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 72 "/home/malasiot/source/mbtools/src/osm.l"
 case 39:
-#line 73 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 73 "/home/malasiot/source/mbtools/src/osm.l"
 case 40:
-#line 74 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 74 "/home/malasiot/source/mbtools/src/osm.l"
 case 41:
-#line 75 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 75 "/home/malasiot/source/mbtools/src/osm.l"
 case 42:
 YY_RULE_SETUP
-#line 75 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 75 "/home/malasiot/source/mbtools/src/osm.l"
 {
     return OSM::BisonParser::make_NUMBER(atof(yytext), *yylloc) ;
 }
@@ -1106,7 +1106,7 @@ YY_RULE_SETUP
 case 43:
 /* rule 43 can match eol */
 YY_RULE_SETUP
-#line 79 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 79 "/home/malasiot/source/mbtools/src/osm.l"
 {
     return OSM::BisonParser::make_STRING(std::string(yytext+1, yyleng-2), *yylloc) ;
 }
@@ -1114,24 +1114,24 @@ YY_RULE_SETUP
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 83 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 83 "/home/malasiot/source/mbtools/src/osm.l"
 yylloc->lines (yyleng); yylloc->step ();
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 85 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 85 "/home/malasiot/source/mbtools/src/osm.l"
 yylloc->step ();
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 87 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 87 "/home/malasiot/source/mbtools/src/osm.l"
 return OSM::BisonParser::make_END(*yylloc);
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 88 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 88 "/home/malasiot/source/mbtools/src/osm.l"
 ECHO;
 	YY_BREAK
-#line 1135 "/home/malasiot/source/osm2sqlite/src/parser/osm_scanner.cpp"
+#line 1135 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2177,7 +2177,7 @@ void osmfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 88 "/home/malasiot/source/osm2sqlite/src/osm.l"
+#line 88 "/home/malasiot/source/mbtools/src/osm.l"
 
 
 

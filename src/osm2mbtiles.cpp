@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 
     mapFile = ( tmp_dir / tmp_file ).native() ;
 
+    cout << mapFile << endl ;
     MapFile gfile ;
 
     if ( !gfile.create(mapFile) ) {

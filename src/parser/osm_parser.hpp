@@ -31,16 +31,16 @@
 // version 2.2 of Bison.
 
 /**
- ** \file /home/malasiot/source/osm2sqlite/src/parser/osm_parser.hpp
+ ** \file /home/malasiot/source/mbtools/src/parser/osm_parser.hpp
  ** Define the OSM::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_HOME_MALASIOT_SOURCE_OSM2SQLITE_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
-# define YY_YY_HOME_MALASIOT_SOURCE_OSM2SQLITE_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
+#ifndef YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
+# define YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
 // //                    "%code requires" blocks.
-#line 18 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:372
+#line 18 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:372
 
 	namespace OSM {
 		namespace Rule {
@@ -51,7 +51,7 @@
 	}
 
 
-#line 55 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 55 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 # include <vector>
@@ -125,9 +125,9 @@
 # define YYDEBUG 1
 #endif
 
-#line 6 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:372
+#line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:372
 namespace OSM {
-#line 131 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 131 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 
@@ -1433,11 +1433,11 @@ namespace OSM {
   }
 
 
-#line 6 "/home/malasiot/source/osm2sqlite/src/osm.y" // lalr1.cc:372
+#line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:372
 } // OSM
-#line 1439 "/home/malasiot/source/osm2sqlite/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 1439 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 
 
-#endif // !YY_YY_HOME_MALASIOT_SOURCE_OSM2SQLITE_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
+#endif // !YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_OSM_PARSER_HPP_INCLUDED

@@ -1,4 +1,5 @@
 #include "MBTileWriter.h"
+#include "base64.h"
 
 #include <boost/filesystem.hpp>
 
@@ -61,6 +62,8 @@ bool MBTileWriter::writeTiles(const MapFile &map, MapConfig &cfg)
             for( uint32_t x = x0 ; x<=x1 ; x++ )
                 for(uint32_t y = y0 ; y<=y1 ; y++ )
                 {
+                    if ( z == 12 && x == 2302 && y == pow(2, z)-1-1535 )
+                        cout << "ok here" << endl ;
                     VectorTileWriter vt(x, y, z) ;
 
                     if ( map.queryTile(cfg, vt) ) {
@@ -75,6 +78,13 @@ bool MBTileWriter::writeTiles(const MapFile &map, MapConfig &cfg)
                         cmd.exec() ;
                         cmd.clear() ;
                     }
+ /*                   else {
+                        string data = vt.toString(true) ;
+                        string b64 = base64_encode((const unsigned char *)data.data(), data.size()) ;
+                        cout << b64 << endl ;
+
+                    }
+                    */
                 }
         }
 

@@ -1,9 +1,10 @@
 #include "HttpServer.h"
 #include "Database.h"
-
+#include "base64.h"
 #include <boost/regex.hpp>
 
 #include <time.h>
+
 using namespace std ;
 
 extern void gmt_time_string(char *buf, size_t buf_len, time_t *t) ;
@@ -41,6 +42,8 @@ void TileRequestHandler::respond(const HttpServerRequest &request, HttpServerRes
         int tx = stoi(m.str(2)) ;
         int ty = stoi(m.str(3)) ;
 
+        ty = pow(2, zoom) - 1 - ty ;
+
         SQLite::Query q(con, "SELECT tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?") ;
 
         q.bind(zoom) ;
@@ -49,36 +52,45 @@ void TileRequestHandler::respond(const HttpServerRequest &request, HttpServerRes
 
         SQLite::QueryResult res = q.exec() ;
 
-        if ( res ) {
+        resp.setHeader("Content-Encoding", "gzip") ;
+        resp.setHeader("Content-Type", "application/x-protobuf") ;
+        resp.setHeader("Connection", "keep-alive") ;
+        resp.setHeader("Access-Control-Allow-Origin", "*") ;
 
+        char ctime_buf[64], mtime_buf[64] ;
+        time_t curtime = time(NULL), modtime = boost::filesystem::last_write_time(tileset_);
+
+        gmt_time_string(ctime_buf, sizeof(ctime_buf), &curtime);
+        gmt_time_string(mtime_buf, sizeof(mtime_buf), &modtime);
+
+        resp.setHeader("Date", ctime_buf) ;
+        resp.setHeader("Last-Modified", mtime_buf) ;
+
+        ostringstream etag ;
+        etag << modtime  ;
+        resp.setHeader("Etag", etag.str()) ;
+
+        if ( res ) {
             int blobsize ;
             const char *data = res.getBlob(0, blobsize) ;
 
-            resp.setHeader("Content-Encoding", "gzip") ;
-            resp.setHeader("Content-Type", "application/x-protobuf") ;
-    //        resp.setHeader("Connection", "keep-alive") ;
-
-            char ctime_buf[64], mtime_buf[64] ;
-            time_t curtime = time(NULL), modtime = boost::filesystem::last_write_time(tileset_);
-
-            gmt_time_string(ctime_buf, sizeof(ctime_buf), &curtime);
-            gmt_time_string(mtime_buf, sizeof(mtime_buf), &modtime);
-
-      //      resp.setHeader("Date", ctime_buf) ;
-      //      resp.setHeader("Last-Modified", mtime_buf) ;
-
-            ostringstream etag ;
-            etag << modtime  ;
-    //        resp.setHeader("Etag", etag.str()) ;
-
             ostringstream cl ;
             cl << blobsize ;
-    //        resp.setHeader("Content-Length", cl.str()) ;
+            resp.setHeader("Content-Length", cl.str()) ;
 
             resp.write(data, blobsize) ;
         }
-        else
-            resp.setCode(404) ;
+        else {
+
+            string empty_tile = base64_decode("H4sIAAAAAAAAAwMAAAAAAAAAAAA=") ;
+
+            ostringstream cl ;
+            cl << empty_tile.size() ;
+            resp.setHeader("Content-Length", cl.str()) ;
+
+            resp.write(empty_tile.data(), empty_tile.size()) ;
+
+        }
 
     }
     catch ( SQLite::Exception &e )
@@ -96,18 +108,8 @@ int main(int argc, char *argv[]) {
 
     TileRequestHandler tileHandler("/home/malasiot/tmp/oo.mbtiles") ;
 
-    try {
     boost::regex r(R"(/tiles/\d+/\d+/\d+\.vector\.pbf)") ;
-
-    if ( boost::regex_match("234.vector.pbf", r) )
-        cout << "ok \n" ;
     server.addHandler(tileHandler, r) ;
-    }
-    catch ( boost::regex_error &e)
-    {
-        cerr << e.what() << endl ;
-    }
-
 
     server.start() ;
 

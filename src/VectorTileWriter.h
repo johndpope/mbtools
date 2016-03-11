@@ -13,6 +13,12 @@
 #include "GeomHelpers.h"
 #include "vector_tile.pb.h"
 
+struct EncodedVertex {
+    int32_t x_, y_ ;
+} ;
+
+typedef std::vector<EncodedVertex> LinearRing ;
+
 class VectorTileWriter {
 public:
 
@@ -25,7 +31,12 @@ public:
     uint32_t y() const { return ty_ ; }
     uint32_t z() const { return tz_ ; }
     uint32_t extent() const { return te_ ; }
-    BBox box() const { return box_ ; }
+    BBox box(uint32_t buffer = 128) const {
+        BBox res ;
+        tms::tileBounds(tx_, ty_, tz_, res.minx_, res.miny_, res.maxx_, res.maxy_, buffer) ;
+        res.srid_ = 3857 ;
+        return res ;
+   }
 
     void beginLayer(const std::string &name) ;
     void endLayer() ;
@@ -54,7 +65,7 @@ private:
 
     void tile_coords(double x, double y, int &tx, int &ty) {
         tx = te_ * ( x - box_.minx_ )/( box_.maxx_ - box_.minx_ ) ;
-        ty = te_ * ( y - box_.miny_ )/( box_.maxy_ - box_.miny_ ) ;
+        ty = te_ * ( box_.maxy_ - y )/( box_.maxy_ - box_.miny_ ) ;
     }
 
     void addPoint(int x, int y) ;
@@ -63,6 +74,7 @@ private:
     void encodeLineGeometry(const gaiaGeomCollPtr &geom, const Dictionary &attr) ;
     void encodePolygonGeometry(const gaiaGeomCollPtr &geom, const Dictionary &attr) ;
     void setFeatureAttributes(const Dictionary &attr) ;
+    void encodeRing(const LinearRing &r, bool close) ;
 };
 
 

@@ -62,9 +62,9 @@ void metersToTile(double mx, double my, uint32_t zoom, uint32_t &tx, uint32_t &t
 }
 // Returns bounds of the given tile in EPSG:900913 coordinates
 
-void tileBounds(uint32_t tx, uint32_t ty, uint32_t zoom, double &minx, double &miny, double &maxx, double &maxy) {
-    pixelsToMeters( tx*tile_size, ty*tile_size, zoom, minx, miny ) ;
-    pixelsToMeters( (tx+1)*tile_size, (ty+1)*tile_size, zoom, maxx, maxy ) ;
+void tileBounds(uint32_t tx, uint32_t ty, uint32_t zoom, double &minx, double &miny, double &maxx, double &maxy, uint32_t buffer) {
+    pixelsToMeters( tx*tile_size - buffer, ty*tile_size - buffer, zoom, minx, miny ) ;
+    pixelsToMeters( (tx+1)*tile_size + buffer, (ty+1)*tile_size + buffer, zoom, maxx, maxy ) ;
 }
 
 // Returns bounds of the given tile in latutude/longitude using WGS84 datum
