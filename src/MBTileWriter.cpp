@@ -28,9 +28,11 @@ bool MBTileWriter::writeMetaData(const std::string &name, const std::string &val
     SQLite::Connection &con = session.handle() ;
 
     try {
-        SQLite::Command cmd(con, "REPLACE INTO metadata VALUES (?, ?)") ;
-        cmd.bind(name) ;
-        cmd.bind(val) ;
+        SQLite::Command cmd(con, "INSERT INTO metadata (name, value) VALUES (?, ?)") ;
+        cmd.bind(1, name) ;
+        cmd.bind(2, val) ;
+
+        cmd.exec() ;
         return true ;
     }
     catch ( SQLite::Exception &e ) {

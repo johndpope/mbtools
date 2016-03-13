@@ -39,6 +39,7 @@ MapWidget::MapWidget(QWidget *parent): QWebView(parent) {
            map.debug = true ;
            map.collisionDebug = true ;
            </script>
+
             </body>
             </html>
             )" ;

@@ -75,26 +75,6 @@ ENDIF( WIN32 )
 
 INSTALL(TARGETS osm2mbtiles DESTINATION bin  )
 
-###############################################################################
-
-SET ( TILESERVER_SOURCES
-	Database.cpp
-	Dictionary.cpp
-	HttpServer.cpp
-	mongoose/mongoose.c
-	base64.cpp
-)
-
-SET ( TILESERVER_HEADERS
-	Database.h
-	Dictionary.h
-	HttpServer.h
-	mongoose/mongoose.h
-)
-
-ADD_EXECUTABLE(tileserver tileserver.cpp ${TILESERVER_SOURCES})
-TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z)
-
 ##################################################################################3
 
 SET ( RSC_TOOL_SOURCES
@@ -110,34 +90,3 @@ SET ( RSC_TOOL_HEADERS
 ADD_EXECUTABLE(makeres makeres.cpp ${RSC_TOOL_SOURCES})
 TARGET_LINK_LIBRARIES(makeres ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z)
 
-##################################################################################3
-
-SET ( MBTEST_APP_SOURCES
-	mbtest.cpp
-	MapView.cpp
-	MapWidget.cpp
-)
-
-SET ( MBTEST_APP_HEADERS
-	MapView.h
-	MapWidget.h
-)
-
-
-SET(MBTEST_APP_FORMS )
-SET(MBTEST_APP_RESOURCES mdi.qrc)
-
-QT5_WRAP_CPP(MBTEST_APP_MOC_SOURCES ${MBTEST_APP_HEADERS})
-#QT5_WRAP_UI(MBTEST_APP_UI_HEADERS ${MBTEST_APP_FORMS} )
-QT5_ADD_RESOURCES(MBTEST_APP_RC_SOURCES ${MBTEST_APP_RESOURCES} )
-
-IF ( WIN32 )
-ADD_EXECUTABLE(mbtestapp WIN32 ${MBTEST_APP_SOURCES} ${MBTEST_APP_MOC_SOURCES} ${MBTEST_APP_RC_SOURCES})
-ELSE ( WIN32 )
-ADD_EXECUTABLE(mbtestapp ${MBTEST_APP_SOURCES} ${MBTEST_APP_MOC_SOURCES} ${MBTEST_APP_RC_SOURCES})
-ENDIF ( WIN32 )
-
-
-TARGET_LINK_LIBRARIES(mbtestapp
-		Qt5::Widgets Qt5::WebKit Qt5::WebKitWidgets Qt5::Network
-)

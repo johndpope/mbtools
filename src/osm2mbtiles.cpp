@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     twriter.writeMetaData("name", mcfg.name_) ;
     twriter.writeMetaData("version", "1.1") ;
     twriter.writeMetaData("type", "baselayer") ;
-    twriter.writeMetaData("version", "1.1") ;
+
     twriter.writeMetaData("description", mcfg.description_) ;
     twriter.writeMetaData("attribution", mcfg.attribution_) ;
 
