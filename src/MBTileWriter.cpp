@@ -2,21 +2,29 @@
 #include "base64.h"
 
 #include <boost/filesystem.hpp>
+#include <fstream>
+
+namespace fs = boost::filesystem ;
 
 using namespace std ;
 
-MBTileWriter::MBTileWriter(const std::string &fileName)
+MBTileWriter::MBTileWriter(const std::string &fileName): tileset_(fileName)
 {
-    if ( boost::filesystem::exists(fileName) )
-        boost::filesystem::remove(fileName);
+    if ( !fs::is_directory(fileName) ) {
+        if ( fs::exists(fileName) ) fs::remove(fileName);
 
-    db_.reset(new SQLite::Database(fileName)) ;
+        db_.reset(new SQLite::Database(fileName)) ;
 
-    SQLite::Session session(db_.get()) ;
-    SQLite::Connection &con = session.handle() ;
+        SQLite::Session session(db_.get()) ;
+        SQLite::Connection &con = session.handle() ;
 
-    con.exec("CREATE TABLE metadata (name text, value text, UNIQUE(name));") ;
-    con.exec("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob, UNIQUE (zoom_level, tile_column, tile_row));") ;
+        con.exec("CREATE TABLE metadata (name text, value text, UNIQUE(name));") ;
+        con.exec("CREATE TABLE tiles (zoom_level integer, tile_column integer, tile_row integer, tile_data blob, UNIQUE (zoom_level, tile_column, tile_row));") ;
+    }
+    else {
+        if ( !fs::exists(tileset_) )
+            fs::create_directory(tileset_) ;
+    }
 }
 
 
@@ -42,16 +50,24 @@ bool MBTileWriter::writeMetaData(const std::string &name, const std::string &val
 }
 
 
-bool MBTileWriter::writeTiles(const MapFile &map, MapConfig &cfg)
+bool MBTileWriter::writeTilesDB(const MapFile &map, MapConfig &cfg)
 {
     assert(db_) ;
+
+
+    // write metadata
+    writeMetaData("name", cfg.name_) ;
+    writeMetaData("version", "1.1") ;
+    writeMetaData("type", "baselayer") ;
+
+    writeMetaData("description", cfg.description_) ;
+    writeMetaData("attribution", cfg.attribution_) ;
 
     SQLite::Session session(db_.get()) ;
     SQLite::Connection &con = session.handle() ;
 
-    // write metadata
-
     try {
+
         SQLite::Transaction trans(con) ;
         SQLite::Command cmd(con, "REPLACE INTO tiles (zoom_level, tile_column, tile_row, tile_data) VALUES (?,?,?,?);") ;
 
@@ -64,8 +80,7 @@ bool MBTileWriter::writeTiles(const MapFile &map, MapConfig &cfg)
             for( uint32_t x = x0 ; x<=x1 ; x++ )
                 for(uint32_t y = y0 ; y<=y1 ; y++ )
                 {
-                    if ( z == 12 && x == 2302 && y == pow(2, z)-1-1535 )
-                        cout << "ok here" << endl ;
+                    cout << z << ' ' << x << ' ' << y << endl ;
                     VectorTileWriter vt(x, y, z) ;
 
                     if ( map.queryTile(cfg, vt) ) {
@@ -80,13 +95,6 @@ bool MBTileWriter::writeTiles(const MapFile &map, MapConfig &cfg)
                         cmd.exec() ;
                         cmd.clear() ;
                     }
- /*                   else {
-                        string data = vt.toString(true) ;
-                        string b64 = base64_encode((const unsigned char *)data.data(), data.size()) ;
-                        cout << b64 << endl ;
-
-                    }
-                    */
                 }
         }
 
@@ -99,4 +107,43 @@ bool MBTileWriter::writeTiles(const MapFile &map, MapConfig &cfg)
         cerr << e.what() << endl ;
         return false ;
     }
+}
+
+bool MBTileWriter::writeTilesFolder(const MapFile &map, MapConfig &cfg)
+{
+
+
+
+    for( uint32_t z = cfg.minz_ ; z <= cfg.maxz_ ; z++ )
+    {
+        uint32_t x0, y0, x1, y1 ;
+        tms::metersToTile(cfg.bbox_.minx_, cfg.bbox_.miny_, z, x0, y0) ;
+        tms::metersToTile(cfg.bbox_.maxx_, cfg.bbox_.maxy_, z, x1, y1) ;
+
+        for( uint32_t x = x0 ; x<=x1 ; x++ )
+            for(uint32_t y = y0 ; y<=y1 ; y++ )
+            {
+                VectorTileWriter vt(x, y, z) ;
+
+                if ( map.queryTile(cfg, vt) ) {
+
+                    string data = vt.toString() ;
+
+                    fs::path tile(tileset_) ;
+
+                    tile /= to_string(z) ;
+                    tile /= to_string(x) ;
+
+                    fs::create_directories(tile) ;
+
+                    tile /= to_string(y) + ".pbf";
+
+                    ofstream strm(tile.native().c_str(), ios::binary) ;
+                    strm.write(data.data(), data.size()) ;
+                }
+            }
+    }
+
+    return true ;
+
 }

@@ -43,15 +43,17 @@
 #line 18 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:372
 
 	namespace OSM {
-		namespace Rule {
+		namespace Filter {
 			class Parser ;
 			class ExpressionNode ;
 			class Command ;
+			class LayerDefinition ;
+			class Rule ;
 		}
 	}
 
 
-#line 55 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 57 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 # include <vector>
@@ -127,7 +129,7 @@
 
 #line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:372
 namespace OSM {
-#line 131 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 133 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 
@@ -274,11 +276,10 @@ namespace OSM {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
-      // rule
       // action_block
       // command_list
       // command
-      char dummy1[sizeof(OSM::Rule::Command *)];
+      char dummy1[sizeof(OSM::Filter::Command *)];
 
       // boolean_value_expression
       // boolean_term
@@ -301,14 +302,22 @@ namespace OSM {
       // boolean_literal
       // numeric_literal
       // attribute
-      char dummy2[sizeof(OSM::Rule::ExpressionNode *)];
+      char dummy2[sizeof(OSM::Filter::ExpressionNode *)];
+
+      // layer_list
+      // layer
+      char dummy3[sizeof(OSM::Filter::LayerDefinition *)];
+
+      // rule_list
+      // rule
+      char dummy4[sizeof(OSM::Filter::Rule *)];
 
       // "number"
-      char dummy3[sizeof(double)];
+      char dummy5[sizeof(double)];
 
       // "identifier"
       // "string literal"
-      char dummy4[sizeof(std::string)];
+      char dummy6[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -364,6 +373,7 @@ namespace OSM {
         TOK_CONTINUE_CMD = 287,
         TOK_ASSIGN = 288,
         TOK_IN = 289,
+        TOK_LAYER = 290,
         TOK_IDENTIFIER = 291,
         TOK_NUMBER = 292,
         TOK_STRING = 293,
@@ -402,9 +412,13 @@ namespace OSM {
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const OSM::Rule::Command * v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const OSM::Filter::Command * v, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const OSM::Rule::ExpressionNode * v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const OSM::Filter::ExpressionNode * v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const OSM::Filter::LayerDefinition * v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const OSM::Filter::Rule * v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const double v, const location_type& l);
 
@@ -602,6 +616,10 @@ namespace OSM {
 
     static inline
     symbol_type
+    make_LAYER (const location_type& l);
+
+    static inline
+    symbol_type
     make_IDENTIFIER (const std::string& v, const location_type& l);
 
     static inline
@@ -618,7 +636,7 @@ namespace OSM {
 
 
     /// Build a parser object.
-    BisonParser (OSM::Rule::Parser &driver_yyarg, OSM::BisonParser::location_type &loc_yyarg);
+    BisonParser (OSM::Filter::Parser &driver_yyarg, OSM::BisonParser::location_type &loc_yyarg);
     virtual ~BisonParser ();
 
     /// Parse.
@@ -816,10 +834,10 @@ namespace OSM {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 116,     ///< Last index in yytable_.
-      yynnts_ = 26,  ///< Number of nonterminal symbols.
+      yylast_ = 131,     ///< Last index in yytable_.
+      yynnts_ = 29,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
-      yyfinal_ = 35, ///< Termination state number.
+      yyfinal_ = 5, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 40  ///< Number of tokens.
@@ -827,7 +845,7 @@ namespace OSM {
 
 
     // User arguments.
-    OSM::Rule::Parser &driver;
+    OSM::Filter::Parser &driver;
     OSM::BisonParser::location_type &loc;
   };
 
@@ -904,35 +922,44 @@ namespace OSM {
   {
       switch (other.type_get ())
     {
-      case 41: // rule
-      case 42: // action_block
-      case 43: // command_list
-      case 44: // command
-        value.copy< OSM::Rule::Command * > (other.value);
+      case 45: // action_block
+      case 46: // command_list
+      case 47: // command
+        value.copy< OSM::Filter::Command * > (other.value);
         break;
 
-      case 45: // boolean_value_expression
-      case 46: // boolean_term
-      case 47: // boolean_factor
-      case 48: // boolean_primary
-      case 49: // predicate
-      case 50: // comparison_predicate
-      case 51: // like_text_predicate
-      case 52: // exists_predicate
-      case 53: // list_predicate
-      case 54: // literal_list
-      case 55: // expression
-      case 56: // term
-      case 57: // factor
-      case 58: // function
-      case 59: // function_argument_list
-      case 60: // function_argument
-      case 61: // literal
-      case 62: // general_literal
-      case 63: // boolean_literal
-      case 64: // numeric_literal
-      case 65: // attribute
-        value.copy< OSM::Rule::ExpressionNode * > (other.value);
+      case 48: // boolean_value_expression
+      case 49: // boolean_term
+      case 50: // boolean_factor
+      case 51: // boolean_primary
+      case 52: // predicate
+      case 53: // comparison_predicate
+      case 54: // like_text_predicate
+      case 55: // exists_predicate
+      case 56: // list_predicate
+      case 57: // literal_list
+      case 58: // expression
+      case 59: // term
+      case 60: // factor
+      case 61: // function
+      case 62: // function_argument_list
+      case 63: // function_argument
+      case 64: // literal
+      case 65: // general_literal
+      case 66: // boolean_literal
+      case 67: // numeric_literal
+      case 68: // attribute
+        value.copy< OSM::Filter::ExpressionNode * > (other.value);
+        break;
+
+      case 41: // layer_list
+      case 42: // layer
+        value.copy< OSM::Filter::LayerDefinition * > (other.value);
+        break;
+
+      case 43: // rule_list
+      case 44: // rule
+        value.copy< OSM::Filter::Rule * > (other.value);
         break;
 
       case 37: // "number"
@@ -961,35 +988,44 @@ namespace OSM {
     (void) v;
       switch (this->type_get ())
     {
-      case 41: // rule
-      case 42: // action_block
-      case 43: // command_list
-      case 44: // command
-        value.copy< OSM::Rule::Command * > (v);
+      case 45: // action_block
+      case 46: // command_list
+      case 47: // command
+        value.copy< OSM::Filter::Command * > (v);
         break;
 
-      case 45: // boolean_value_expression
-      case 46: // boolean_term
-      case 47: // boolean_factor
-      case 48: // boolean_primary
-      case 49: // predicate
-      case 50: // comparison_predicate
-      case 51: // like_text_predicate
-      case 52: // exists_predicate
-      case 53: // list_predicate
-      case 54: // literal_list
-      case 55: // expression
-      case 56: // term
-      case 57: // factor
-      case 58: // function
-      case 59: // function_argument_list
-      case 60: // function_argument
-      case 61: // literal
-      case 62: // general_literal
-      case 63: // boolean_literal
-      case 64: // numeric_literal
-      case 65: // attribute
-        value.copy< OSM::Rule::ExpressionNode * > (v);
+      case 48: // boolean_value_expression
+      case 49: // boolean_term
+      case 50: // boolean_factor
+      case 51: // boolean_primary
+      case 52: // predicate
+      case 53: // comparison_predicate
+      case 54: // like_text_predicate
+      case 55: // exists_predicate
+      case 56: // list_predicate
+      case 57: // literal_list
+      case 58: // expression
+      case 59: // term
+      case 60: // factor
+      case 61: // function
+      case 62: // function_argument_list
+      case 63: // function_argument
+      case 64: // literal
+      case 65: // general_literal
+      case 66: // boolean_literal
+      case 67: // numeric_literal
+      case 68: // attribute
+        value.copy< OSM::Filter::ExpressionNode * > (v);
+        break;
+
+      case 41: // layer_list
+      case 42: // layer
+        value.copy< OSM::Filter::LayerDefinition * > (v);
+        break;
+
+      case 43: // rule_list
+      case 44: // rule
+        value.copy< OSM::Filter::Rule * > (v);
         break;
 
       case 37: // "number"
@@ -1017,14 +1053,28 @@ namespace OSM {
   {}
 
   template <typename Base>
-  BisonParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const OSM::Rule::Command * v, const location_type& l)
+  BisonParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const OSM::Filter::Command * v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  BisonParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const OSM::Rule::ExpressionNode * v, const location_type& l)
+  BisonParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const OSM::Filter::ExpressionNode * v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  BisonParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const OSM::Filter::LayerDefinition * v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  BisonParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const OSM::Filter::Rule * v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1060,35 +1110,44 @@ namespace OSM {
     // Type destructor.
     switch (yytype)
     {
-      case 41: // rule
-      case 42: // action_block
-      case 43: // command_list
-      case 44: // command
-        value.template destroy< OSM::Rule::Command * > ();
+      case 45: // action_block
+      case 46: // command_list
+      case 47: // command
+        value.template destroy< OSM::Filter::Command * > ();
         break;
 
-      case 45: // boolean_value_expression
-      case 46: // boolean_term
-      case 47: // boolean_factor
-      case 48: // boolean_primary
-      case 49: // predicate
-      case 50: // comparison_predicate
-      case 51: // like_text_predicate
-      case 52: // exists_predicate
-      case 53: // list_predicate
-      case 54: // literal_list
-      case 55: // expression
-      case 56: // term
-      case 57: // factor
-      case 58: // function
-      case 59: // function_argument_list
-      case 60: // function_argument
-      case 61: // literal
-      case 62: // general_literal
-      case 63: // boolean_literal
-      case 64: // numeric_literal
-      case 65: // attribute
-        value.template destroy< OSM::Rule::ExpressionNode * > ();
+      case 48: // boolean_value_expression
+      case 49: // boolean_term
+      case 50: // boolean_factor
+      case 51: // boolean_primary
+      case 52: // predicate
+      case 53: // comparison_predicate
+      case 54: // like_text_predicate
+      case 55: // exists_predicate
+      case 56: // list_predicate
+      case 57: // literal_list
+      case 58: // expression
+      case 59: // term
+      case 60: // factor
+      case 61: // function
+      case 62: // function_argument_list
+      case 63: // function_argument
+      case 64: // literal
+      case 65: // general_literal
+      case 66: // boolean_literal
+      case 67: // numeric_literal
+      case 68: // attribute
+        value.template destroy< OSM::Filter::ExpressionNode * > ();
+        break;
+
+      case 41: // layer_list
+      case 42: // layer
+        value.template destroy< OSM::Filter::LayerDefinition * > ();
+        break;
+
+      case 43: // rule_list
+      case 44: // rule
+        value.template destroy< OSM::Filter::Rule * > ();
         break;
 
       case 37: // "number"
@@ -1114,35 +1173,44 @@ namespace OSM {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 41: // rule
-      case 42: // action_block
-      case 43: // command_list
-      case 44: // command
-        value.move< OSM::Rule::Command * > (s.value);
+      case 45: // action_block
+      case 46: // command_list
+      case 47: // command
+        value.move< OSM::Filter::Command * > (s.value);
         break;
 
-      case 45: // boolean_value_expression
-      case 46: // boolean_term
-      case 47: // boolean_factor
-      case 48: // boolean_primary
-      case 49: // predicate
-      case 50: // comparison_predicate
-      case 51: // like_text_predicate
-      case 52: // exists_predicate
-      case 53: // list_predicate
-      case 54: // literal_list
-      case 55: // expression
-      case 56: // term
-      case 57: // factor
-      case 58: // function
-      case 59: // function_argument_list
-      case 60: // function_argument
-      case 61: // literal
-      case 62: // general_literal
-      case 63: // boolean_literal
-      case 64: // numeric_literal
-      case 65: // attribute
-        value.move< OSM::Rule::ExpressionNode * > (s.value);
+      case 48: // boolean_value_expression
+      case 49: // boolean_term
+      case 50: // boolean_factor
+      case 51: // boolean_primary
+      case 52: // predicate
+      case 53: // comparison_predicate
+      case 54: // like_text_predicate
+      case 55: // exists_predicate
+      case 56: // list_predicate
+      case 57: // literal_list
+      case 58: // expression
+      case 59: // term
+      case 60: // factor
+      case 61: // function
+      case 62: // function_argument_list
+      case 63: // function_argument
+      case 64: // literal
+      case 65: // general_literal
+      case 66: // boolean_literal
+      case 67: // numeric_literal
+      case 68: // attribute
+        value.move< OSM::Filter::ExpressionNode * > (s.value);
+        break;
+
+      case 41: // layer_list
+      case 42: // layer
+        value.move< OSM::Filter::LayerDefinition * > (s.value);
+        break;
+
+      case 43: // rule_list
+      case 44: // rule
+        value.move< OSM::Filter::Rule * > (s.value);
         break;
 
       case 37: // "number"
@@ -1409,6 +1477,12 @@ namespace OSM {
   }
 
   BisonParser::symbol_type
+  BisonParser::make_LAYER (const location_type& l)
+  {
+    return symbol_type (token::TOK_LAYER, l);
+  }
+
+  BisonParser::symbol_type
   BisonParser::make_IDENTIFIER (const std::string& v, const location_type& l)
   {
     return symbol_type (token::TOK_IDENTIFIER, v, l);
@@ -1435,7 +1509,7 @@ namespace OSM {
 
 #line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:372
 } // OSM
-#line 1439 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 1513 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 

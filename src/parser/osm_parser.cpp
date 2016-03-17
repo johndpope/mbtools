@@ -49,17 +49,15 @@
 
 #line 51 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:407
 // Unqualified %code blocks.
-#line 29 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:408
+#line 31 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:408
 
 
 #include <OsmRuleParser.h>
 
 	// Prototype for the yylex function
-static OSM::BisonParser::symbol_type yylex(OSM::Rule::Parser &driver, OSM::BisonParser::location_type &loc);
+static OSM::BisonParser::symbol_type yylex(OSM::Filter::Parser &driver, OSM::BisonParser::location_type &loc);
 
-
-
-#line 63 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:408
+#line 61 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -145,7 +143,7 @@ static OSM::BisonParser::symbol_type yylex(OSM::Rule::Parser &driver, OSM::Bison
 
 #line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:474
 namespace OSM {
-#line 149 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:474
+#line 147 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:474
 
   /* Return YYSTR after stripping away unnecessary quotes and
      backslashes, so that it's suitable for yyerror.  The heuristic is
@@ -186,7 +184,7 @@ namespace OSM {
 
 
   /// Build a parser object.
-  BisonParser::BisonParser (OSM::Rule::Parser &driver_yyarg, OSM::BisonParser::location_type &loc_yyarg)
+  BisonParser::BisonParser (OSM::Filter::Parser &driver_yyarg, OSM::BisonParser::location_type &loc_yyarg)
     :
 #if YYDEBUG
       yydebug_ (false),
@@ -248,35 +246,44 @@ namespace OSM {
   {
       switch (that.type_get ())
     {
-      case 41: // rule
-      case 42: // action_block
-      case 43: // command_list
-      case 44: // command
-        value.move< OSM::Rule::Command * > (that.value);
+      case 45: // action_block
+      case 46: // command_list
+      case 47: // command
+        value.move< OSM::Filter::Command * > (that.value);
         break;
 
-      case 45: // boolean_value_expression
-      case 46: // boolean_term
-      case 47: // boolean_factor
-      case 48: // boolean_primary
-      case 49: // predicate
-      case 50: // comparison_predicate
-      case 51: // like_text_predicate
-      case 52: // exists_predicate
-      case 53: // list_predicate
-      case 54: // literal_list
-      case 55: // expression
-      case 56: // term
-      case 57: // factor
-      case 58: // function
-      case 59: // function_argument_list
-      case 60: // function_argument
-      case 61: // literal
-      case 62: // general_literal
-      case 63: // boolean_literal
-      case 64: // numeric_literal
-      case 65: // attribute
-        value.move< OSM::Rule::ExpressionNode * > (that.value);
+      case 48: // boolean_value_expression
+      case 49: // boolean_term
+      case 50: // boolean_factor
+      case 51: // boolean_primary
+      case 52: // predicate
+      case 53: // comparison_predicate
+      case 54: // like_text_predicate
+      case 55: // exists_predicate
+      case 56: // list_predicate
+      case 57: // literal_list
+      case 58: // expression
+      case 59: // term
+      case 60: // factor
+      case 61: // function
+      case 62: // function_argument_list
+      case 63: // function_argument
+      case 64: // literal
+      case 65: // general_literal
+      case 66: // boolean_literal
+      case 67: // numeric_literal
+      case 68: // attribute
+        value.move< OSM::Filter::ExpressionNode * > (that.value);
+        break;
+
+      case 41: // layer_list
+      case 42: // layer
+        value.move< OSM::Filter::LayerDefinition * > (that.value);
+        break;
+
+      case 43: // rule_list
+      case 44: // rule
+        value.move< OSM::Filter::Rule * > (that.value);
         break;
 
       case 37: // "number"
@@ -303,35 +310,44 @@ namespace OSM {
     state = that.state;
       switch (that.type_get ())
     {
-      case 41: // rule
-      case 42: // action_block
-      case 43: // command_list
-      case 44: // command
-        value.copy< OSM::Rule::Command * > (that.value);
+      case 45: // action_block
+      case 46: // command_list
+      case 47: // command
+        value.copy< OSM::Filter::Command * > (that.value);
         break;
 
-      case 45: // boolean_value_expression
-      case 46: // boolean_term
-      case 47: // boolean_factor
-      case 48: // boolean_primary
-      case 49: // predicate
-      case 50: // comparison_predicate
-      case 51: // like_text_predicate
-      case 52: // exists_predicate
-      case 53: // list_predicate
-      case 54: // literal_list
-      case 55: // expression
-      case 56: // term
-      case 57: // factor
-      case 58: // function
-      case 59: // function_argument_list
-      case 60: // function_argument
-      case 61: // literal
-      case 62: // general_literal
-      case 63: // boolean_literal
-      case 64: // numeric_literal
-      case 65: // attribute
-        value.copy< OSM::Rule::ExpressionNode * > (that.value);
+      case 48: // boolean_value_expression
+      case 49: // boolean_term
+      case 50: // boolean_factor
+      case 51: // boolean_primary
+      case 52: // predicate
+      case 53: // comparison_predicate
+      case 54: // like_text_predicate
+      case 55: // exists_predicate
+      case 56: // list_predicate
+      case 57: // literal_list
+      case 58: // expression
+      case 59: // term
+      case 60: // factor
+      case 61: // function
+      case 62: // function_argument_list
+      case 63: // function_argument
+      case 64: // literal
+      case 65: // general_literal
+      case 66: // boolean_literal
+      case 67: // numeric_literal
+      case 68: // attribute
+        value.copy< OSM::Filter::ExpressionNode * > (that.value);
+        break;
+
+      case 41: // layer_list
+      case 42: // layer
+        value.copy< OSM::Filter::LayerDefinition * > (that.value);
+        break;
+
+      case 43: // rule_list
+      case 44: // rule
+        value.copy< OSM::Filter::Rule * > (that.value);
         break;
 
       case 37: // "number"
@@ -574,35 +590,44 @@ namespace OSM {
          when using variants.  */
         switch (yyr1_[yyn])
     {
-      case 41: // rule
-      case 42: // action_block
-      case 43: // command_list
-      case 44: // command
-        yylhs.value.build< OSM::Rule::Command * > ();
+      case 45: // action_block
+      case 46: // command_list
+      case 47: // command
+        yylhs.value.build< OSM::Filter::Command * > ();
         break;
 
-      case 45: // boolean_value_expression
-      case 46: // boolean_term
-      case 47: // boolean_factor
-      case 48: // boolean_primary
-      case 49: // predicate
-      case 50: // comparison_predicate
-      case 51: // like_text_predicate
-      case 52: // exists_predicate
-      case 53: // list_predicate
-      case 54: // literal_list
-      case 55: // expression
-      case 56: // term
-      case 57: // factor
-      case 58: // function
-      case 59: // function_argument_list
-      case 60: // function_argument
-      case 61: // literal
-      case 62: // general_literal
-      case 63: // boolean_literal
-      case 64: // numeric_literal
-      case 65: // attribute
-        yylhs.value.build< OSM::Rule::ExpressionNode * > ();
+      case 48: // boolean_value_expression
+      case 49: // boolean_term
+      case 50: // boolean_factor
+      case 51: // boolean_primary
+      case 52: // predicate
+      case 53: // comparison_predicate
+      case 54: // like_text_predicate
+      case 55: // exists_predicate
+      case 56: // list_predicate
+      case 57: // literal_list
+      case 58: // expression
+      case 59: // term
+      case 60: // factor
+      case 61: // function
+      case 62: // function_argument_list
+      case 63: // function_argument
+      case 64: // literal
+      case 65: // general_literal
+      case 66: // boolean_literal
+      case 67: // numeric_literal
+      case 68: // attribute
+        yylhs.value.build< OSM::Filter::ExpressionNode * > ();
+        break;
+
+      case 41: // layer_list
+      case 42: // layer
+        yylhs.value.build< OSM::Filter::LayerDefinition * > ();
+        break;
+
+      case 43: // rule_list
+      case 44: // rule
+        yylhs.value.build< OSM::Filter::Rule * > ();
         break;
 
       case 37: // "number"
@@ -633,366 +658,402 @@ namespace OSM {
             {
   case 2:
 #line 101 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { driver.node = yystack_[1].value.as< OSM::Rule::ExpressionNode * > () ; driver.actions = yystack_[0].value.as< OSM::Rule::Command * > () ; }
-#line 638 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+    { driver.layers_ = yylhs.value.as< OSM::Filter::LayerDefinition * > () = yystack_[0].value.as< OSM::Filter::LayerDefinition * > () ; }
+#line 663 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 3:
-#line 106 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = yystack_[1].value.as< OSM::Rule::Command * > () ; }
-#line 644 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 102 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { driver.layers_ = yylhs.value.as< OSM::Filter::LayerDefinition * > () = yystack_[1].value.as< OSM::Filter::LayerDefinition * > () ; yylhs.value.as< OSM::Filter::LayerDefinition * > ()->next_ = yystack_[0].value.as< OSM::Filter::LayerDefinition * > () ; }
+#line 669 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 4:
-#line 110 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = yystack_[0].value.as< OSM::Rule::Command * > () ;  }
-#line 650 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 105 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::LayerDefinition * > () = new OSM::Filter::LayerDefinition{yystack_[2].value.as< std::string > (), yystack_[1].value.as< std::string > ()} ; yylhs.value.as< OSM::Filter::LayerDefinition * > ()->rules_ = yystack_[0].value.as< OSM::Filter::Rule * > () ; }
+#line 675 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 5:
-#line 111 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = yystack_[1].value.as< OSM::Rule::Command * > () ; }
-#line 656 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 107 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Rule * > () = yystack_[0].value.as< OSM::Filter::Rule * > () ; }
+#line 681 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 6:
-#line 112 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = yystack_[2].value.as< OSM::Rule::Command * > () ; yystack_[2].value.as< OSM::Rule::Command * > ()->next_ = yystack_[0].value.as< OSM::Rule::Command * > () ;}
-#line 662 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 108 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Rule * > () = yystack_[1].value.as< OSM::Filter::Rule * > () ; yylhs.value.as< OSM::Filter::Rule * > ()->next_ = yystack_[0].value.as< OSM::Filter::Rule * > () ; }
+#line 687 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 7:
-#line 116 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Add, yystack_[2].value.as< std::string > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 668 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 111 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Rule * > () = new OSM::Filter::Rule{yystack_[1].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::Command * > ()} ; }
+#line 693 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 8:
-#line 117 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Set, yystack_[2].value.as< std::string > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ;}
-#line 674 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 112 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Rule * > () = new OSM::Filter::Rule{nullptr, yystack_[0].value.as< OSM::Filter::Command * > ()} ; }
+#line 699 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 9:
-#line 118 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Delete, yystack_[0].value.as< std::string > ()) ; }
-#line 680 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 117 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = yystack_[1].value.as< OSM::Filter::Command * > () ; }
+#line 705 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 10:
-#line 119 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Store, yystack_[1].value.as< std::string > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 686 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 121 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = yystack_[0].value.as< OSM::Filter::Command * > () ;  }
+#line 711 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 11:
-#line 120 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::Command * > () = new OSM::Rule::Command( OSM::Rule::Command::Continue) ;}
-#line 692 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 122 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = yystack_[1].value.as< OSM::Filter::Command * > () ; }
+#line 717 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 12:
-#line 129 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 698 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 123 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = yystack_[2].value.as< OSM::Filter::Command * > () ; yystack_[2].value.as< OSM::Filter::Command * > ()->next_ = yystack_[0].value.as< OSM::Filter::Command * > () ;}
+#line 723 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 13:
-#line 130 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BooleanOperator( OSM::Rule::BooleanOperator::Or, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 704 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 127 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = new OSM::Filter::Command( OSM::Filter::Command::Add, yystack_[2].value.as< std::string > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 729 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 14:
-#line 134 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 710 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 128 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = new OSM::Filter::Command( OSM::Filter::Command::Set, yystack_[2].value.as< std::string > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ;}
+#line 735 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 15:
-#line 135 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BooleanOperator( OSM::Rule::BooleanOperator::And, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 716 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 129 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = new OSM::Filter::Command( OSM::Filter::Command::Delete, yystack_[0].value.as< std::string > ()) ; }
+#line 741 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 16:
-#line 139 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 722 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 130 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = new OSM::Filter::Command( OSM::Filter::Command::Store, yystack_[1].value.as< std::string > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 747 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 17:
-#line 140 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BooleanOperator( OSM::Rule::BooleanOperator::Not, yystack_[0].value.as< OSM::Rule::ExpressionNode * > (), NULL) ; }
-#line 728 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 131 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::Command * > () = new OSM::Filter::Command( OSM::Filter::Command::Continue) ;}
+#line 753 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 18:
-#line 144 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 734 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 140 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 759 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 19:
-#line 145 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[1].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 740 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 141 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BooleanOperator( OSM::Filter::BooleanOperator::Or, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 765 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 20:
-#line 149 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 746 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 145 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 771 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 21:
-#line 150 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 752 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 146 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BooleanOperator( OSM::Filter::BooleanOperator::And, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 777 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 22:
-#line 151 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 758 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 150 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 783 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 23:
-#line 152 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 764 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 151 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BooleanOperator( OSM::Filter::BooleanOperator::Not, yystack_[0].value.as< OSM::Filter::ExpressionNode * > (), NULL) ; }
+#line 789 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 24:
-#line 157 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::Equal, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 770 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 155 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 795 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 25:
-#line 158 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::NotEqual, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 776 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 156 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[1].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 801 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 26:
-#line 159 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::Less, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 782 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 160 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 807 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 27:
-#line 160 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::Greater, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 788 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 161 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 813 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 28:
-#line 161 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::LessOrEqual, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 794 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 162 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 819 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 29:
-#line 162 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ComparisonPredicate( OSM::Rule::ComparisonPredicate::GreaterOrEqual, yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ) ; }
-#line 800 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 163 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 825 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 30:
-#line 166 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LikeTextPredicate(yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< std::string > (), true) ; }
-#line 806 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 168 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ComparisonPredicate( OSM::Filter::ComparisonPredicate::Equal, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ) ; }
+#line 831 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 31:
-#line 167 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LikeTextPredicate(yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< std::string > (), false) ; }
-#line 812 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 169 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ComparisonPredicate( OSM::Filter::ComparisonPredicate::NotEqual, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ) ; }
+#line 837 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 32:
-#line 171 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ExistsPredicate(yystack_[0].value.as< std::string > ()) ; }
-#line 818 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 170 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ComparisonPredicate( OSM::Filter::ComparisonPredicate::Less, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ) ; }
+#line 843 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 33:
-#line 175 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ListPredicate(yystack_[4].value.as< std::string > (), yystack_[1].value.as< OSM::Rule::ExpressionNode * > (), true) ; }
-#line 824 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 171 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ComparisonPredicate( OSM::Filter::ComparisonPredicate::Greater, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ) ; }
+#line 849 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 34:
-#line 176 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ListPredicate(yystack_[5].value.as< std::string > (), yystack_[1].value.as< OSM::Rule::ExpressionNode * > (), false) ; }
-#line 830 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 172 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ComparisonPredicate( OSM::Filter::ComparisonPredicate::LessOrEqual, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ) ; }
+#line 855 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 35:
-#line 180 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ExpressionNode() ; yylhs.value.as< OSM::Rule::ExpressionNode * > ()->appendChild(yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 836 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 173 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ComparisonPredicate( OSM::Filter::ComparisonPredicate::GreaterOrEqual, yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ) ; }
+#line 861 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 36:
-#line 181 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()->prependChild(yystack_[2].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 842 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 177 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::LikeTextPredicate(yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< std::string > (), true) ; }
+#line 867 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 37:
-#line 185 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 848 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 178 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::LikeTextPredicate(yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< std::string > (), false) ; }
+#line 873 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 38:
-#line 186 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('+',yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 854 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 182 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ExistsPredicate(yystack_[0].value.as< std::string > ()) ; }
+#line 879 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 39:
-#line 187 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('.',yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 860 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 186 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ListPredicate(yystack_[4].value.as< std::string > (), yystack_[1].value.as< OSM::Filter::ExpressionNode * > (), true) ; }
+#line 885 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 40:
-#line 188 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('-', yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 866 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 187 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ListPredicate(yystack_[5].value.as< std::string > (), yystack_[1].value.as< OSM::Filter::ExpressionNode * > (), false) ; }
+#line 891 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 41:
-#line 192 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 872 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 191 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ExpressionNode() ; yylhs.value.as< OSM::Filter::ExpressionNode * > ()->appendChild(yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 897 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 42:
-#line 193 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('*', yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 878 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 192 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()->prependChild(yystack_[2].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 903 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 43:
-#line 194 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::BinaryOperator('/', yystack_[2].value.as< OSM::Rule::ExpressionNode * > (), yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 884 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 196 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 909 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 44:
-#line 198 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 890 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 197 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BinaryOperator('+',yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 915 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 45:
-#line 199 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 896 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 198 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BinaryOperator('.',yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 921 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 46:
-#line 200 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 902 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 199 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BinaryOperator('-', yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 927 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 47:
-#line 201 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[1].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 908 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 203 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 933 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 48:
-#line 205 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::Function(yystack_[2].value.as< std::string > ()) ; }
-#line 914 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 204 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BinaryOperator('*', yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 939 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 49:
-#line 206 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    {
-			yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::Function(yystack_[3].value.as< std::string > (), yystack_[1].value.as< OSM::Rule::ExpressionNode * > ()) ;
-		 }
-#line 922 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 205 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::BinaryOperator('/', yystack_[2].value.as< OSM::Filter::ExpressionNode * > (), yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 945 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 50:
-#line 212 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::ExpressionNode() ; yylhs.value.as< OSM::Rule::ExpressionNode * > ()->appendChild(yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 928 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 209 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 951 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 51:
-#line 213 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; yystack_[0].value.as< OSM::Rule::ExpressionNode * > ()->prependChild(yystack_[2].value.as< OSM::Rule::ExpressionNode * > ()) ; }
-#line 934 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 210 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 957 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 52:
-#line 217 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 940 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 211 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 963 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 53:
-#line 221 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 946 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 212 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[1].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 969 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 54:
-#line 222 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 952 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 216 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::Function(yystack_[2].value.as< std::string > ()) ; }
+#line 975 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 55:
-#line 226 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LiteralExpressionNode(yystack_[0].value.as< std::string > ()) ; }
-#line 958 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 217 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    {
+			yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::Function(yystack_[3].value.as< std::string > (), yystack_[1].value.as< OSM::Filter::ExpressionNode * > ()) ;
+		 }
+#line 983 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 56:
-#line 227 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = yystack_[0].value.as< OSM::Rule::ExpressionNode * > () ; }
-#line 964 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 223 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::ExpressionNode() ; yylhs.value.as< OSM::Filter::ExpressionNode * > ()->appendChild(yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 989 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 57:
-#line 232 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LiteralExpressionNode(true) ; }
-#line 970 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 224 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; yystack_[0].value.as< OSM::Filter::ExpressionNode * > ()->prependChild(yystack_[2].value.as< OSM::Filter::ExpressionNode * > ()) ; }
+#line 995 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 58:
-#line 233 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    { yylhs.value.as< OSM::Rule::ExpressionNode * > () =  new OSM::Rule::LiteralExpressionNode(false) ; }
-#line 976 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 228 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 1001 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 59:
-#line 237 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
-    {
-		yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::LiteralExpressionNode((double)yystack_[0].value.as< double > ()) ;
-	}
-#line 984 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 232 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 1007 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
   case 60:
+#line 233 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 1013 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 61:
+#line 237 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::LiteralExpressionNode(yystack_[0].value.as< std::string > ()) ; }
+#line 1019 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 62:
+#line 238 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = yystack_[0].value.as< OSM::Filter::ExpressionNode * > () ; }
+#line 1025 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 63:
 #line 243 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::LiteralExpressionNode(true) ; }
+#line 1031 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 64:
+#line 244 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    { yylhs.value.as< OSM::Filter::ExpressionNode * > () =  new OSM::Filter::LiteralExpressionNode(false) ; }
+#line 1037 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 65:
+#line 248 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
     {
-		yylhs.value.as< OSM::Rule::ExpressionNode * > () = new OSM::Rule::Attribute(yystack_[0].value.as< std::string > ()) ;
+		yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::LiteralExpressionNode((double)yystack_[0].value.as< double > ()) ;
 	}
-#line 992 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 1045 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 66:
+#line 254 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:847
+    {
+		yylhs.value.as< OSM::Filter::ExpressionNode * > () = new OSM::Filter::Attribute(yystack_[0].value.as< std::string > ()) ;
+	}
+#line 1053 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 996 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
+#line 1057 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -1247,130 +1308,137 @@ namespace OSM {
   }
 
 
-  const signed char BisonParser::yypact_ninf_ = -77;
+  const signed char BisonParser::yypact_ninf_ = -93;
 
   const signed char BisonParser::yytable_ninf_ = -1;
 
   const signed char
   BisonParser::yypact_[] =
   {
-      -2,   -11,   -77,   -77,   -25,    -2,    -1,   -77,   -77,    18,
-       7,    42,    19,   -77,   -77,   -77,   -77,   -77,   -77,    92,
-      61,    -3,   -77,   -77,   -77,   -77,   -77,   -77,   -77,   -77,
-      32,    55,    21,    35,    37,   -77,    62,   -77,    -2,    -2,
-      22,    31,    38,    38,    38,    38,    38,    38,    38,    38,
-      38,    38,    38,   -77,   -77,    49,    38,   -77,    59,   -77,
-      60,    58,    -8,    48,    50,    51,    52,   -77,    69,    79,
-     -77,   -77,   -77,   -77,   -77,   -77,   -77,   -77,   -77,   -77,
-     -77,   -77,   -77,   -77,   -77,    -8,    85,   -77,    38,    86,
-      87,    76,    78,   -77,    38,   -77,    62,    90,   -77,   -77,
-      -8,    38,    38,   -77,   -77,   -77,   -77,   -77,   -77
+     -18,   -14,    27,   -18,     8,   -93,   -93,    -1,    -5,   -93,
+     -93,    19,    42,    76,     0,   -93,   -93,   -93,    -1,   -93,
+      34,    72,    64,   -93,   -93,   -93,   -93,   -93,   -93,    90,
+      69,   -15,   -93,   -93,   -93,   -93,   -93,   -93,   -93,   -93,
+      59,    63,    54,    55,    56,    58,   -93,    83,    84,    78,
+       4,    89,   -93,   -93,    42,    42,    75,    77,    46,    46,
+      46,    46,    46,    46,    46,    46,    46,    46,    46,   -93,
+     -93,    81,    85,   -93,    46,   -93,    76,    95,    46,   -93,
+      96,   -93,    97,    98,    -8,   -93,   -93,   -93,   -93,   -93,
+     -93,   -93,   -93,   -93,   -93,   -93,   -93,   -93,   -93,   -93,
+      46,    46,   -93,   -93,    -8,   100,   -93,    46,   101,   102,
+     -93,   -93,   104,   -93,   -93,    -8,   -93,   -93
   };
 
   const unsigned char
   BisonParser::yydefact_[] =
   {
-       0,     0,    57,    58,     0,     0,    60,    59,    55,     0,
-       0,    12,    14,    16,    18,    20,    21,    22,    23,     0,
-      37,    41,    44,    45,    54,    56,    53,    46,    17,    32,
-       0,     0,     0,     0,     0,     1,     0,     2,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    19,    47,     0,     0,    48,    60,    52,
-       0,    50,     0,     0,     0,     0,     0,    11,     0,     4,
-      13,    15,    30,    31,    24,    25,    26,    27,    28,    29,
-      38,    40,    39,    42,    43,     0,     0,    49,     0,     0,
-      35,     0,     0,     9,     0,     3,     5,     0,    51,    33,
-       0,     0,     0,    10,     6,    34,    36,     7,     8
+       0,     0,     0,     2,     0,     1,     3,     0,     0,    63,
+      64,     0,     0,     0,    66,    65,    61,     4,     5,     8,
+       0,    18,    20,    22,    24,    26,    27,    28,    29,     0,
+      43,    47,    50,    51,    60,    62,    59,    52,    23,    38,
+       0,     0,     0,     0,     0,     0,    17,     0,    10,     0,
+       0,     0,     6,     7,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    25,
+      53,     0,     0,    15,     0,     9,    11,     0,     0,    54,
+      66,    58,     0,    56,     0,    19,    21,    36,    37,    30,
+      31,    32,    33,    34,    35,    44,    46,    45,    48,    49,
+       0,     0,    16,    12,     0,     0,    55,     0,     0,    41,
+      13,    14,     0,    57,    39,     0,    40,    42
   };
 
   const signed char
   BisonParser::yypgoto_[] =
   {
-     -77,   -77,   -77,    17,   -77,    10,    75,   -77,   114,   -77,
-     -77,   -77,   -77,   -77,   -76,    -5,   -30,   -77,   -77,    28,
-     -77,   -54,   -77,   -77,   -77,   -77
+     -93,   117,   -93,   106,   -93,   107,    52,   -93,   -11,    74,
+     -93,   122,   -93,   -93,   -93,   -93,   -93,   -92,   -12,    -3,
+     -93,   -93,    24,   -93,   -76,   -93,   -93,   -93,   -93
   };
 
   const signed char
   BisonParser::yydefgoto_[] =
   {
-      -1,     9,    37,    68,    69,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    89,    19,    20,    21,    22,    60,
-      61,    23,    24,    25,    26,    27
+      -1,     2,     3,    17,    18,    19,    47,    48,    20,    21,
+      22,    23,    24,    25,    26,    27,    28,   108,    29,    30,
+      31,    32,    82,    83,    33,    34,    35,    36,    37
   };
 
   const unsigned char
   BisonParser::yytable_[] =
   {
-      31,     1,    32,     2,     3,     4,     2,     3,    90,    97,
-       5,    29,     2,     3,     4,    30,    51,    52,    35,     5,
-      33,    83,    84,    39,   106,     6,     7,     8,    59,     7,
-       8,    90,    36,    34,     6,     7,     8,    74,    75,    76,
-      77,    78,    79,    80,    81,    82,    90,    38,    70,     2,
-       3,    86,     2,     3,    53,    55,    56,    57,    62,    56,
-      72,    40,    41,    42,    43,    44,    45,    46,    47,    73,
-      85,    58,     7,     8,    58,     7,     8,    54,    48,    49,
-      33,    88,    87,    59,    91,    50,    92,    93,    94,   103,
-      63,    64,    65,    66,    67,    95,   107,   108,    40,    41,
-      42,    43,    44,    45,    46,    47,    96,    54,    99,   101,
-     100,   102,   105,   104,    71,    28,    98
+      41,    40,     8,    49,    67,    68,     9,    10,   109,     9,
+      10,    11,   112,     9,    10,    11,    12,     1,     9,    10,
+      12,    50,     4,   117,    13,    78,    79,     5,   109,    15,
+      16,    14,    15,    16,    51,    14,    15,    16,    81,   109,
+      80,    15,    16,    85,     7,     8,    89,    90,    91,    92,
+      93,    94,    95,    96,    97,    39,     9,    10,    11,    13,
+       9,    10,   102,    12,    98,    99,   105,    78,    55,    56,
+      57,    58,    59,    60,    61,    62,    63,    54,    14,    15,
+      16,    69,    80,    15,    16,    70,    64,    65,   110,   111,
+      71,    72,    73,    66,    74,    81,    56,    57,    58,    59,
+      60,    61,    62,    63,    42,    43,    44,    45,    46,    75,
+      84,    76,    77,    87,   100,    88,   104,    50,   101,   106,
+       6,   107,    70,   114,    52,   115,   116,    53,   103,    86,
+      38,   113
   };
 
   const unsigned char
   BisonParser::yycheck_[] =
   {
-       5,     3,     3,    14,    15,    16,    14,    15,    62,    85,
-      21,    36,    14,    15,    16,     5,    19,    20,     0,    21,
-      21,    51,    52,     4,   100,    36,    37,    38,    33,    37,
-      38,    85,    25,    34,    36,    37,    38,    42,    43,    44,
-      45,    46,    47,    48,    49,    50,   100,     5,    38,    14,
-      15,    56,    14,    15,    22,    34,    21,    22,    21,    21,
-      38,     6,     7,     8,     9,    10,    11,    12,    13,    38,
-      21,    36,    37,    38,    36,    37,    38,    22,    17,    18,
-      21,    23,    22,    88,    36,    24,    36,    36,    36,    94,
-      28,    29,    30,    31,    32,    26,   101,   102,     6,     7,
-       8,     9,    10,    11,    12,    13,    27,    22,    22,    33,
-      23,    33,    22,    96,    39,     1,    88
+      12,    12,     3,     3,    19,    20,    14,    15,    84,    14,
+      15,    16,   104,    14,    15,    16,    21,    35,    14,    15,
+      21,    21,    36,   115,    25,    21,    22,     0,   104,    37,
+      38,    36,    37,    38,    34,    36,    37,    38,    50,   115,
+      36,    37,    38,    54,    36,     3,    58,    59,    60,    61,
+      62,    63,    64,    65,    66,    36,    14,    15,    16,    25,
+      14,    15,    74,    21,    67,    68,    78,    21,     4,     6,
+       7,     8,     9,    10,    11,    12,    13,     5,    36,    37,
+      38,    22,    36,    37,    38,    22,    17,    18,   100,   101,
+      36,    36,    36,    24,    36,   107,     6,     7,     8,     9,
+      10,    11,    12,    13,    28,    29,    30,    31,    32,    26,
+      21,    27,    34,    38,    33,    38,    21,    21,    33,    22,
+       3,    23,    22,    22,    18,    23,    22,    20,    76,    55,
+       8,   107
   };
 
   const unsigned char
   BisonParser::yystos_[] =
   {
-       0,     3,    14,    15,    16,    21,    36,    37,    38,    41,
-      45,    46,    47,    48,    49,    50,    51,    52,    53,    55,
-      56,    57,    58,    61,    62,    63,    64,    65,    48,    36,
-      45,    55,     3,    21,    34,     0,    25,    42,     5,     4,
-       6,     7,     8,     9,    10,    11,    12,    13,    17,    18,
-      24,    19,    20,    22,    22,    34,    21,    22,    36,    55,
-      59,    60,    21,    28,    29,    30,    31,    32,    43,    44,
-      45,    46,    38,    38,    55,    55,    55,    55,    55,    55,
-      55,    55,    55,    56,    56,    21,    55,    22,    23,    54,
-      61,    36,    36,    36,    36,    26,    27,    54,    59,    22,
-      23,    33,    33,    55,    43,    22,    54,    55,    55
+       0,    35,    41,    42,    36,     0,    41,    36,     3,    14,
+      15,    16,    21,    25,    36,    37,    38,    43,    44,    45,
+      48,    49,    50,    51,    52,    53,    54,    55,    56,    58,
+      59,    60,    61,    64,    65,    66,    67,    68,    51,    36,
+      48,    58,    28,    29,    30,    31,    32,    46,    47,     3,
+      21,    34,    43,    45,     5,     4,     6,     7,     8,     9,
+      10,    11,    12,    13,    17,    18,    24,    19,    20,    22,
+      22,    36,    36,    36,    36,    26,    27,    34,    21,    22,
+      36,    58,    62,    63,    21,    48,    49,    38,    38,    58,
+      58,    58,    58,    58,    58,    58,    58,    58,    59,    59,
+      33,    33,    58,    46,    21,    58,    22,    23,    57,    64,
+      58,    58,    57,    62,    22,    23,    22,    57
   };
 
   const unsigned char
   BisonParser::yyr1_[] =
   {
-       0,    40,    41,    42,    43,    43,    43,    44,    44,    44,
-      44,    44,    45,    45,    46,    46,    47,    47,    48,    48,
-      49,    49,    49,    49,    50,    50,    50,    50,    50,    50,
-      51,    51,    52,    53,    53,    54,    54,    55,    55,    55,
-      55,    56,    56,    56,    57,    57,    57,    57,    58,    58,
-      59,    59,    60,    61,    61,    62,    62,    63,    63,    64,
-      65
+       0,    40,    41,    41,    42,    43,    43,    44,    44,    45,
+      46,    46,    46,    47,    47,    47,    47,    47,    48,    48,
+      49,    49,    50,    50,    51,    51,    52,    52,    52,    52,
+      53,    53,    53,    53,    53,    53,    54,    54,    55,    56,
+      56,    57,    57,    58,    58,    58,    58,    59,    59,    59,
+      60,    60,    60,    60,    61,    61,    62,    62,    63,    64,
+      64,    65,    65,    66,    66,    67,    68
   };
 
   const unsigned char
   BisonParser::yyr2_[] =
   {
-       0,     2,     2,     3,     1,     2,     3,     4,     4,     2,
-       3,     1,     1,     3,     1,     3,     1,     2,     1,     3,
-       1,     1,     1,     1,     3,     3,     3,     3,     3,     3,
-       3,     3,     2,     5,     6,     1,     3,     1,     3,     3,
-       3,     1,     3,     3,     1,     1,     1,     3,     3,     4,
-       1,     3,     1,     1,     1,     1,     1,     1,     1,     1,
-       1
+       0,     2,     1,     2,     4,     1,     2,     2,     1,     3,
+       1,     2,     3,     4,     4,     2,     3,     1,     1,     3,
+       1,     3,     1,     2,     1,     3,     1,     1,     1,     1,
+       3,     3,     3,     3,     3,     3,     3,     3,     2,     5,
+       6,     1,     3,     1,     3,     3,     3,     1,     3,     3,
+       1,     1,     1,     3,     3,     4,     1,     3,     1,     1,
+       1,     1,     1,     1,     1,     1,     1
   };
 
 
@@ -1385,13 +1453,14 @@ namespace OSM {
   "\">=\"", "\"true\"", "\"false\"", "\"^\"", "\"+\"", "\"-\"", "\"*\"",
   "\"/\"", "\"(\"", "\")\"", "\",\"", "\".\"", "\"{\"", "\"}\"", "\";\"",
   "\"add tag\"", "\"set tag\"", "\"delete tag\"", "\"store\"",
-  "\"continue\"", "\"=\"", "\"in\"", "\"not\"", "\"identifier\"",
-  "\"number\"", "\"string literal\"", "UMINUS", "$accept", "rule",
-  "action_block", "command_list", "command", "boolean_value_expression",
-  "boolean_term", "boolean_factor", "boolean_primary", "predicate",
-  "comparison_predicate", "like_text_predicate", "exists_predicate",
-  "list_predicate", "literal_list", "expression", "term", "factor",
-  "function", "function_argument_list", "function_argument", "literal",
+  "\"continue\"", "\"=\"", "\"in\"", "\"@layer\"", "\"identifier\"",
+  "\"number\"", "\"string literal\"", "UMINUS", "$accept", "layer_list",
+  "layer", "rule_list", "rule", "action_block", "command_list", "command",
+  "boolean_value_expression", "boolean_term", "boolean_factor",
+  "boolean_primary", "predicate", "comparison_predicate",
+  "like_text_predicate", "exists_predicate", "list_predicate",
+  "literal_list", "expression", "term", "factor", "function",
+  "function_argument_list", "function_argument", "literal",
   "general_literal", "boolean_literal", "numeric_literal", "attribute", YY_NULLPTR
   };
 
@@ -1399,13 +1468,13 @@ namespace OSM {
   const unsigned char
   BisonParser::yyrline_[] =
   {
-       0,   101,   101,   106,   110,   111,   112,   116,   117,   118,
-     119,   120,   129,   130,   134,   135,   139,   140,   144,   145,
-     149,   150,   151,   152,   157,   158,   159,   160,   161,   162,
-     166,   167,   171,   175,   176,   180,   181,   185,   186,   187,
-     188,   192,   193,   194,   198,   199,   200,   201,   205,   206,
-     212,   213,   217,   221,   222,   226,   227,   232,   233,   237,
-     243
+       0,   101,   101,   102,   105,   107,   108,   111,   112,   117,
+     121,   122,   123,   127,   128,   129,   130,   131,   140,   141,
+     145,   146,   150,   151,   155,   156,   160,   161,   162,   163,
+     168,   169,   170,   171,   172,   173,   177,   178,   182,   186,
+     187,   191,   192,   196,   197,   198,   199,   203,   204,   205,
+     209,   210,   211,   212,   216,   217,   223,   224,   228,   232,
+     233,   237,   238,   243,   244,   248,   254
   };
 
   // Print the state stack on the debug stream.
@@ -1440,8 +1509,8 @@ namespace OSM {
 
 #line 6 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:1155
 } // OSM
-#line 1444 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:1155
-#line 250 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:1156
+#line 1513 "/home/malasiot/source/mbtools/src/parser/osm_parser.cpp" // lalr1.cc:1155
+#line 261 "/home/malasiot/source/mbtools/src/osm.y" // lalr1.cc:1156
 
 #include <OsmRuleScanner.h>
 
@@ -1454,8 +1523,8 @@ void OSM::BisonParser::error(const OSM::BisonParser::location_type &loc, const s
 // Now that we have the Parser declared, we can declare the Scanner and implement
 // the yylex function
 
-static OSM::BisonParser::symbol_type yylex(OSM::Rule::Parser &driver, OSM::BisonParser::location_type &loc) {
-	return  driver.scanner.lex(&loc);
+static OSM::BisonParser::symbol_type yylex(OSM::Filter::Parser &driver, OSM::BisonParser::location_type &loc) {
+	return  driver.scanner_.lex(&loc);
 }
 
 static int yydebug_=1 ;

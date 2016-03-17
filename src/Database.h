@@ -91,9 +91,10 @@ class Connection: boost::noncopyable {
     void exec(const std::string &sql, ...) ;
 
     sqlite3_int64 last_insert_rowid() {
-        return sqlite3_last_insert_rowid(handle);
+        return sqlite3_last_insert_rowid(handle_);
     }
 
+    sqlite3 *handle() { return handle_ ; }
 protected:
 
     friend class Statement ;
@@ -101,7 +102,7 @@ protected:
 
     void check() ;
 
-    sqlite3 *handle ;
+    sqlite3 *handle_ ;
 };
 
 
@@ -166,6 +167,7 @@ public:
     Statement &bind(void const * buf, size_t buf_size);
 
 
+    sqlite3_stmt *handle() const { return handle_ ; }
 protected:
 
     void check();
@@ -178,14 +180,14 @@ private:
 
 private:
 
-    Connection &con ;
-    std::string sql ;
+    Connection &con_ ;
+    std::string sql_ ;
 
 protected:
 
     friend class QueryResult ;
 
-    sqlite3_stmt *handle;
+    sqlite3_stmt *handle_;
 
 private:
 
@@ -221,7 +223,7 @@ class QueryResult
 
 public:
 
-    operator int () { return !empty ; }
+    operator int () { return !empty_ ; }
 
     void next() ;
 
@@ -305,8 +307,8 @@ private:
 
 private:
 
-    Query &cmd ;
-    bool empty ;
+    Query &cmd_ ;
+    bool empty_ ;
 
 } ;
 
@@ -323,7 +325,7 @@ public:
 
 private:
 
-   Connection &con ;
+   Connection &con_ ;
  };
 
 

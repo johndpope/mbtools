@@ -68,9 +68,9 @@ int main(int argc, char *argv[])
         return 0 ;
     }
 
-    for( const ImportLayer &layer: icfg.layers_)  {
-        if ( ! gfile.createLayerTable(layer.name_, layer.geom_, layer.srid_ ) ) {
-            cerr << "Failed to create layer " << layer.name_ << ", skipping" ;
+    for( OSM::Filter::LayerDefinition *layer = icfg.layers_ ; layer ; layer = layer->next_)  {
+        if ( ! gfile.createLayerTable(layer->name_, layer->type_, layer->srid_ ) ) {
+            cerr << "Failed to create layer " << layer->name_ << ", skipping" ;
            continue ;
         }
     }
@@ -82,14 +82,11 @@ int main(int argc, char *argv[])
 
     MBTileWriter twriter(tileSet) ;
 
-    twriter.writeMetaData("name", mcfg.name_) ;
-    twriter.writeMetaData("version", "1.1") ;
-    twriter.writeMetaData("type", "baselayer") ;
 
-    twriter.writeMetaData("description", mcfg.description_) ;
-    twriter.writeMetaData("attribution", mcfg.attribution_) ;
-
-    twriter.writeTiles(gfile, mcfg) ;
+    if ( boost::filesystem::is_directory(tileSet) )
+        twriter.writeTilesFolder(gfile, mcfg) ;
+    else
+        twriter.writeTilesDB(gfile, mcfg) ;
 
 
 //    boost::filesystem::remove(mapFile) ;

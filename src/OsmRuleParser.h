@@ -16,11 +16,12 @@ namespace OSM {
 
 class FlexScanner ;
 
-namespace Rule {
+namespace Filter {
 
 class ExpressionNode ;
 class Context ;
 class Command ;
+class LayerDefinition ;
 
 class Parser {
 
@@ -32,13 +33,12 @@ public:
 
     void error(const BisonParser::location_type &loc,  const std::string& m) ;
 
-    FlexScanner scanner;
-    BisonParser parser;
-    ExpressionNode *node ;
-    Command *actions ;
+    FlexScanner scanner_;
+    BisonParser parser_;
+    LayerDefinition *layers_ = nullptr ;
 
-    std::string errorString ;
-    OSM::BisonParser::location_type loc ;
+    std::string error_string_ ;
+    OSM::BisonParser::location_type loc_ ;
  } ;
 
 
@@ -61,7 +61,7 @@ public:
     enum Type { String, Number, Boolean, Null } ;
 
     Literal(): type_(Null) {}
-    Literal(const std::string &val) ;
+    Literal(const std::string &val, bool auto_conv = true) ;
     Literal(const double val): type_(Number), number_val_(val) {}
     Literal(const bool val): type_(Boolean), boolean_val_(val) {}
 
@@ -75,6 +75,32 @@ public:
     std::string string_val_ ;
     double number_val_ ;
     bool boolean_val_ ;
+};
+
+class Rule {
+public:
+
+    Rule(ExpressionNode *exp, Command *cmd): node_(exp), actions_(cmd) {}
+    ~Rule() ;
+
+    ExpressionNode *node_ = nullptr ;
+    Command *actions_ = nullptr ;
+    Rule *next_ = nullptr ;
+};
+
+
+
+class LayerDefinition {
+public:
+    LayerDefinition(const std::string layer_name, const std::string &layer_type):
+    name_(layer_name), type_(layer_type) {}
+
+    std::string name_ ;
+    std::string type_ ;
+    std::string srid_ = "3857";
+
+    Rule *rules_ = nullptr;
+    LayerDefinition *next_ = nullptr;
 };
 
 class ExpressionNode {
@@ -148,13 +174,13 @@ private:
 
 class Function: public ExpressionNode {
 public:
-    Function(const std::string &name_): name(name_) {}
-    Function(const std::string &name_, ExpressionNode *args): name(name_), ExpressionNode(args) {}
+    Function(const std::string &name): name_(name) {}
+    Function(const std::string &name, ExpressionNode *args): name_(name), ExpressionNode(args) {}
 
     Literal eval(Context &ctx) ;
 
 private:
-    std::string name ;
+    std::string name_ ;
 
 };
 

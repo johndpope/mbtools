@@ -36,63 +36,16 @@ bool ImportConfig::parse(const string &fileName)
         return false ;
     }
 
-    int count = 0 ;
-    while ( !strm.eof() )
-    {
-        string line ;
-        getline(strm, line) ;
+    OSM::Filter::Parser parser(strm) ;
 
-        ++count ;
+    if ( ! parser.parse() )  {
+        cerr << "Error parsing " << fileName << " : error in rule (line: " << ")" << endl ;
+        cerr << parser.error_string_ << endl ;
 
-        if ( line.empty() || line.at(0)== '#' ) continue ;
-        else if ( boost::starts_with(line, "@layer") )
-        {
-            vector<string> tokens ;
-            split_line(line, tokens) ;
-
-            if ( tokens.size() < 3 ) {
-                cerr << "error parsing layer definition" << endl ;
-                return false ;
-            }
-            // parse layer info
-
-            ImportLayer layer ;
-
-            layer.name_ = tokens[1] ;
-            layer.geom_ = tokens[2] ;
-
-            layers_.push_back(layer) ;
-        }
-        else // rules
-        {
-            if ( layers_.empty() )
-            {
-                cerr << "Error parsing " << fileName << " :rule found before any layer definition (line: " << count << ")" ;
-                return false ;
-            }
-
-            ImportLayer &layer = layers_.back() ;
-
-            istringstream sstrm(line) ;
-            OSM::Rule::Parser parser(sstrm) ;
-
-            if ( ! parser.parse() )
-            {
-                cerr << "Error parsing " << fileName << " : error in rule (line: " << count << ")" << endl ;
-                cerr << parser.errorString << endl ;
-
-                return false ;
-            }
-
-            Rule rule ;
-
-            rule.condition_ = parser.node ;
-            rule.actions_ = parser.actions ;
-
-            layer.rules_.push_back(rule) ;
-        }
-
+        return false ;
     }
+
+    layers_ = parser.layers_ ;
 
     return true ;
 }

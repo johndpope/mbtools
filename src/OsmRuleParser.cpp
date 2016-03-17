@@ -7,30 +7,24 @@
 using namespace std;
 
 namespace OSM {
-namespace Rule {
+namespace Filter {
 
 Parser::Parser(std::istream &strm) :
-    scanner(strm),
-    parser(*this, loc),
-    node(NULL),
-    actions(0) {}
+    scanner_(strm),
+    parser_(*this, loc_)
+{}
 
 bool Parser::parse() {
-//    parser.set_debug_level(5);
+    //    parser.set_debug_level(5);
 
-    loc.initialize() ;
-    int res = parser.parse();
+    loc_.initialize() ;
+    int res = parser_.parse();
 
-    if ( res == 0 ) return true ;
-    else {
-        delete node ;
-        delete actions ;
-        return false ;
-    }
+    return ( res == 0 ) ;
 }
 
 void Parser::error(const OSM::BisonParser::location_type &loc,
-           const std::string& m)
+                   const std::string& m)
 {
     std::stringstream strm ;
 
@@ -39,7 +33,7 @@ void Parser::error(const OSM::BisonParser::location_type &loc,
     else strm << loc.begin.column <<  '-' << loc.end.column-1 ;
     strm <<  ")" ;
 
-    errorString = strm.str() ;
+    error_string_ = strm.str() ;
 }
 //////////////////////////////////////////////////////////////////
 
@@ -67,19 +61,25 @@ string Context::value(const string &key) const
 
 ///////////////////////////////////////////////////////////////////
 
-Literal::Literal(const std::string &val)
+Literal::Literal(const std::string &val, bool auto_conv)
 {
-    char * e;
-    double x = std::strtod(val.c_str(), &e);
+    if ( auto_conv ) {
+        char * e;
+        double x = std::strtod(val.c_str(), &e);
 
-    if (*e != 0 ||  errno != 0 )  {
+        if (*e != 0 ||  errno != 0 )  {
+            type_ = String ;
+            string_val_ = val ;
+        }
+        else
+        {
+            type_ = Number ;
+            number_val_ = x ;
+        }
+    }
+    else {
         type_ = String ;
         string_val_ = val ;
-    }
-    else
-    {
-        type_ = Number ;
-        number_val_ = x ;
     }
 
 }
@@ -87,29 +87,29 @@ Literal::Literal(const std::string &val)
 bool Literal::toBoolean() const {
 
     switch ( type_ ) {
-        case Null: return false ;
-        case Boolean: return boolean_val_ ;
-        case Number: return number_val_ != 0.0 ;
-        case String: return ( string_val_ != "0" && string_val_.empty()) ;
+    case Null: return false ;
+    case Boolean: return boolean_val_ ;
+    case Number: return number_val_ != 0.0 ;
+    case String: return ( string_val_ != "0" && string_val_.empty()) ;
     }
 }
 
 double Literal::toNumber() const {
 
     switch ( type_ ) {
-        case Null: return 0 ;
-        case Boolean: return (double)boolean_val_ ;
-        case Number: return number_val_ ;
-        case String: return atof(string_val_.c_str()) ;
+    case Null: return 0 ;
+    case Boolean: return (double)boolean_val_ ;
+    case Number: return number_val_ ;
+    case String: return atof(string_val_.c_str()) ;
     }
 }
 
 string Literal::toString() const {
     switch ( type_ ) {
-        case Null: return "" ;
-        case Boolean: ( boolean_val_ ) ? "TRUE" : "FALSE" ;
-        case Number: return str(boost::format("%f") % number_val_) ;
-        case String: return string_val_ ;
+    case Null: return "" ;
+    case Boolean: ( boolean_val_ ) ? "TRUE" : "FALSE" ;
+    case Number: return str(boost::format("%f") % number_val_) ;
+    case String: return string_val_ ;
     }
 }
 
@@ -117,42 +117,42 @@ string Literal::toString() const {
 Literal BooleanOperator::eval(Context &ctx)
 {
     switch ( op ) {
-        case And:
-            return ( children_[0]->eval(ctx).toBoolean() && children_[1]->eval(ctx).toBoolean() ) ;
-        case Or:
-            return ( children_[0]->eval(ctx).toBoolean() || children_[1]->eval(ctx).toBoolean() ) ;
-        case Not:
-           return !( children_[0]->eval(ctx).toBoolean() ) ;
+    case And:
+        return ( children_[0]->eval(ctx).toBoolean() && children_[1]->eval(ctx).toBoolean() ) ;
+    case Or:
+        return ( children_[0]->eval(ctx).toBoolean() || children_[1]->eval(ctx).toBoolean() ) ;
+    case Not:
+        return !( children_[0]->eval(ctx).toBoolean() ) ;
     }
 }
 
 Literal ComparisonPredicate::eval(Context &ctx)
 {
 
-   Literal lhs = children_[0]->eval(ctx) ;
-   Literal rhs = children_[1]->eval(ctx) ;
+    Literal lhs = children_[0]->eval(ctx) ;
+    Literal rhs = children_[1]->eval(ctx) ;
 
-   if ( lhs.isNull() || rhs.isNull() ) return false ;
+    if ( lhs.isNull() || rhs.isNull() ) return false ;
 
     switch ( op_ ) {
-        case Equal:
-            {
-                if ( lhs.type_ == Literal::String && lhs.type_ == Literal::String )
-                    return Literal(lhs.string_val_ == rhs.string_val_) ;
-                else return Literal(lhs.toNumber() == rhs.toNumber()) ;
-            }
-        case NotEqual:
-            if ( lhs.type_ == Literal::String && lhs.type_ == Literal::String )
-                return Literal(lhs.string_val_ != rhs.string_val_) ;
-            else return Literal(lhs.toNumber() != rhs.toNumber()) ;
-        case Less:
-            return lhs.toNumber() < rhs.toNumber() ;
-        case Greater:
-            return lhs.toNumber() > rhs.toNumber() ;
-        case LessOrEqual:
-            return lhs.toNumber() <= rhs.toNumber() ;
-        case GreaterOrEqual:
-            return lhs.toNumber() >= rhs.toNumber() ;
+    case Equal:
+    {
+        if ( lhs.type_ == Literal::String && lhs.type_ == Literal::String )
+            return Literal(lhs.string_val_ == rhs.string_val_) ;
+        else return Literal(lhs.toNumber() == rhs.toNumber()) ;
+    }
+    case NotEqual:
+        if ( lhs.type_ == Literal::String && lhs.type_ == Literal::String )
+            return Literal(lhs.string_val_ != rhs.string_val_) ;
+        else return Literal(lhs.toNumber() != rhs.toNumber()) ;
+    case Less:
+        return lhs.toNumber() < rhs.toNumber() ;
+    case Greater:
+        return lhs.toNumber() > rhs.toNumber() ;
+    case LessOrEqual:
+        return lhs.toNumber() <= rhs.toNumber() ;
+    case GreaterOrEqual:
+        return lhs.toNumber() >= rhs.toNumber() ;
     }
 
     return Literal() ;
@@ -173,80 +173,80 @@ static string globToRegex(const char *pat)
 
         switch (c)
         {
-            case '*':
-                rx += "[^\\\\/]*" ;
-                break;
-            case '?':
-                rx += "[^\\\\/]" ;
-                break;
-            case '$':  //Regex special characters
-            case '(':
-            case ')':
-            case '+':
-            case '.':
-            case '|':
-                rx += '\\';
-                rx += c;
-                break;
-            case '\\':
-                if ( pc[i] == '*' ) rx += "\\*" ;
-                else if ( pc[i] == '?' )  rx += "\\?" ;
-                ++i ;
+        case '*':
+            rx += "[^\\\\/]*" ;
+            break;
+        case '?':
+            rx += "[^\\\\/]" ;
+            break;
+        case '$':  //Regex special characters
+        case '(':
+        case ')':
+        case '+':
+        case '.':
+        case '|':
+            rx += '\\';
+            rx += c;
+            break;
+        case '\\':
+            if ( pc[i] == '*' ) rx += "\\*" ;
+            else if ( pc[i] == '?' )  rx += "\\?" ;
+            ++i ;
             break ;
-            case '[':
-            {
-                if ( inCharClass )  rx += "\\[";
-                else {
-                    inCharClass = true ;
-                    be += c ;
-                }
-                break ;
+        case '[':
+        {
+            if ( inCharClass )  rx += "\\[";
+            else {
+                inCharClass = true ;
+                be += c ;
             }
-            case ']':
-            {
-                if ( inCharClass ) {
-                    inCharClass = false ;
-                    rx += be ;
-                    rx += c ;
-                    rx += "{1}" ;
-                    be.clear() ;
-                }
-                else rx += "\\]" ;
-
-                break ;
+            break ;
+        }
+        case ']':
+        {
+            if ( inCharClass ) {
+                inCharClass = false ;
+                rx += be ;
+                rx += c ;
+                rx += "{1}" ;
+                be.clear() ;
             }
-            case '%':
-            {
-                boost::regex rd("(0\\d)?d") ;
-                boost::smatch what;
+            else rx += "\\]" ;
 
-                if ( boost::regex_match(std::string(pat + i), what, rd,  boost::match_extra) )
+            break ;
+        }
+        case '%':
+        {
+            boost::regex rd("(0\\d)?d") ;
+            boost::smatch what;
+
+            if ( boost::regex_match(std::string(pat + i), what, rd,  boost::match_extra) )
+            {
+
+                rx += "[[:digit:]]" ;
+
+                if ( what.size() == 2 )
                 {
-
-                    rx += "[[:digit:]]" ;
-
-                    if ( what.size() == 2 )
-                    {
-                        rx +=  "{" ;
-                        rx += what[1] ;
-                        rx += "}" ;
-                    }
-                    else
-                        rx += "+" ;
-
-                    i += what.size() ;
+                    rx +=  "{" ;
+                    rx += what[1] ;
+                    rx += "}" ;
                 }
                 else
-                {
-                    if ( inCharClass ) be += c ;
-                    else rx += c;
-                }
-                break ;
+                    rx += "+" ;
 
+                i += what.size() ;
             }
-            default:
+            else
+            {
                 if ( inCharClass ) be += c ;
                 else rx += c;
+            }
+            break ;
+
+        }
+        default:
+            if ( inCharClass ) be += c ;
+            else rx += c;
         }
     }
 
@@ -324,11 +324,7 @@ Literal Attribute::eval(Context &ctx)
     return ctx.value(name_) ;
 }
 
-Literal Function::eval(Context &ctx)
-{
-    return Literal() ;
 
-}
 
 Literal BinaryOperator::eval(Context &ctx)
 {

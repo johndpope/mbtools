@@ -4,6 +4,8 @@
 
 #include <parser/osm_parser.hpp>
 #include <string.h>
+
+void comment() ;
 %}
 
 %option debug noyywrap
@@ -13,6 +15,7 @@
 %option debug
 %option case-insensitive
 
+%x COMMENT
 
 %{
 # define YY_USER_ACTION  yylloc->columns (yyleng);
@@ -22,6 +25,8 @@
 %{
    yylloc->step();
 %}
+
+"@layer"			{ return OSM::BisonParser::make_LAYER(*yylloc); }
 
 "AND"                 { return OSM::BisonParser::make_AND(*yylloc); }
 "&&"                { return OSM::BisonParser::make_AND(*yylloc) ; }
@@ -85,6 +90,14 @@ delete[[:space:]]+(tag)? { return OSM::BisonParser::make_DELETE_CMD(*yylloc) ; }
 [ \t]+   yylloc->step ();
 
 <<EOF>>    return OSM::BisonParser::make_END(*yylloc);
+
+"/*" { BEGIN(COMMENT); }
+<COMMENT>\n { yylloc->lines (); yylloc->step ();}
+<COMMENT>"*/" { BEGIN(INITIAL) ; }
+<COMMENT>.  { yylloc->step (); }
+
+"#"[^\n]*\n { yylloc->step();}
+
 %%
 
 
