@@ -58,7 +58,7 @@ bool MapConfig::parse(const string &fileName)
                             ZoomInterval zi ;
                             if ( level.HasMember("min_zoom") ) zi.min_zoom_ = level["min_zoom"].GetInt() ;
                             if ( level.HasMember("max_zoom" ) )zi.max_zoom_ = level["max_zoom"].GetInt() ;
-                            if ( level.HasMember("simplify_threshold") ) zi.simplify_threshold_ = level["max_zoom"].GetDouble() ;
+                            if ( level.HasMember("simplify_threshold") ) zi.simplify_threshold_ = level["simplify_threshold"].GetDouble() ;
 
                             layer.zr_.intervals_.push_back(zi) ;
                         }
@@ -67,7 +67,7 @@ bool MapConfig::parse(const string &fileName)
                         ZoomInterval zi ;
                         if ( levels.HasMember("min_zoom") ) zi.min_zoom_ = levels["min_zoom"].GetInt() ;
                         if ( levels.HasMember("max_zoom") ) zi.max_zoom_ = levels["max_zoom"].GetInt() ;
-                        if ( levels.HasMember("simplify_threshold") ) zi.simplify_threshold_ = levels["max_zoom"].GetDouble() ;
+                        if ( levels.HasMember("simplify_threshold") ) zi.simplify_threshold_ = levels["simplify_threshold"].GetDouble() ;
 
                         layer.zr_.intervals_.push_back(zi) ;
                     }

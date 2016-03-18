@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 {
     string map_file, map_config_file, tile_set ;
     int srid = 3857 ;
-    string shp_file, layer_name, encoding = "";
+    string shp_file, layer_name, encoding = "WINDOWS-1252";
 
     for( int i=1 ; i<argc ; i++ )
     {

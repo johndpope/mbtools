@@ -6,6 +6,8 @@
 #include <shapefil.h>
 #include <iomanip>
 
+#include <iconv.h>
+
 using namespace std ;
 namespace fs = boost::filesystem ;
 
@@ -15,7 +17,48 @@ struct DBField {
     char name_[12] ;
 };
 
-static void parse_record(DBFHandle db_handle, int index, const vector<DBField> &fields, Dictionary &dict) {
+string to_utf8( const string &src, const string &enc )
+{
+    std::vector<char> in_buf(src.begin(), src.end());
+    char* src_ptr = &in_buf[0];
+    size_t src_size = src.size();
+
+    const size_t buf_size_ = 1024 ;
+    const bool ignore_error_ = true ;
+
+    std::vector<char> buf(buf_size_);
+    std::string dst;
+
+    iconv_t cd = iconv_open( "UTF-8", enc.c_str() );
+
+    if ( cd != (iconv_t)-1 ) {
+
+        while ( 0 < src_size ) {
+
+            char* dst_ptr = &buf[0];
+            size_t dst_size = buf.size();
+            size_t res = ::iconv(cd, &src_ptr, &src_size, &dst_ptr, &dst_size);
+
+            if (res == (size_t)-1) {
+                if (errno == E2BIG)  ;
+                else if ( ignore_error_ ) {
+                    // skip character
+                    ++src_ptr;
+                    --src_size;
+                } else {
+                    break ;
+                }
+            }
+            dst.append(&buf[0], buf.size() - dst_size);
+        }
+
+        iconv_close( cd );
+    }
+
+    return  dst ;
+}
+
+static void parse_record(DBFHandle db_handle, int index, const vector<DBField> &fields, Dictionary &dict, const string &enc) {
     for( uint i=0 ;i<fields.size() ; i++ ) {
         const DBField &f = fields[i] ;
 
@@ -30,7 +73,7 @@ static void parse_record(DBFHandle db_handle, int index, const vector<DBField> &
         }
         else if ( f.type_ == FTString ) {
             const char *p = DBFReadStringAttribute(db_handle, index, i) ;
-            fstr << p ;
+            fstr << to_utf8(p, enc) ;
         }
 
         string sval = fstr.str() ;
@@ -149,15 +192,15 @@ bool MapFile::processShpFile(const string &file_name, const string &table_name, 
                     gaiaSetPoint (ring->Coords, j, *vx++, *vy++);
                 }
 
-                gaiaClockwise(ring) ;
-                gaiaRingPtr iring = gaiaCloneRingSpecial(ring, GAIA_REVERSE_ORDER) ;
+                //      gaiaClockwise(ring) ;
+                //     gaiaRingPtr iring = gaiaCloneRingSpecial(ring, GAIA_REVERSE_ORDER) ;
 
                 if ( gpoly ) {
-                    gaiaInsertInteriorRing(gpoly, iring);
+                    gaiaInsertInteriorRing(gpoly, ring);
                 }
                 else {
 
-                    gpoly = gaiaInsertPolygonInGeomColl (geom, iring);
+                    gpoly = gaiaInsertPolygonInGeomColl (geom, ring);
                 }
             }
         }
@@ -166,7 +209,7 @@ bool MapFile::processShpFile(const string &file_name, const string &table_name, 
         SHPDestroyObject(obj) ;
 
         Dictionary dict ;
-        parse_record(db_handle, i, field_info, dict) ;
+        parse_record(db_handle, i, field_info, dict, char_enc) ;
         string tags = serializeTags(dict) ;
 
         unsigned char *blob ;

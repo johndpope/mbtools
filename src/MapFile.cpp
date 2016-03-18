@@ -59,6 +59,7 @@ bool MapFile::create(const std::string &name) {
         con.exec("PRAGMA synchronous=NORMAL") ;
         con.exec("PRAGMA journal_mode=WAL") ;
         con.exec("SELECT InitSpatialMetadata(1);") ;
+        con.exec("PRAGMA encoding=\"UTF-8\"") ;
 
         return true ;
     }
