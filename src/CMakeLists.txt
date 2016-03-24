@@ -5,6 +5,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
 	${ZLIB_INCLUDE_DIR}
 	${Boost_INCLUDE_DIR}
 	${PROTOBUF_INCLUDE_DIRS}
+	${GLFW_INCLUDE_DIRS}
+	${PNG_INCLUDE_DIRS}
 )
 
 IF ( WIN32 )
@@ -64,6 +66,7 @@ SET ( OSM2MBTILES_HEADERS
 
 PROTOBUF_GENERATE_CPP(OSM_PROTO_SOURCES OSM_PROTO_HEADERS protobuf/osmformat.proto protobuf/fileformat.proto)
 PROTOBUF_GENERATE_CPP(VT_PROTO_SOURCES VT_PROTO_HEADERS protobuf/vector_tile.proto)
+PROTOBUF_GENERATE_CPP(MT_PROTO_SOURCES MT_PROTO_HEADERS protobuf/mesh_tile.proto)
 
 FIND_PACKAGE(BISON REQUIRED)
 FIND_PACKAGE(FLEX REQUIRED)
@@ -156,3 +159,42 @@ SET ( TILE_SERVER_HEADERS
 
 ADD_EXECUTABLE(tileserver ${TILE_SERVER_SOURCES})
 TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z)
+
+########################################################################################
+
+ADD_DEFINITIONS(-DSELF_CHECK -DLINUX -DTRILIBRARY)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/vcglib)
+ADD_EXECUTABLE(xyz2mesh xyz2mesh.cpp triangle.c Mesh.cpp)
+TARGET_LINK_LIBRARIES(xyz2mesh  ${Boost_LIBRARIES})
+
+########################################################################################
+
+##################################################################################3
+
+SET ( MESH2MBTILES_SOURCES
+	triangle.c
+	Mesh.cpp
+	MapConfig.cpp
+	MeshTilesetWriter.cpp
+	MeshTileWriter.cpp
+	GeomHelpers.cpp
+	Database.cpp
+	MeshTileRenderer.cpp
+)
+
+SET ( MESH2MBTILES_HEADERS
+	triangle.h
+	Mesh.h
+	MapConfig.h
+	MeshTilesetWriter.h
+	MeshTileWriter.h
+	MeshTileWriter.h
+	Database.h
+	MeshTileRenderer.h
+)
+
+LIST(APPEND MESH2MBTILES_SOURCES ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
+
+ADD_EXECUTABLE(mesh2mbtiles mesh2mbtiles.cpp  ${MESH2MBTILES_SOURCES} )
+TARGET_LINK_LIBRARIES(mesh2mbtiles ${PROTOBUF_LIBRARIES} ${ZLIB_LIBRARIES} ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PNG_LIBRARIES}
+${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr pthread Xi )

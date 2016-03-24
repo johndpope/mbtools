@@ -1,6 +1,5 @@
 #include "MBTileWriter.h"
-#include "base64.h"
-
+#include "MeshTileWriter.h"
 #include <boost/filesystem.hpp>
 #include <fstream>
 
@@ -77,7 +76,7 @@ bool MBTileWriter::writeTilesDB(const MapFile &map, MapConfig &cfg)
             tms::metersToTile(cfg.bbox_.minx_, cfg.bbox_.miny_, z, x0, y0) ;
             tms::metersToTile(cfg.bbox_.maxx_, cfg.bbox_.maxy_, z, x1, y1) ;
 
-#pragma omp parallel for
+//#pragma omp parallel for
             for( uint32_t x = x0 ; x<=x1 ; x++ )
                 for(uint32_t y = y0 ; y<=y1 ; y++ )
                 {
@@ -117,9 +116,6 @@ bool MBTileWriter::writeTilesDB(const MapFile &map, MapConfig &cfg)
 
 bool MBTileWriter::writeTilesFolder(const MapFile &map, MapConfig &cfg)
 {
-
-
-
     for( uint32_t z = cfg.minz_ ; z <= cfg.maxz_ ; z++ )
     {
         uint32_t x0, y0, x1, y1 ;

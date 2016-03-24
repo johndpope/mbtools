@@ -10,6 +10,7 @@ public:
 
     bool writeTilesDB(const MapFile &map, MapConfig &cfg) ;
     bool writeTilesFolder(const MapFile &map, MapConfig &cfg) ;
+
     bool writeMetaData(const std::string &name, const std::string &val);
 
 private:
