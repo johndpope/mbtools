@@ -177,6 +177,8 @@ private:
 
     bool init_shaders(const vector<ShaderProgram> &shaders) ;
 
+    friend class MeshTileRenderer ;
+
     GLFWwindow* win_ = 0;
     GLuint fbo_ = 0, texture_id_ = 0;
     uint32_t ts_ ;
@@ -408,6 +410,8 @@ void RenderingContext::render(const std::string &name) {
     glBindVertexArray(0) ;
     glUseProgram(0) ;
 
+    glFlush() ;
+
 }
 
 void RenderingContext::render_debug(const std::string &name) {
@@ -429,7 +433,6 @@ void RenderingContext::render_debug(const std::string &name) {
     glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tfbuf_.size() * sizeof(float), tfbuf_.data());
 }
 
-
 MeshTileRenderer::MeshTileRenderer(uint32_t ts): tile_size_(ts), ctx_(new RenderingContext(ts))
 {
     ctx_->init() ;
@@ -442,6 +445,12 @@ MeshTileRenderer::~MeshTileRenderer() {
 std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
         const std::string &bytes, const std::string &prname)
 {
+//    std::lock_guard<std::mutex> lock(mtx_) ;
+
+    // we need to do this since we are possibly in a different thread
+
+    glfwMakeContextCurrent(ctx_->win_);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     DataBuffers data ;
@@ -456,6 +465,8 @@ std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
 
         ctx_->clear() ;
     }
+
+
 
     vector<uint8_t> pixels( tile_size_ * tile_size_ * 4 ) ;
 

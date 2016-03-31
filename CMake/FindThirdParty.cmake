@@ -13,7 +13,7 @@ set(Boost_USE_STATIC_LIBS       OFF)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
 
-set(BOOST_COMPONENTS regex filesystem system serialization)
+set(BOOST_COMPONENTS regex filesystem system serialization coroutine context)
 
 #IF ( WIN32 )
 #    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} thread_win32)

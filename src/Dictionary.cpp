@@ -136,7 +136,7 @@ int Dictionary::count(const regex &rx) const
 	return cc ;
 }
 
-int Dictionary::count(const char *str) const
+int Dictionary::count(const string &str) const
 {
     int cc = 0 ;
 

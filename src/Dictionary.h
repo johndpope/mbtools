@@ -46,19 +46,34 @@ class Dictionary
 
 	int count() const ;
     int count(const std::regex &kx) const ;
-    int count(const char *) const ;
+    int count(const std::string &) const ;
 
 	bool empty() const ;
 
     void dump() const ;
+
+public:
+
+    typedef std::map<std::string, std::string> ContainerType ;
+
+    // stl style iterators
+
+    typedef typename ContainerType::iterator iterator;
+    typedef typename ContainerType::const_iterator const_iterator;
+
+    iterator begin() { return container_.begin(); }
+    const_iterator begin() const { return container_.begin(); }
+    const_iterator cbegin() const { return container_.cbegin(); }
+    iterator end() { return container_.end(); }
+    const_iterator end() const { return container_.end(); }
+    const_iterator cend() const {return container_.cend(); }
 	
 	private:
 
 	friend class DictionaryIterator ;
 
-    typedef std::map<std::string, std::string> ContainerType ;
     ContainerType container_ ;
- 
+
 } ;
 
 class DictionaryIterator

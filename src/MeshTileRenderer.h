@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "GeomHelpers.h"
+#include <mutex>
 
 struct RenderingContext ;
 
@@ -22,6 +23,7 @@ private:
 
     uint32_t tile_size_ ;
     std::shared_ptr<RenderingContext> ctx_ ;
+    std::mutex mtx_ ;
 } ;
 
 

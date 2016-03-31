@@ -145,6 +145,8 @@ SET ( TILE_SERVER_SOURCES
 	Dictionary.cpp
 	HttpServer.cpp
 	MapServer.cpp
+	MeshTileRenderer.cpp
+	GeomHelpers.cpp
 	tileserver.cpp
 )
 
@@ -154,11 +156,14 @@ SET ( TILE_SERVER_HEADERS
 	Dictionary.h
 	HttpServer.h
 	MapServer.h
+	MeshTileRenderer.h
+	GeomHelpers.h
 
 )
 
-ADD_EXECUTABLE(tileserver ${TILE_SERVER_SOURCES})
-TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z)
+ADD_EXECUTABLE(tileserver ${TILE_SERVER_SOURCES} ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
+TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${PNG_LIBRARIES}
+${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr Xi pthread dl z)
 
 ########################################################################################
 
@@ -167,7 +172,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/vcglib)
 ADD_EXECUTABLE(xyz2mesh xyz2mesh.cpp triangle.c Mesh.cpp)
 TARGET_LINK_LIBRARIES(xyz2mesh  ${Boost_LIBRARIES})
 
-########################################################################################
+
 
 ##################################################################################3
 
@@ -198,3 +203,28 @@ LIST(APPEND MESH2MBTILES_SOURCES ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
 ADD_EXECUTABLE(mesh2mbtiles mesh2mbtiles.cpp  ${MESH2MBTILES_SOURCES} )
 TARGET_LINK_LIBRARIES(mesh2mbtiles ${PROTOBUF_LIBRARIES} ${ZLIB_LIBRARIES} ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PNG_LIBRARIES}
 ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr pthread Xi )
+
+########################################################################################
+
+SET ( SERVER_SOURCES
+	Dictionary.cpp
+	server/connection.cpp
+	server/connection.hpp
+	server/io_service_pool.cpp
+	server/io_service_pool.hpp
+	server/main.cpp
+	server/reply.cpp
+	server/reply.hpp
+	server/request_handler.hpp
+	server/request.hpp
+	server/request.cpp
+	server/request_parser.cpp
+	server/request_parser.hpp
+	server/server.cpp
+	server/server.hpp
+	server/http_parser.c
+	server/http_parser.h
+	server/request_handler_factory.hpp
+)
+ADD_EXECUTABLE(http_example ${SERVER_SOURCES})
+TARGET_LINK_LIBRARIES(http_example ${Boost_LIBRARIES})
