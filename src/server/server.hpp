@@ -20,6 +20,7 @@
 #include "connection.hpp"
 #include "io_service_pool.hpp"
 #include "request_handler_factory.hpp"
+#include "connection_manager.hpp"
 
 
 namespace http {
@@ -38,6 +39,8 @@ public:
     /// Run the server's io_service loop.
     void run();
 
+    void stop() ;
+
 private:
     /// Initiate an asynchronous accept operation.
     void start_accept();
@@ -48,6 +51,8 @@ private:
     /// Handle a request to stop the server.
     void handle_stop();
 
+    void do_await_stop() ;
+
     /// The pool of io_service objects used to perform asynchronous operations.
     io_service_pool io_service_pool_;
 
@@ -57,8 +62,10 @@ private:
     /// Acceptor used to listen for incoming connections.
     boost::asio::ip::tcp::acceptor acceptor_;
 
-    /// The next connection to be accepted.
-    connection_ptr new_connection_;
+    connection_manager connection_manager_;
+
+     /// The next socket to be accepted.
+    boost::asio::ip::tcp::socket socket_;
 
     /// The handler for all incoming requests.
     std::shared_ptr<request_handler_factory> handler_factory_;

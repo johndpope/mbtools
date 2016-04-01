@@ -267,6 +267,8 @@ static void gmt_time_string(char *buf, size_t buf_len, time_t *t) {
 
 void reply::encode_file_data(const std::string &bytes, const std::string &encoding, const std::string &mime, time_t mod_time )
 {
+    status_ = ok ;
+
     if ( bytes.empty() ) return ;
 
     if ( encoding.empty() ) // try gzip encoding
@@ -280,6 +282,7 @@ void reply::encode_file_data(const std::string &bytes, const std::string &encodi
     if ( !mime.empty() )
         headers_.add("Content-Type", mime) ;
 
+    headers_.add("Access-Control-Allow-Origin", "*") ;
 
     char ctime_buf[64], mtime_buf[64] ;
     time_t curtime = time(NULL) ;

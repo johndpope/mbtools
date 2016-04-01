@@ -25,20 +25,27 @@
 namespace http {
 namespace server {
 
+class connection_manager ;
+
 /// Represents a single connection from a client.
 class connection
-        : public boost::enable_shared_from_this<connection>,
-        private boost::noncopyable
+        : public std::enable_shared_from_this<connection>
 {
 public:
+    connection(const connection&) = delete;
+    connection& operator=(const connection&) = delete;
+
     /// Construct a connection with the given io_service.
-    explicit connection(boost::asio::io_service& io_service, const std::shared_ptr<request_handler_factory>& handler);
+    explicit connection(boost::asio::ip::tcp::socket socket,
+                        connection_manager& manager, const std::shared_ptr<request_handler_factory>& handler);
 
     /// Get the socket associated with the connection.
     boost::asio::ip::tcp::socket &socket() ;
 
     /// Start the first asynchronous operation for the connection.
     void start();
+
+    void stop();
 
 private:
     /// Handle completion of a read operation.
@@ -55,7 +62,9 @@ private:
     std::shared_ptr<request_handler_factory> handler_factory_;
 
     /// Buffer for incoming data.
-    boost::array<char, 128> buffer_;
+    boost::array<char, 8192> buffer_;
+
+    connection_manager& connection_manager_;
 
     /// The incoming request.
     request request_;
@@ -67,7 +76,7 @@ private:
     reply reply_;
 };
 
-typedef boost::shared_ptr<connection> connection_ptr;
+typedef std::shared_ptr<connection> connection_ptr;
 
 } // namespace server
 } // namespace http

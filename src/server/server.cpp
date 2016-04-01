@@ -19,7 +19,7 @@ server::server(const std::shared_ptr<request_handler_factory> &handlers, const s
     : io_service_pool_(io_service_pool_size),
       signals_(io_service_pool_.get_io_service()),
       acceptor_(io_service_pool_.get_io_service()),
-      new_connection_(),
+      socket_(io_service_pool_.get_io_service()),
       handler_factory_(handlers)
 
 {
@@ -31,9 +31,8 @@ server::server(const std::shared_ptr<request_handler_factory> &handlers, const s
 #if defined(SIGQUIT)
     signals_.add(SIGQUIT);
 #endif // defined(SIGQUIT)
-    signals_.async_wait(
-                [this] ( const boost::system::error_code&, int ){ io_service_pool_.stop(); }
-    );
+
+    do_await_stop();
 
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
     boost::asio::ip::tcp::resolver resolver(acceptor_.get_io_service());
@@ -55,13 +54,52 @@ void server::run()
 
 void server::start_accept()
 {
-    new_connection_.reset(new connection(io_service_pool_.get_io_service(), handler_factory_));
-    acceptor_.async_accept(new_connection_->socket(), [this] ( const boost::system::error_code& e ){
-        if (!e) new_connection_->start();
+    //new_connection_.reset(new connection(io_service_pool_.get_io_service(), handler_factory_));
+    acceptor_.async_accept(socket_, [this] ( const boost::system::error_code& e ){
+
+        // Check whether the server was stopped by a signal before this
+             // completion handler had a chance to run.
+             if (!acceptor_.is_open())
+             {
+               return;
+             }
+
+             if (!e)
+             {
+               connection_manager_.start(std::make_shared<connection>(
+                   std::move(socket_), connection_manager_, handler_factory_));
+             }
+
+        //if (!e) new_connection_->start();
         start_accept();
     }) ;
 }
 
+void server::handle_stop()
+{
+    acceptor_.close();
+    connection_manager_.stop_all();
+    io_service_pool_.stop();
+}
+
+
+void server::do_await_stop()
+{
+  signals_.async_wait(
+      [this](boost::system::error_code /*ec*/, int /*signo*/)
+      {
+        // The server is stopped by cancelling all outstanding asynchronous
+        // operations. Once all operations have finished the io_service::run()
+        // call will exit.
+            handle_stop() ;
+      });
+}
+
+void server::stop()
+{
+    handle_stop() ;
+
+}
 
 } // namespace server
 } // namespace http

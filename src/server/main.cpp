@@ -43,10 +43,10 @@ class Factory: public request_handler_factory {
 public:
     Factory() = default ;
 
-    request_handler *create(const request &req) {
+    std::shared_ptr<request_handler> create(const request &req) {
         boost::smatch m ;
         if ( boost::regex_match(req.path_, m, TileHandler::rx_) )
-             return new TileHandler() ;
+             return std::shared_ptr<request_handler>(new TileHandler()) ;
         else
             return nullptr ;
     }

@@ -13,13 +13,16 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include "request_handler_factory.hpp"
+#include "connection_manager.hpp"
 
 namespace http {
 namespace server {
 
-connection::connection(boost::asio::io_service& io_service,
+connection::connection(boost::asio::ip::tcp::socket socket,
+                       connection_manager& manager,
                        const std::shared_ptr<request_handler_factory>& handler)
-    : socket_(io_service),
+    : socket_(std::move(socket)),
+      connection_manager_(manager),
       handler_factory_(handler)
 {
 }
@@ -35,6 +38,10 @@ void connection::start()
                             boost::bind(&connection::handle_read, shared_from_this(),
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred));
+}
+
+void connection::stop() {
+    socket_.close();
 }
 
 extern std::vector<boost::asio::const_buffer> reply_to_buffers(const reply &rep) ;
@@ -54,14 +61,13 @@ void connection::handle_read(const boost::system::error_code& e,
                 reply_ = reply::stock_reply(reply::bad_request);
             }
             else {
-                request_handler * handler = handler_factory_->create(request_) ;
+                std::shared_ptr<request_handler> handler = handler_factory_->create(request_) ;
 
                 if ( handler )
                     handler->handle_request(request_, reply_);
                 else
                     reply_ = reply::stock_reply(reply::not_found);
 
-                delete handler ;
             }
 
             boost::asio::async_write(socket_, reply_to_buffers(reply_),
@@ -84,11 +90,10 @@ void connection::handle_read(const boost::system::error_code& e,
                                                 boost::asio::placeholders::bytes_transferred));
         }
     }
-
-    // If an error occurs then no new asynchronous operations are started. This
-    // means that all shared_ptr references to the connection object will
-    // disappear and the object will be destroyed automatically after this
-    // handler returns. The connection class's destructor closes the socket.
+    else if (e != boost::asio::error::operation_aborted)
+    {
+        connection_manager_.stop(shared_from_this());
+    }
 }
 
 void connection::handle_write(const boost::system::error_code& e)
@@ -100,10 +105,10 @@ void connection::handle_write(const boost::system::error_code& e)
         socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
     }
 
-    // No new asynchronous operations are started. This means that all shared_ptr
-    // references to the connection object will disappear and the object will be
-    // destroyed automatically after this handler returns. The connection class's
-    // destructor closes the socket.
+    if (e != boost::asio::error::operation_aborted)
+    {
+        connection_manager_.stop(shared_from_this());
+    }
 }
 
 } // namespace server

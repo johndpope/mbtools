@@ -138,35 +138,6 @@ TARGET_LINK_LIBRARIES(makeres ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z
 
 ##################################################################################3
 
-SET ( TILE_SERVER_SOURCES
-	mongoose/mongoose.c
-	base64.cpp
-	Database.cpp
-	Dictionary.cpp
-	HttpServer.cpp
-	MapServer.cpp
-	MeshTileRenderer.cpp
-	GeomHelpers.cpp
-	tileserver.cpp
-)
-
-SET ( TILE_SERVER_HEADERS
-	mongoose/mongoose.h
-	Database.h
-	Dictionary.h
-	HttpServer.h
-	MapServer.h
-	MeshTileRenderer.h
-	GeomHelpers.h
-
-)
-
-ADD_EXECUTABLE(tileserver ${TILE_SERVER_SOURCES} ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
-TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${PNG_LIBRARIES}
-${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr Xi pthread dl z)
-
-########################################################################################
-
 ADD_DEFINITIONS(-DSELF_CHECK -DLINUX -DTRILIBRARY)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/vcglib)
 ADD_EXECUTABLE(xyz2mesh xyz2mesh.cpp triangle.c Mesh.cpp)
@@ -206,13 +177,22 @@ ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr pthre
 
 ########################################################################################
 
-SET ( SERVER_SOURCES
+SET ( TILE_SERVER_SOURCES
 	Dictionary.cpp
+	base64.cpp
+	Database.cpp
+	Dictionary.cpp
+	MapServer.cpp
+	MeshTileRenderer.cpp
+	GeomHelpers.cpp
+	tileserver.cpp
+
 	server/connection.cpp
 	server/connection.hpp
+	server/connection_manager.hpp
+	server/connection_manager.cpp
 	server/io_service_pool.cpp
 	server/io_service_pool.hpp
-	server/main.cpp
 	server/reply.cpp
 	server/reply.hpp
 	server/request_handler.hpp
@@ -226,5 +206,8 @@ SET ( SERVER_SOURCES
 	server/http_parser.h
 	server/request_handler_factory.hpp
 )
-ADD_EXECUTABLE(http_example ${SERVER_SOURCES})
-TARGET_LINK_LIBRARIES(http_example ${Boost_LIBRARIES})
+
+
+ADD_EXECUTABLE(tileserver ${TILE_SERVER_SOURCES} ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
+TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${PNG_LIBRARIES}
+${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr Xi pthread dl z)
