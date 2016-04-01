@@ -5,11 +5,9 @@
 #include "dictionary.hpp"
 #include "osm_document.hpp"
 
-#include "ImportConfig.h"
+#include "import_config.hpp"
 #include "map_config.hpp"
-#include "VectorTileWriter.h"
-
-
+#include "vector_tile_writer.hpp"
 
 #include <map>
 
@@ -18,7 +16,6 @@
 using std::string ;
 using std::vector ;
 using std::map ;
-
 
 class MapFile {
 public:

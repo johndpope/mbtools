@@ -2,7 +2,7 @@
 
 #include "map_config.hpp"
 #include "map_file.hpp"
-#include "MBTileWriter.h"
+#include "mb_tile_writer.hpp"
 
 #include <boost/filesystem.hpp>
 

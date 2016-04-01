@@ -1,4 +1,5 @@
-#include "MBTileWriter.h"
+#include "mb_tile_writer.hpp"
+
 #include "MeshTileWriter.h"
 #include <boost/filesystem.hpp>
 #include <fstream>

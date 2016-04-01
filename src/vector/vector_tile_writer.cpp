@@ -1,4 +1,4 @@
-#include "VectorTileWriter.h"
+#include "vector_tile_writer.hpp"
 
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/gzip_stream.h>

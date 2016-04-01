@@ -11,6 +11,9 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/server
 	${CMAKE_CURRENT_SOURCE_DIR}/osm
 	${CMAKE_CURRENT_SOURCE_DIR}/map
+	${CMAKE_CURRENT_SOURCE_DIR}/vector
+	${CMAKE_CURRENT_SOURCE_DIR}/mesh
+	${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/
 	${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/vcglib
 	${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/triangle
 
@@ -31,13 +34,12 @@ endif()
 
 SET ( OSM2MBTILES_SOURCES
 
-	ImportConfig.cpp
-	MBTileWriter.cpp
-
-	VectorTileWriter.cpp
+	vector/mb_tile_writer.cpp
+	vector/vector_tile_writer.cpp
 
 	osm/osm2mbtiles.cpp
 
+	osm/import_config.cpp
 	osm/osm_rule_parser.cpp
 	osm/osm_filter_functions.cpp
 	osm/osm_processor.cpp
@@ -58,13 +60,10 @@ SET ( OSM2MBTILES_SOURCES
 
 SET ( OSM2MBTILES_HEADERS
 
-	VectorTileWriter.h
-	MapFile.h
+	vector/vector_tile_writer.hpp
+	vector/mb_tile_writer.hpp
 
-	ImportConfig.h
-
-	MBTileWriter.h
-
+	osm/import_config.hpp
 	osm/osm_filter_functions.hpp
 	osm/osm_document.hpp
 	osm/osm_rule_parser.hpp
@@ -110,10 +109,8 @@ INSTALL(TARGETS osm2mbtiles DESTINATION bin  )
 ##################################################################################3
 
 SET ( SHP2MBTILES_SOURCES
-
-	SHPProcessor.cpp
-	MBTileWriter.cpp
-	VectorTileWriter.cpp
+	vector/mb_tile_writer.cpp
+	vector/vector_tile_writer.cpp
 
 	map/map_config.cpp
 	map/map_file.cpp
@@ -121,12 +118,14 @@ SET ( SHP2MBTILES_SOURCES
 
 	util/dictionary.cpp
 	util/database.cpp
+
+	shp/shp2mbtiles.cpp
+	shp/shp_processor.cpp
 )
 
 SET ( SHP2MBTILES_HEADERS
-	VectorTileWriter.h
-
-	MBTileWriter.h
+	vector/vector_tile_writer.hpp
+	vector/mb_tile_writer.hpp
 
 	map/map_config.hpp
 	map/geom_helpers.hpp
@@ -138,7 +137,7 @@ SET ( SHP2MBTILES_HEADERS
 
 LIST(APPEND SHP2MBTILES_SOURCES ${VT_PROTO_SOURCES} ${VT_PROTO_HEADERS})
 
-ADD_EXECUTABLE(shp2mbtiles shp2mbtiles.cpp ${SHP2MBTILES_SOURCES} )
+ADD_EXECUTABLE(shp2mbtiles  ${SHP2MBTILES_SOURCES} )
 TARGET_LINK_LIBRARIES(shp2mbtiles ${PROTOBUF_LIBRARIES} ${ZLIB_LIBRARIES} ${SQLITE3_LIBRARY} ${SPATIALITE_LIBRARY} ${SHAPELIB_LIBRARY} ${Boost_LIBRARIES})
 
 
@@ -149,7 +148,7 @@ SET ( RSC_TOOL_SOURCES
 	util/database.hpp
 	util/dictionary.cpp
 	util/dictionary.hpp
-	makeres.cpp
+	tools/makeres.cpp
 )
 
 ADD_EXECUTABLE(makeres ${RSC_TOOL_SOURCES})
