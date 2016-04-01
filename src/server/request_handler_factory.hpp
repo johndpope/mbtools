@@ -6,18 +6,16 @@
 // modeled after POCO Net library
 
 namespace http {
-namespace server {
-
-class request_handler_factory {
+class RequestHandlerFactory {
 public:
-    request_handler_factory() = default ;
+    RequestHandlerFactory() = default ;
 
     // implement this to return a handler matching the request
 
-    virtual std::shared_ptr<request_handler> create(const request &req) = 0;
+    virtual std::shared_ptr<RequestHandler> create(const Request &req) = 0;
 };
 
-}
+
 }
 
 #endif

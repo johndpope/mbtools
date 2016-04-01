@@ -1,7 +1,7 @@
 #include <fstream>
 
-#include "MapConfig.h"
-#include "MapFile.h"
+#include "map_config.hpp"
+#include "map_file.hpp"
 #include "MBTileWriter.h"
 
 #include <boost/filesystem.hpp>

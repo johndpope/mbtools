@@ -1,7 +1,7 @@
 #ifndef __VECTOR_TILE_WRITTER_H__
 #define __VECTOR_TILE_WRITTER_H__
 
-#include <Dictionary.h>
+#include "dictionary.hpp"
 
 #include <vector>
 #include <string>
@@ -10,7 +10,7 @@
 #include <sqlite3.h>
 #include <spatialite.h>
 
-#include "GeomHelpers.h"
+#include "geom_helpers.hpp"
 #include "vector_tile.pb.h"
 
 struct EncodedVertex {

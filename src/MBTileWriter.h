@@ -1,7 +1,7 @@
 #ifndef __MBTILE_WRITER_H__
 #define __MBTILE_WRITER_H__
 
-#include "MapFile.h"
+#include "map_file.hpp"
 #include <boost/filesystem.hpp>
 
 class MBTileWriter {

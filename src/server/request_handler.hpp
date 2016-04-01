@@ -16,23 +16,21 @@
 #include <memory>
 
 namespace http {
-namespace server {
 
-struct reply;
-struct request;
+struct Response;
+struct Request;
 
 /// The common handler for all incoming requests.
-class request_handler: private boost::noncopyable
+class RequestHandler: private boost::noncopyable
 {
 public:
 
-    explicit request_handler() = default;
+    explicit RequestHandler() = default;
 
     /// Handle a request and produce a reply.
-    virtual void handle_request(const request& req, reply& rep) = 0;
+    virtual void handle_request(const Request& req, Response& rep) = 0;
 };
 
-} // namespace server
 } // namespace http
 
 #endif // HTTP_SERVER2_REQUEST_HANDLER_HPP

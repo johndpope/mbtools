@@ -1,6 +1,6 @@
 %{
-#include <OsmRuleScanner.h>
-#include <OsmRuleParser.h>
+#include <osm_rule_scanner.hpp>
+#include <osm_rule_parser.hpp>
 
 #include <parser/osm_parser.hpp>
 #include <string.h>

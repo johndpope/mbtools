@@ -1,5 +1,5 @@
 //
-// connection.cpp
+// Connection.cpp
 // ~~~~~~~~~~~~~~
 //
 // Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -16,37 +16,36 @@
 #include "connection_manager.hpp"
 
 namespace http {
-namespace server {
 
-connection::connection(boost::asio::ip::tcp::socket socket,
-                       connection_manager& manager,
-                       const std::shared_ptr<request_handler_factory>& handler)
+Connection::Connection(boost::asio::ip::tcp::socket socket,
+                       ConnectionManager& manager,
+                       const std::shared_ptr<RequestHandlerFactory>& handler)
     : socket_(std::move(socket)),
       connection_manager_(manager),
       handler_factory_(handler)
 {
 }
 
-boost::asio::ip::tcp::socket &connection::socket()
+boost::asio::ip::tcp::socket &Connection::socket()
 {
     return socket_;
 }
 
-void connection::start()
+void Connection::start()
 {
     socket_.async_read_some(boost::asio::buffer(buffer_),
-                            boost::bind(&connection::handle_read, shared_from_this(),
+                            boost::bind(&Connection::handle_read, shared_from_this(),
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred));
 }
 
-void connection::stop() {
+void Connection::stop() {
     socket_.close();
 }
 
-extern std::vector<boost::asio::const_buffer> reply_to_buffers(const reply &rep) ;
+extern std::vector<boost::asio::const_buffer> response_to_buffers(const Response &rep) ;
 
-void connection::handle_read(const boost::system::error_code& e,
+void Connection::handle_read(const boost::system::error_code& e,
                              std::size_t bytes_transferred)
 {
 
@@ -58,34 +57,34 @@ void connection::handle_read(const boost::system::error_code& e,
         if (result )
         {
             if ( !request_parser_.decode_message(request_) ) {
-                reply_ = reply::stock_reply(reply::bad_request);
+                reply_ = Response::stock_reply(Response::bad_request);
             }
             else {
-                std::shared_ptr<request_handler> handler = handler_factory_->create(request_) ;
+                std::shared_ptr<RequestHandler> handler = handler_factory_->create(request_) ;
 
                 if ( handler )
                     handler->handle_request(request_, reply_);
                 else
-                    reply_ = reply::stock_reply(reply::not_found);
+                    reply_ = Response::stock_reply(Response::not_found);
 
             }
 
-            boost::asio::async_write(socket_, reply_to_buffers(reply_),
-                                     boost::bind(&connection::handle_write, shared_from_this(),
+            boost::asio::async_write(socket_, response_to_buffers(reply_),
+                                     boost::bind(&Connection::handle_write, shared_from_this(),
                                      boost::asio::placeholders::error));
 
         }
         else if (!result)
         {
-            reply_ = reply::stock_reply(reply::bad_request);
-            boost::asio::async_write(socket_, reply_to_buffers(reply_),
-                                     boost::bind(&connection::handle_write, shared_from_this(),
+            reply_ = Response::stock_reply(Response::bad_request);
+            boost::asio::async_write(socket_, response_to_buffers(reply_),
+                                     boost::bind(&Connection::handle_write, shared_from_this(),
                                      boost::asio::placeholders::error));
         }
         else
         {
             socket_.async_read_some(boost::asio::buffer(buffer_),
-                                    boost::bind(&connection::handle_read, shared_from_this(),
+                                    boost::bind(&Connection::handle_read, shared_from_this(),
                                                 boost::asio::placeholders::error,
                                                 boost::asio::placeholders::bytes_transferred));
         }
@@ -96,11 +95,11 @@ void connection::handle_read(const boost::system::error_code& e,
     }
 }
 
-void connection::handle_write(const boost::system::error_code& e)
+void Connection::handle_write(const boost::system::error_code& e)
 {
     if (!e)
     {
-        // Initiate graceful connection closure.
+        // Initiate graceful Connection closure.
         boost::system::error_code ignored_ec;
         socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
     }
@@ -111,5 +110,5 @@ void connection::handle_write(const boost::system::error_code& e)
     }
 }
 
-} // namespace server
+
 } // namespace http

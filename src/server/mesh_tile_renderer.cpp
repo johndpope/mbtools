@@ -1,4 +1,4 @@
-#include "MeshTileRenderer.h"
+#include "mesh_tile_renderer.hpp"
 #include "Mesh.h"
 
 #include "mesh_tile.pb.h"

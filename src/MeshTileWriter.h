@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "MapConfig.h"
+#include "map_config.hpp"
 #include "mesh_tile.pb.h"
 
 class MeshHelper ;

@@ -1,4 +1,4 @@
-#include <OsmDocument.h>
+#include <osm_document.hpp>
 
 #include <fileformat.pb.h>
 #include <osmformat.pb.h>

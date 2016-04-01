@@ -1,8 +1,8 @@
 #ifndef __OSM_RULE_PARSER_H__
 #define __OSM_RULE_PARSER_H__
 
-#include <OsmRuleScanner.h>
-#include <OsmDocument.h>
+#include "osm_rule_scanner.hpp"
+#include "osm_document.hpp"
 
 #include <deque>
 #include <string>

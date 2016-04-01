@@ -12,9 +12,8 @@
 
 
 namespace http {
-namespace server {
 
-server::server(const std::shared_ptr<request_handler_factory> &handlers, const std::string& address, const std::string& port,
+Server::Server(const std::shared_ptr<RequestHandlerFactory> &handlers, const std::string& address, const std::string& port,
                std::size_t io_service_pool_size)
     : io_service_pool_(io_service_pool_size),
       signals_(io_service_pool_.get_io_service()),
@@ -47,12 +46,12 @@ server::server(const std::shared_ptr<request_handler_factory> &handlers, const s
     start_accept();
 }
 
-void server::run()
+void Server::run()
 {
     io_service_pool_.run();
 }
 
-void server::start_accept()
+void Server::start_accept()
 {
     //new_connection_.reset(new connection(io_service_pool_.get_io_service(), handler_factory_));
     acceptor_.async_accept(socket_, [this] ( const boost::system::error_code& e ){
@@ -66,7 +65,7 @@ void server::start_accept()
 
              if (!e)
              {
-               connection_manager_.start(std::make_shared<connection>(
+               connection_manager_.start(std::make_shared<Connection>(
                    std::move(socket_), connection_manager_, handler_factory_));
              }
 
@@ -75,7 +74,7 @@ void server::start_accept()
     }) ;
 }
 
-void server::handle_stop()
+void Server::handle_stop()
 {
     acceptor_.close();
     connection_manager_.stop_all();
@@ -83,7 +82,7 @@ void server::handle_stop()
 }
 
 
-void server::do_await_stop()
+void Server::do_await_stop()
 {
   signals_.async_wait(
       [this](boost::system::error_code /*ec*/, int /*signo*/)
@@ -95,11 +94,9 @@ void server::do_await_stop()
       });
 }
 
-void server::stop()
+void Server::stop()
 {
     handle_stop() ;
-
 }
 
-} // namespace server
 } // namespace http

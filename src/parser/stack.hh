@@ -40,7 +40,7 @@
 
 # include <vector>
 
-#line 6 "/home/malasiot/source/mbtools/src/osm.y" // stack.hh:133
+#line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // stack.hh:133
 namespace OSM {
 #line 46 "/home/malasiot/source/mbtools/src/parser/stack.hh" // stack.hh:133
   template <class T, class S = std::vector<T> >
@@ -151,7 +151,7 @@ namespace OSM {
     unsigned int range_;
   };
 
-#line 6 "/home/malasiot/source/mbtools/src/osm.y" // stack.hh:133
+#line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // stack.hh:133
 } // OSM
 #line 157 "/home/malasiot/source/mbtools/src/parser/stack.hh" // stack.hh:133
 

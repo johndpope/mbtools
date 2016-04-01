@@ -1,4 +1,4 @@
-#include "Dictionary.h"
+#include "dictionary.hpp"
 
 #include <iostream>
 

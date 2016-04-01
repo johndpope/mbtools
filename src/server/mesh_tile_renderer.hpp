@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <string>
 #include <memory>
-
-#include "GeomHelpers.h"
 #include <mutex>
+
+#include "geom_helpers.hpp"
 
 struct RenderingContext ;
 
@@ -23,8 +23,6 @@ private:
 
     uint32_t tile_size_ ;
     std::shared_ptr<RenderingContext> ctx_ ;
-    std::mutex mtx_ ;
 } ;
-
 
 #endif

@@ -1,4 +1,4 @@
-#include "XmlReader.h"
+#include "xml_reader.hpp"
 
 #include <iostream>
 #include <boost/algorithm/string/replace.hpp>

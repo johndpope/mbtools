@@ -15,13 +15,12 @@
 #include <vector>
 #include <boost/asio.hpp>
 
-#include "Dictionary.h"
+#include "dictionary.hpp"
 
 namespace http {
-namespace server {
 
 /// A reply to be sent to a client.
-struct reply
+struct Response
 {
     /// The status of the reply.
     enum status_type
@@ -52,7 +51,7 @@ struct reply
 
 
     /// Get a stock reply.
-    static reply stock_reply(status_type status);
+    static Response stock_reply(status_type status);
 
     // this will fill in the reply for sending over a file payload
 
@@ -66,7 +65,7 @@ struct reply
                      const std::string &mime) ;
 };
 
-} // namespace server
+
 } // namespace http
 
 #endif // HTTP_SERVER2_REPLY_HPP

@@ -1,6 +1,4 @@
-#include "MapFile.h"
-
-#include <XmlDocument.h>
+#include "map_file.hpp"
 
 #include <spatialite.h>
 #include <fstream>

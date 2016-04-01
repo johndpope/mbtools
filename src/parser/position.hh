@@ -50,7 +50,7 @@
 #  endif
 # endif
 
-#line 6 "/home/malasiot/source/mbtools/src/osm.y" // location.cc:291
+#line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // location.cc:291
 namespace OSM {
 #line 56 "/home/malasiot/source/mbtools/src/parser/position.hh" // location.cc:291
   /// Abstract a position.
@@ -174,7 +174,7 @@ namespace OSM {
     return ostr << pos.line << '.' << pos.column;
   }
 
-#line 6 "/home/malasiot/source/mbtools/src/osm.y" // location.cc:291
+#line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // location.cc:291
 } // OSM
 #line 180 "/home/malasiot/source/mbtools/src/parser/position.hh" // location.cc:291
 #endif // !YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_POSITION_HH_INCLUDED

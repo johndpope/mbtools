@@ -1,4 +1,4 @@
-#include "MapConfig.h"
+#include "map_config.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
@@ -13,8 +13,7 @@
 #include "rapidjson/error/error.h"
 #include "rapidjson/error/en.h"
 
-
-#include "GeomHelpers.h"
+#include "geom_helpers.hpp"
 
 using namespace std ;
 

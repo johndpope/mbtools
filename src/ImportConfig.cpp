@@ -11,7 +11,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/document.h"
 
-#include "GeomHelpers.h"
+#include "geom_helpers.hpp"
 
 using namespace std ;
 

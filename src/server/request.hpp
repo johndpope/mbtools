@@ -14,13 +14,12 @@
 #include <string>
 #include <vector>
 
-#include "Dictionary.h"
+#include "dictionary.hpp"
 
 namespace http {
-namespace server {
 
 /// A request received from a client.
-struct request
+struct Request
 {
 
     Dictionary SERVER_ ; // Server variables
@@ -50,11 +49,11 @@ struct request
     int http_version_minor_;
 
 private:
-    friend class request_parser ;
+    friend class RequestParser ;
     void parse_headers(const std::map<std::string, std::string> &headers) ;
 };
 
-} // namespace server
+
 } // namespace http
 
 #endif // HTTP_SERVER2_REQUEST_HPP

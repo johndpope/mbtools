@@ -1,11 +1,13 @@
-#include "MapServer.h"
+#include "map_server.hpp"
+#include "mesh_tile_renderer.hpp"
 
-#include "HttpServer.h"
-#include "Database.h"
-#include "base64.h"
+#include "database.hpp"
+#include "base64.hpp"
+#include "queue.hpp"
 
 #include <boost/regex.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <boost/filesystem.hpp>
 
 #include <time.h>
 
@@ -14,21 +16,19 @@
 #include <thread>
 #include <future>
 
-#include "Queue.h"
-
 using namespace std ;
 namespace fs = boost::filesystem ;
-using namespace http::server ;
+using namespace http ;
 
 ////////////////////////////////////////////////////////////////////
 
 class OGLRenderingLoop ;
 
-class TileRequestHandler: public request_handler {
+class TileRequestHandler: public RequestHandler {
 public:
 
     TileRequestHandler(const string &map_id, const string &tileSet, std::shared_ptr<OGLRenderingLoop> &renderer) ;
-    void handle_request(const request &request, reply &resp) ;
+    void handle_request(const Request &request, Response &resp) ;
 
 private:
 
@@ -120,7 +120,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHgDATwAAdgpQwQAAAAldEVYdGRhdGU6Y3JlYXRlADIw\
 MTYtMDQtMDFUMDk6MTE6MjMrMDM6MDCHKZUkAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE2LTA0LTAx\
 VDA5OjExOjIzKzAzOjAw9nQtmAAAAABJRU5ErkJggg==" ;
 
-void TileRequestHandler::handle_request(const request &request, reply &resp)
+void TileRequestHandler::handle_request(const Request &request, Response &resp)
 {
     boost::smatch m ;
     boost::regex_match(request.path_, m, uri_pattern_) ;
@@ -186,7 +186,7 @@ void TileRequestHandler::handle_request(const request &request, reply &resp)
                     empty_tile = base64_decode(g_empty_transparent_png_256) ;
 
                 if ( empty_tile.empty() )
-                    resp = reply::stock_reply(reply::not_implemented) ;
+                    resp = Response::stock_reply(Response::not_implemented) ;
                 else
                     resp.encode_file_data(empty_tile, encoding, mime, mod_time) ;
             }
@@ -194,7 +194,7 @@ void TileRequestHandler::handle_request(const request &request, reply &resp)
         }
         catch ( SQLite::Exception &e )
         {
-            resp = reply::stock_reply(reply::internal_server_error) ;
+            resp = Response::stock_reply(Response::internal_server_error) ;
             cerr << e.what() << endl ;
         }
     }
@@ -219,7 +219,7 @@ void TileRequestHandler::handle_request(const request &request, reply &resp)
                 empty_tile = base64_decode(g_empty_transparent_png_256) ;
 
             if ( empty_tile.empty() )
-                resp = reply::stock_reply(reply::not_implemented) ;
+                resp = Response::stock_reply(Response::not_implemented) ;
             else
                 resp.encode_file_data(empty_tile, encoding, mime, mod_time) ;
         }
@@ -229,11 +229,11 @@ void TileRequestHandler::handle_request(const request &request, reply &resp)
 //////////////////////////////////////////////////////////////////////////////
 
 
-class AssetRequestHandler: public request_handler {
+class AssetRequestHandler: public RequestHandler {
 public:
 
     AssetRequestHandler(const string &url_prefix, const std::string &rsdb) ;
-    void handle_request(const request &request, reply &resp) ;
+    void handle_request(const Request &request, Response &resp) ;
 
 private:
 
@@ -249,7 +249,7 @@ AssetRequestHandler::AssetRequestHandler(const string &url_prefix, const std::st
         db_.reset(new SQLite::Database(rsdb_.native())) ;
 }
 
-void AssetRequestHandler::handle_request(const request &req, reply &resp) {
+void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
 
     boost::regex r("/" + url_prefix_ + "/(.*)") ;
 
@@ -281,12 +281,12 @@ void AssetRequestHandler::handle_request(const request &req, reply &resp) {
                 resp.encode_file_data(content, "gzip", string(), mod_time) ;
             }
             else {
-                resp = reply::stock_reply(reply::not_found) ;
+                resp = Response::stock_reply(Response::not_found) ;
             }
         }
         catch ( SQLite::Exception &e )
         {
-            resp = reply::stock_reply(reply::internal_server_error) ;
+            resp = Response::stock_reply(Response::internal_server_error) ;
             cerr << e.what() << endl ;
         }
     }
@@ -296,21 +296,21 @@ void AssetRequestHandler::handle_request(const request &req, reply &resp) {
         if ( fs::exists(file) )
             resp.encode_file(file.native(), string(), string()) ;
         else
-            resp = reply::stock_reply(reply::not_found) ;
+            resp = Response::stock_reply(Response::not_found) ;
 
     }
 }
 
 
 
-class MapServerHandlerFactory: public request_handler_factory {
+class MapServerHandlerFactory: public RequestHandlerFactory {
 public:
 
     MapServerHandlerFactory(const string &rootFolder)  ;
     ~MapServerHandlerFactory() {
         shutdown_gl_loop() ;
     }
-    std::shared_ptr<request_handler> create(const request &req) ;
+    std::shared_ptr<RequestHandler> create(const Request &req) ;
 
 private:
 
@@ -393,7 +393,7 @@ MapServerHandlerFactory::MapServerHandlerFactory(const string &rootFolder)
 }
 
 
-std::shared_ptr<request_handler> MapServerHandlerFactory::create(const request &req) {
+std::shared_ptr<RequestHandler> MapServerHandlerFactory::create(const Request &req) {
 
     boost::smatch m ;
 
@@ -420,5 +420,5 @@ std::shared_ptr<request_handler> MapServerHandlerFactory::create(const request &
 
 
 MapServer::MapServer(const string &rootFolder, const string &ports):
-    http::server::server(std::make_shared<MapServerHandlerFactory>(rootFolder), "127.0.0.1", ports, 4) {
+    http::Server(std::make_shared<MapServerHandlerFactory>(rootFolder), "127.0.0.1", ports, 4) {
 }

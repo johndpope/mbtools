@@ -2,7 +2,7 @@
 
 #include <stdarg.h>
 
-#include "OsmRuleParser.h"
+#include "osm_rule_parser.hpp"
 
 #include <iomanip>
 

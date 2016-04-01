@@ -17,7 +17,7 @@
 #include <boost/shared_ptr.hpp>
 
 namespace http {
-namespace server {
+namespace detail {
 
 /// A pool of io_service objects.
 class io_service_pool

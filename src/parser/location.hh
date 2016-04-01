@@ -40,7 +40,7 @@
 
 # include "position.hh"
 
-#line 6 "/home/malasiot/source/mbtools/src/osm.y" // location.cc:291
+#line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // location.cc:291
 namespace OSM {
 #line 46 "/home/malasiot/source/mbtools/src/parser/location.hh" // location.cc:291
   /// Abstract a location.
@@ -181,7 +181,7 @@ namespace OSM {
     return ostr;
   }
 
-#line 6 "/home/malasiot/source/mbtools/src/osm.y" // location.cc:291
+#line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // location.cc:291
 } // OSM
 #line 187 "/home/malasiot/source/mbtools/src/parser/location.hh" // location.cc:291
 #endif // !YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_LOCATION_HH_INCLUDED

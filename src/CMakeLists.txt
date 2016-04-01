@@ -7,6 +7,13 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
 	${PROTOBUF_INCLUDE_DIRS}
 	${GLFW_INCLUDE_DIRS}
 	${PNG_INCLUDE_DIRS}
+	${CMAKE_CURRENT_SOURCE_DIR}/util
+	${CMAKE_CURRENT_SOURCE_DIR}/server
+	${CMAKE_CURRENT_SOURCE_DIR}/osm
+	${CMAKE_CURRENT_SOURCE_DIR}/map
+	${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/vcglib
+	${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/triangle
+
 )
 
 IF ( WIN32 )
@@ -23,45 +30,54 @@ if (OPENMP_FOUND)
 endif()
 
 SET ( OSM2MBTILES_SOURCES
-	OsmRuleParser.cpp
-	OsmPBFReader.cpp
-	OsmDocument.cpp
-	OsmPolygon.cpp
-	MapFile.cpp
-	MapConfig.cpp
+
 	ImportConfig.cpp
 	MBTileWriter.cpp
-	OSMFilterFunctions.cpp
-	OSMProcessor.cpp
 
 	VectorTileWriter.cpp
-	GeomHelpers.cpp
 
-	Dictionary.cpp
-	XmlReader.cpp
-	XmlDocument.cpp
-	Database.cpp
-	zfstream.cpp
-	base64.cpp
+	osm/osm2mbtiles.cpp
+
+	osm/osm_rule_parser.cpp
+	osm/osm_filter_functions.cpp
+	osm/osm_processor.cpp
+	osm/osm_polygon.cpp
+	osm/osm_pbf_reader.cpp
+	osm/osm_document.cpp
+
+	map/map_file.cpp
+	map/geom_helpers.cpp
+	map/map_config.cpp
+
+	util/dictionary.cpp
+	util/xml_reader.cpp
+	util/database.cpp
+	util/zfstream.cpp
+	util/base64.cpp
 )
 
 SET ( OSM2MBTILES_HEADERS
-	OsmRuleParser.h
-	OsmDocument.h
+
 	VectorTileWriter.h
 	MapFile.h
-	MapConfig.h
-	ImportConfig.h
-	GeomHelpers.h
-	MBTileWriter.h
-	OSMFilterFunctions.h
 
-	Dictionary.h
-	XmlReader.h
-	XmlDocument.h
-	Database.h
-	zfstream.h
-	base64.h
+	ImportConfig.h
+
+	MBTileWriter.h
+
+	osm/osm_filter_functions.hpp
+	osm/osm_document.hpp
+	osm/osm_rule_parser.hpp
+
+	map/map_config.hpp
+	map/map_file.hpp
+	map/geom_helpers.hpp
+
+	util/dictionary.hpp
+	util/xml_reader.hpp
+	util/database.hpp
+	util/zfstream.hpp
+	util/base64.h
 )
 
 PROTOBUF_GENERATE_CPP(OSM_PROTO_SOURCES OSM_PROTO_HEADERS protobuf/osmformat.proto protobuf/fileformat.proto)
@@ -71,8 +87,8 @@ PROTOBUF_GENERATE_CPP(MT_PROTO_SOURCES MT_PROTO_HEADERS protobuf/mesh_tile.proto
 FIND_PACKAGE(BISON REQUIRED)
 FIND_PACKAGE(FLEX REQUIRED)
 
-FLEX_TARGET(OSM_FILTER_SCANNER ${CMAKE_CURRENT_SOURCE_DIR}/osm.l  ${CMAKE_CURRENT_SOURCE_DIR}/parser/osm_scanner.cpp)
-BISON_TARGET(OSM_FILTER_PARSER ${CMAKE_CURRENT_SOURCE_DIR}/osm.y  ${CMAKE_CURRENT_SOURCE_DIR}/parser/osm_parser.cpp)
+FLEX_TARGET(OSM_FILTER_SCANNER ${CMAKE_CURRENT_SOURCE_DIR}/osm/osm.l  ${CMAKE_CURRENT_SOURCE_DIR}/parser/osm_scanner.cpp)
+BISON_TARGET(OSM_FILTER_PARSER ${CMAKE_CURRENT_SOURCE_DIR}/osm/osm.y  ${CMAKE_CURRENT_SOURCE_DIR}/parser/osm_parser.cpp)
 
 ADD_FLEX_BISON_DEPENDENCY(OSM_FILTER_SCANNER OSM_FILTER_PARSER)
 
@@ -82,7 +98,7 @@ LIST(APPEND OSM2MBTILES_SOURCES ${FLEX_OSM_FILTER_SCANNER_OUTPUTS} ${BISON_OSM_F
 )
 
 ###############################################################################
-ADD_EXECUTABLE(osm2mbtiles osm2mbtiles.cpp ${OSM2MBTILES_SOURCES})
+ADD_EXECUTABLE(osm2mbtiles ${OSM2MBTILES_SOURCES})
 TARGET_LINK_LIBRARIES(osm2mbtiles ${PROTOBUF_LIBRARIES} ${ZLIB_LIBRARIES} ${SQLITE3_LIBRARY} ${SPATIALITE_LIBRARY} ${Boost_LIBRARIES})
 
 IF ( WIN32 )
@@ -94,24 +110,30 @@ INSTALL(TARGETS osm2mbtiles DESTINATION bin  )
 ##################################################################################3
 
 SET ( SHP2MBTILES_SOURCES
-	MapFile.cpp
-	MapConfig.cpp
+
 	SHPProcessor.cpp
 	MBTileWriter.cpp
 	VectorTileWriter.cpp
-	GeomHelpers.cpp
-	Dictionary.cpp
-	Database.cpp
+
+	map/map_config.cpp
+	map/map_file.cpp
+	map/geom_helpers.cpp
+
+	util/dictionary.cpp
+	util/database.cpp
 )
 
 SET ( SHP2MBTILES_HEADERS
 	VectorTileWriter.h
-	MapFile.h
-	MapConfig.h
-	GeomHelpers.h
+
 	MBTileWriter.h
-	Dictionary.h
-	Database.h
+
+	map/map_config.hpp
+	map/geom_helpers.hpp
+	map/map_file.hpp
+
+	util/dictionary.h
+	util/database.h
 )
 
 LIST(APPEND SHP2MBTILES_SOURCES ${VT_PROTO_SOURCES} ${VT_PROTO_HEADERS})
@@ -123,14 +145,11 @@ TARGET_LINK_LIBRARIES(shp2mbtiles ${PROTOBUF_LIBRARIES} ${ZLIB_LIBRARIES} ${SQLI
 ######################################################################################
 
 SET ( RSC_TOOL_SOURCES
-	Database.cpp
-	Dictionary.cpp
+	util/database.cpp
+	util/database.hpp
+	util/dictionary.cpp
+	util/dictionary.hpp
 	makeres.cpp
-)
-
-SET ( RSC_TOOL_HEADERS
-	Database.h
-	Dictionary.h
 )
 
 ADD_EXECUTABLE(makeres ${RSC_TOOL_SOURCES})
@@ -140,33 +159,35 @@ TARGET_LINK_LIBRARIES(makeres ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z
 
 ADD_DEFINITIONS(-DSELF_CHECK -DLINUX -DTRILIBRARY)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/vcglib)
-ADD_EXECUTABLE(xyz2mesh xyz2mesh.cpp triangle.c Mesh.cpp)
+ADD_EXECUTABLE(xyz2mesh xyz2mesh.cpp 3rdparty/triangle/triangle.c Mesh.cpp)
 TARGET_LINK_LIBRARIES(xyz2mesh  ${Boost_LIBRARIES})
-
 
 
 ##################################################################################3
 
 SET ( MESH2MBTILES_SOURCES
-	triangle.c
+	3rdparty/triangle/triangle.c
 	Mesh.cpp
-	MapConfig.cpp
+
 	MeshTilesetWriter.cpp
 	MeshTileWriter.cpp
-	GeomHelpers.cpp
-	Database.cpp
-	MeshTileRenderer.cpp
+
+	map/map_config.cpp
+	map/geom_helpers.cpp
+
+	util/database.cpp
 )
 
 SET ( MESH2MBTILES_HEADERS
 	triangle.h
 	Mesh.h
-	MapConfig.h
+
 	MeshTilesetWriter.h
 	MeshTileWriter.h
 	MeshTileWriter.h
-	Database.h
-	MeshTileRenderer.h
+
+	map/map_config.hpp
+	util/database.hpp
 )
 
 LIST(APPEND MESH2MBTILES_SOURCES ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
@@ -178,14 +199,23 @@ ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr pthre
 ########################################################################################
 
 SET ( TILE_SERVER_SOURCES
-	Dictionary.cpp
-	base64.cpp
-	Database.cpp
-	Dictionary.cpp
-	MapServer.cpp
-	MeshTileRenderer.cpp
-	GeomHelpers.cpp
-	tileserver.cpp
+
+	util/base64.cpp
+	util/base64.hpp
+	util/database.cpp
+	util/database.hpp
+
+	util/dictionary.cpp
+	util/dictionary.hpp
+
+	server/map_server.cpp
+	server/map_server.hpp
+
+	server/mesh_tile_renderer.cpp
+	server/mesh_tile_renderer.hpp
+
+	map/geom_helpers.cpp
+	server/tile_server.cpp
 
 	server/connection.cpp
 	server/connection.hpp
@@ -197,7 +227,6 @@ SET ( TILE_SERVER_SOURCES
 	server/reply.hpp
 	server/request_handler.hpp
 	server/request.hpp
-	server/request.cpp
 	server/request_parser.cpp
 	server/request_parser.hpp
 	server/server.cpp

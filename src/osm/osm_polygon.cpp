@@ -1,4 +1,5 @@
-#include <OsmDocument.h>
+#include "osm_document.hpp"
+
 #include <list>
 
 using namespace std ;

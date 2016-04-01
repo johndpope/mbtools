@@ -1,5 +1,4 @@
-#include "MapServer.h"
-#include "rapidjson/rapidjson.h"
+#include "server/map_server.hpp"
 
 #include <thread>
 

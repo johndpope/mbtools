@@ -1,9 +1,7 @@
 #ifndef __MAP_SERVER_H__
 #define __MAP_SERVER_H__
 
-#include "server/server.hpp"
-#include "Database.h"
-#include "MeshTileRenderer.h"
+#include "server.hpp"
 
 // This creates the map server that will provide tiles and other assets required by mapbox client when displaying a map
 // The server responds to the following endpoints:
@@ -20,7 +18,7 @@
 // <root>/maps/<map1>/assets/* or <root>/maps/<map1>/assets.sqlite
 // <root>/assets/* or <root>/assets.sqlite
 
-class MapServer: public http::server::server {
+class MapServer: public http::Server {
 public:
     MapServer(const std::string &root, const std::string &ports) ;
 

@@ -1,5 +1,5 @@
-#include "OsmDocument.h"
-#include "OsmRuleParser.h"
+#include "osm_document.hpp"
+#include "osm_rule_parser.hpp"
 
 #include <stdlib.h>
 
@@ -7,8 +7,8 @@
 #include <iomanip>
 #include <set>
 
-#include <XmlReader.h>
-#include <zfstream.h>
+#include "xml_reader.hpp"
+#include "zfstream.hpp"
 
 #include <boost/algorithm/string.hpp>
 

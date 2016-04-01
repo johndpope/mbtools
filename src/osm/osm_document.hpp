@@ -6,7 +6,7 @@
 #include <vector>
 #include <deque>
 
-#include <Dictionary.h>
+#include "dictionary.hpp"
 
 namespace OSM {
 

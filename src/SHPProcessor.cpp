@@ -1,4 +1,4 @@
-#include "MapFile.h"
+#include "map_file.hpp"
 
 #include <boost/filesystem.hpp>
 #include <spatialite.h>

@@ -1,12 +1,15 @@
 #ifndef __MAP_FILE_H__
 #define __MAP_FILE_H__
 
-#include "Database.h"
-#include "Dictionary.h"
+#include "database.hpp"
+#include "dictionary.hpp"
+#include "osm_document.hpp"
+
 #include "ImportConfig.h"
-#include "MapConfig.h"
+#include "map_config.hpp"
 #include "VectorTileWriter.h"
-#include "OsmDocument.h"
+
+
 
 #include <map>
 

@@ -30,7 +30,7 @@
 
 %code {
 
-#include <OsmRuleParser.h>
+#include <osm_rule_parser.hpp>
 
 	// Prototype for the yylex function
 static OSM::BisonParser::symbol_type yylex(OSM::Filter::Parser &driver, OSM::BisonParser::location_type &loc);
@@ -259,7 +259,7 @@ attribute:
 
 
 %%
-#include <OsmRuleScanner.h>
+#include <osm_rule_scanner.hpp>
 
 // We have to implement the error function
 void OSM::BisonParser::error(const OSM::BisonParser::location_type &loc, const std::string &msg) {

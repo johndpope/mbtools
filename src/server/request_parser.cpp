@@ -1,5 +1,5 @@
 //
-// request_parser.cpp
+// RequestParser.cpp
 // ~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -28,9 +28,9 @@
 using namespace std ;
 
 namespace http {
-namespace server {
+namespace detail {
 
-request_parser::request_parser()
+RequestParser::RequestParser()
 {
     memset(&settings_, 0, sizeof(settings_));
     settings_.on_url = &on_url;
@@ -45,7 +45,7 @@ request_parser::request_parser()
     reset() ;
 }
 
-void request_parser::reset()
+void RequestParser::reset()
 {
     memset(&parser_, 0, sizeof(parser_));
     http_parser_init(&parser_, HTTP_REQUEST);
@@ -58,29 +58,29 @@ void request_parser::reset()
 }
 
 
-int request_parser::on_message_begin(http_parser *parser)
+int RequestParser::on_message_begin(http_parser *parser)
 {
-    request_parser &rp = *static_cast<request_parser*>(parser->data);
+    RequestParser &rp = *static_cast<RequestParser*>(parser->data);
     rp.is_complete_ = false ;
     return 0;
 }
 
-int request_parser::on_message_complete(http_parser * parser)
+int RequestParser::on_message_complete(http_parser * parser)
 {
-    request_parser &rp = *static_cast<request_parser*>(parser->data);
+    RequestParser &rp = *static_cast<RequestParser*>(parser->data);
     rp.is_complete_ = true ;
 
-    // Force the parser to stop after the request is parsed so clients
-    // can process the request (or response).  This is to properly
-    // handle HTTP/1.1 pipelined requests.
+    // Force the parser to stop after the Request is parsed so clients
+    // can process the Request (or response).  This is to properly
+    // handle HTTP/1.1 pipelined Requests.
     http_parser_pause(parser, 1);
 
     return 0;
 }
 
-int request_parser::on_header_field(http_parser *parser, const char *data, size_t size)
+int RequestParser::on_header_field(http_parser *parser, const char *data, size_t size)
 {
-    request_parser &rp = *static_cast<request_parser*>(parser->data);
+    RequestParser &rp = *static_cast<RequestParser*>(parser->data);
 
     if ( !rp.current_header_value_.empty() ) {
         rp.headers_[rp.current_header_field_] = rp.current_header_value_ ;
@@ -91,16 +91,16 @@ int request_parser::on_header_field(http_parser *parser, const char *data, size_
     return 0 ;
 }
 
-int request_parser::on_header_value(http_parser *parser, const char *data, size_t size)
+int RequestParser::on_header_value(http_parser *parser, const char *data, size_t size)
 {
-    request_parser& rp = *static_cast<request_parser*>(parser->data);
+    RequestParser& rp = *static_cast<RequestParser*>(parser->data);
     rp.current_header_value_.append(data, size);
     return 0 ;
 }
 
-int request_parser::on_headers_complete(http_parser * parser)
+int RequestParser::on_headers_complete(http_parser * parser)
 {
-    request_parser &rp = *static_cast<request_parser*>(parser->data);
+    RequestParser &rp = *static_cast<RequestParser*>(parser->data);
 
     if ( !rp.current_header_value_.empty() ) {
         rp.headers_[rp.current_header_field_] = rp.current_header_value_ ;
@@ -109,37 +109,37 @@ int request_parser::on_headers_complete(http_parser * parser)
     }
 
     // Force the parser to stop after the headers are parsed so clients
-    // can process the request (or response).  This is to properly
-    // handle HTTP/1.1 pipelined requests.
+    // can process the Request (or response).  This is to properly
+    // handle HTTP/1.1 pipelined Requests.
     http_parser_pause(parser, 1);
 
     return 0;
 }
 
-int request_parser::on_url(http_parser *parser, const char *data, size_t size)
+int RequestParser::on_url(http_parser *parser, const char *data, size_t size)
 {
-    request_parser& rp = *static_cast<request_parser*>(parser->data);
+    RequestParser& rp = *static_cast<RequestParser*>(parser->data);
     rp.url_.append(data, size);
 
     return 0;
 }
 
-int request_parser::on_body(http_parser * parser, const char *data, size_t size)
+int RequestParser::on_body(http_parser * parser, const char *data, size_t size)
 {
-    static_cast<request_parser*>(parser->data)->body_.append(data, size) ;
+    static_cast<RequestParser*>(parser->data)->body_.append(data, size) ;
     return 0;
 }
 
 
 
-boost::tribool request_parser::parse(const char *data, size_t size)
+boost::tribool RequestParser::parse(const char *data, size_t size)
 {
     std::size_t used = http_parser_execute(&parser_, &settings_, data, size);
 
     const http_errno error = static_cast< http_errno >(parser_.http_errno);
 
   // The 'on_message_complete' and 'on_headers_complete' callbacks fail
-  // on purpose to force the parser to stop between pipelined requests.
+  // on purpose to force the parser to stop between pipelined Requests.
   // This allows the clients to reliably detect the end of headers and
   // the end of the message.  Make sure the parser is always unpaused
   // for the next call to 'feed'.
@@ -209,7 +209,7 @@ static std::string get_url_field ( const string &data, http_parser_url &url, htt
     return ( data.substr(url.field_data[int(field)].off, url.field_data[int(field)].len) );
 }
 
-static bool parse_url(request &req, const string url)
+static bool parse_url(Request &req, const string url)
 {
     http_parser_url u ;
 
@@ -251,7 +251,7 @@ static bool parse_url(request &req, const string url)
 
 }
 
-static bool parse_cookie(request &session, const std::string &data)
+static bool parse_cookie(Request &session, const std::string &data)
 {
     int pos = data.find("=") ;
 
@@ -271,7 +271,7 @@ static bool parse_cookie(request &session, const std::string &data)
     return true ;
 }
 
-static bool parse_cookies(request &session)
+static bool parse_cookies(Request &session)
 {
     const char *ck = "Cookie" ;
 
@@ -359,7 +359,7 @@ fs::path get_temporary_path(const std::string &dir, const std::string &prefix, c
 }
 
 
-static bool parse_mime_data(request &session, istream &strm, const char *fld, const char *file_name,
+static bool parse_mime_data(Request &session, istream &strm, const char *fld, const char *file_name,
                           const char *content_type,
                           const char *trans_encoding,
                           const char *bnd)
@@ -422,7 +422,7 @@ static bool parse_mime_data(request &session, istream &strm, const char *fld, co
     if ( file_name == 0 ) session.POST_[fld] = data ;
     else
     {
-        request::UploadedFile fileInfo ;
+        Request::UploadedFile fileInfo ;
 
         fileInfo.mime_ = content_type ;
         fileInfo.orig_name_ = file_name ;
@@ -441,7 +441,7 @@ static bool parse_mime_data(request &session, istream &strm, const char *fld, co
 }
 
 
-static bool parse_multipart_data(request &session, istream &strm, const char *bnd)
+static bool parse_multipart_data(Request &session, istream &strm, const char *bnd)
 {
     std::string s = get_next_line(strm) ;
     if ( s.empty() ) return false ;
@@ -517,7 +517,7 @@ static bool parse_multipart_data(request &session, istream &strm, const char *bn
 }
 
 
-static bool parse_form_data(request &session, istream &strm)
+static bool parse_form_data(Request &session, istream &strm)
 {
     const string cl = "Content-Length" ;
 
@@ -590,7 +590,7 @@ static bool parse_form_data(request &session, istream &strm)
 }
 
 
-bool request_parser::decode_message(request &req) const {
+bool RequestParser::decode_message(Request &req) const {
 
     for( auto hdr: headers_ )
         req.SERVER_.add(hdr.first, hdr.second) ;

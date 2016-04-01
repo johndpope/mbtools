@@ -1,6 +1,6 @@
 #include "MeshTilesetWriter.h"
 #include "MeshTileWriter.h"
-#include "MeshTileRenderer.h"
+
 #include <boost/filesystem.hpp>
 #include <fstream>
 
@@ -55,8 +55,6 @@ bool MeshTilesetWriter::writeTilesDB(const string &mesh_file, MapConfig &cfg)
 {
     assert(db_) ;
 
-    MeshTileRenderer rdr(256) ;
-
     writeMetaData("name", cfg.name_) ;
     writeMetaData("version", "1.1") ;
     writeMetaData("type", "baselayer") ;
@@ -87,8 +85,6 @@ bool MeshTilesetWriter::writeTilesDB(const string &mesh_file, MapConfig &cfg)
                     if ( mt.queryTile(x, y, z) ) {
 
                         string data = mt.toString() ;
-
-                        rdr.render(x, y, z, data, "hillshade") ;
 
                         cmd.bind((int)z) ;
                         cmd.bind((int)x) ;

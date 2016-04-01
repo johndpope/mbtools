@@ -18,16 +18,17 @@
 #include "http_parser.h"
 
 namespace http {
-namespace server {
 
-struct request;
+struct Request;
+
+namespace detail {
 
 /// Parser for incoming requests.
-class request_parser
+class RequestParser
 {
 public:
     /// Construct ready to parse the request method.
-    request_parser();
+    RequestParser();
 
     /// Reset to initial parser state.
     void reset();
@@ -36,7 +37,7 @@ public:
     boost::tribool parse(const char *data, size_t buf_len) ;
 
     // fill in the request structure
-    bool decode_message(request &req) const ;
+    bool decode_message(Request &req) const ;
 
 private:
 
@@ -57,7 +58,7 @@ protected:
     bool is_complete_ ;
 };
 
-} // namespace server
+} // namespace detail
 } // namespace http
 
 #endif // HTTP_SERVER2_REQUEST_PARSER_HPP

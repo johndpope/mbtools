@@ -1,4 +1,4 @@
-#include "Database.h"
+#include "database.hpp"
 
 #include <boost/format.hpp>
 

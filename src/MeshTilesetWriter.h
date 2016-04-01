@@ -1,8 +1,8 @@
 #ifndef __MESH_TILESET_WRITER_H__
 #define __MESH_TILESET_WRITER_H__
 
-#include "MapConfig.h"
-#include "Database.h"
+#include "map_config.hpp"
+#include "database.hpp"
 #include <boost/filesystem.hpp>
 
 class MeshTilesetWriter {

@@ -1,5 +1,6 @@
-#include "OsmRuleScanner.h"
-#include "OsmRuleParser.h"
+#include "osm_rule_scanner.hpp"
+#include "osm_rule_parser.hpp"
+
 #include <boost/regex.hpp>
 #include <boost/format.hpp>
 

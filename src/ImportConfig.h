@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "OsmRuleParser.h"
-#include "OsmDocument.h"
+#include "osm_rule_parser.hpp"
+#include "osm_document.hpp"
 
 struct Action {
     std::string key_ ;

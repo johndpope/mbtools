@@ -9,13 +9,14 @@
 //
 
 #include "server.hpp"
+
 #include <stdexcept>
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace http {
-namespace server {
+namespace detail {
 
 io_service_pool::io_service_pool(std::size_t pool_size)
     : next_io_service_(0)

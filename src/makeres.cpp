@@ -4,8 +4,8 @@
 #include <fstream>
 #include <zlib.h>
 
-#include "Database.h"
-#include "Dictionary.h"
+#include "database.hpp"
+#include "dictionary.hpp"
 
 #include <boost/filesystem.hpp>
 
