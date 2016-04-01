@@ -158,7 +158,7 @@ TARGET_LINK_LIBRARIES(makeres ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} pthread dl z
 
 ADD_DEFINITIONS(-DSELF_CHECK -DLINUX -DTRILIBRARY)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/vcglib)
-ADD_EXECUTABLE(xyz2mesh xyz2mesh.cpp 3rdparty/triangle/triangle.c Mesh.cpp)
+ADD_EXECUTABLE(xyz2mesh mesh/xyz2mesh.cpp 3rdparty/triangle/triangle.c mesh/mesh.cpp)
 TARGET_LINK_LIBRARIES(xyz2mesh  ${Boost_LIBRARIES})
 
 
@@ -166,10 +166,10 @@ TARGET_LINK_LIBRARIES(xyz2mesh  ${Boost_LIBRARIES})
 
 SET ( MESH2MBTILES_SOURCES
 	3rdparty/triangle/triangle.c
-	Mesh.cpp
+	mesh/mesh.cpp
 
-	MeshTilesetWriter.cpp
-	MeshTileWriter.cpp
+	mesh/mesh_tileset_writer.cpp
+	mesh/mesh_tile_writer.cpp
 
 	map/map_config.cpp
 	map/geom_helpers.cpp
@@ -178,20 +178,20 @@ SET ( MESH2MBTILES_SOURCES
 )
 
 SET ( MESH2MBTILES_HEADERS
-	triangle.h
-	Mesh.h
 
-	MeshTilesetWriter.h
-	MeshTileWriter.h
-	MeshTileWriter.h
-
+	mesh/mesh.hpp
+	mesh/mesh_tile_writer.hpp
+	mesh/mesh_tileset_writer.h
+	
 	map/map_config.hpp
 	util/database.hpp
+
+	mesh/mesh2mbtiles.cpp
 )
 
 LIST(APPEND MESH2MBTILES_SOURCES ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
 
-ADD_EXECUTABLE(mesh2mbtiles mesh2mbtiles.cpp  ${MESH2MBTILES_SOURCES} )
+ADD_EXECUTABLE(mesh2mbtiles ${MESH2MBTILES_SOURCES} )
 TARGET_LINK_LIBRARIES(mesh2mbtiles ${PROTOBUF_LIBRARIES} ${ZLIB_LIBRARIES} ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PNG_LIBRARIES}
 ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr pthread Xi )
 
