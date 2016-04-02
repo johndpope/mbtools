@@ -6,7 +6,7 @@
 #include <FlexLexer.h>
 #endif
 
-#include <parser/osm_parser.hpp>
+#include "parser/osm_parser.hpp"
 
 #undef YY_DECL
 #define YY_DECL                                         \

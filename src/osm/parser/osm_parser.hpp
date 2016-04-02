@@ -31,14 +31,14 @@
 // version 2.2 of Bison.
 
 /**
- ** \file /home/malasiot/source/mbtools/src/parser/osm_parser.hpp
+ ** \file /home/malasiot/source/mbtools/src/osm/parser/osm_parser.hpp
  ** Define the OSM::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
-# define YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
+#ifndef YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_OSM_PARSER_OSM_PARSER_HPP_INCLUDED
+# define YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_OSM_PARSER_OSM_PARSER_HPP_INCLUDED
 // //                    "%code requires" blocks.
 #line 18 "/home/malasiot/source/mbtools/src/osm/osm.y" // lalr1.cc:372
 
@@ -53,7 +53,7 @@
 	}
 
 
-#line 57 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 57 "/home/malasiot/source/mbtools/src/osm/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 # include <vector>
@@ -129,7 +129,7 @@
 
 #line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // lalr1.cc:372
 namespace OSM {
-#line 133 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 133 "/home/malasiot/source/mbtools/src/osm/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 
@@ -1509,9 +1509,9 @@ namespace OSM {
 
 #line 6 "/home/malasiot/source/mbtools/src/osm/osm.y" // lalr1.cc:372
 } // OSM
-#line 1513 "/home/malasiot/source/mbtools/src/parser/osm_parser.hpp" // lalr1.cc:372
+#line 1513 "/home/malasiot/source/mbtools/src/osm/parser/osm_parser.hpp" // lalr1.cc:372
 
 
 
 
-#endif // !YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_PARSER_OSM_PARSER_HPP_INCLUDED
+#endif // !YY_YY_HOME_MALASIOT_SOURCE_MBTOOLS_SRC_OSM_PARSER_OSM_PARSER_HPP_INCLUDED

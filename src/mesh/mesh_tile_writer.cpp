@@ -1,6 +1,3 @@
-#include "MeshTileWriter.h"
-#include "Mesh.h"
-
 #include <unordered_map>
 #include <set>
 #include <boost/filesystem.hpp>
@@ -11,7 +8,9 @@
 #include <fstream>
 #include <iomanip>
 
-#include "geom_helpers.hpp"
+#include "map/geom_helpers.hpp"
+#include "mesh/mesh_tile_writer.hpp"
+#include "mesh/mesh.hpp"
 
 using namespace std ;
 

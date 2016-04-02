@@ -1,6 +1,6 @@
 #include <fstream>
 
-#include "MeshTilesetWriter.h"
+#include "mesh/mesh_tileset_writer.hpp"
 
 #include <boost/filesystem.hpp>
 

@@ -1,5 +1,5 @@
-#include "MeshTilesetWriter.h"
-#include "MeshTileWriter.h"
+#include "mesh_tileset_writer.hpp"
+#include "mesh_tile_writer.hpp"
 
 #include <boost/filesystem.hpp>
 #include <fstream>

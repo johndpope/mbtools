@@ -1,6 +1,5 @@
 #include "mesh_tile_renderer.hpp"
-#include "Mesh.h"
-
+#include "mesh.hpp"
 #include "mesh_tile.pb.h"
 
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
@@ -250,7 +249,7 @@ GLuint RenderingContext::create_shader(const char *shader_source, GLuint stype)
 
     const GLchar* p[1];
     p[0] = shader_source ;
-    GLint lengths[1] = { strlen(shader_source) };
+    GLint lengths[1] = { (GLint)strlen(shader_source) };
 
     glShaderSource(shader_obj, 1, p, lengths);
 
@@ -362,12 +361,6 @@ void RenderingContext::init_buffers(const DataBuffers &buf, const BBox &box) {
         glVertexAttribPointer(loc, c.dim_, GL_FLOAT, GL_FALSE, 0, (GLvoid *)(c.offset_ * sizeof(float)));
     }
 
-/*
-    tfbuf_.resize(3*buf.coords_.size()/2) ;
-    glGenBuffers(1, &tf_);
-    glBindBuffer(GL_ARRAY_BUFFER, tf_);
-    glBufferData(GL_ARRAY_BUFFER, tfbuf_.size() * sizeof(GLfloat), tfbuf_.data(), GL_DYNAMIC_COPY);
-*/
     float scale =  box.width() ;
     float ofx = box.minx_ ;
     float ofy = box.miny_  ;

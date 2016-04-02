@@ -1,6 +1,6 @@
-#line 2 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
+#line 2 "/home/malasiot/source/mbtools/src/osm/parser/osm_scanner.cpp"
 
-#line 4 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
+#line 4 "/home/malasiot/source/mbtools/src/osm/parser/osm_scanner.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -636,7 +636,7 @@ void comment() ;
 
 #line 21 "/home/malasiot/source/mbtools/src/osm/osm.l"
 # define YY_USER_ACTION  yylloc->columns (yyleng);
-#line 640 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
+#line 640 "/home/malasiot/source/mbtools/src/osm/parser/osm_scanner.cpp"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -806,7 +806,7 @@ YY_DECL
    yylloc->step();
 
 
-#line 810 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
+#line 810 "/home/malasiot/source/mbtools/src/osm/parser/osm_scanner.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -1180,7 +1180,7 @@ YY_RULE_SETUP
 #line 101 "/home/malasiot/source/mbtools/src/osm/osm.l"
 ECHO;
 	YY_BREAK
-#line 1184 "/home/malasiot/source/mbtools/src/parser/osm_scanner.cpp"
+#line 1184 "/home/malasiot/source/mbtools/src/osm/parser/osm_scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{

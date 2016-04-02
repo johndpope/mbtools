@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "mesh/mesh.hpp"
 
 #include <fstream>
 #include <cmath>
@@ -98,7 +98,7 @@ bool Mesh::triangulateCoords(float area)
         y = trsout.pointlist[k+1] ;
         z = trsout.pointattributelist[i] ;
 
-        coords_.push_back({x, y, z}) ;
+        coords_.push_back({(float)x, (float)y, (float)z}) ;
     }
 
     for(i=0 ; i < 3 * trsout.numberoftriangles ; i++ ) {
