@@ -163,7 +163,7 @@ public:
 
     RenderingContext(uint32_t ts): ts_(ts) {}
 
-    bool init() ;
+    bool init(const string &) ;
     void release() ;
     void init_buffers(const DataBuffers &data, const BBox &box) ;
     void render(const std::string &name);
@@ -187,7 +187,7 @@ private:
     vector<float> tfbuf_ ;
 };
 
-bool RenderingContext::init() {
+bool RenderingContext::init(const string &cfg) {
 
     if( !glfwInit() ) return false ;
 
@@ -426,9 +426,9 @@ void RenderingContext::render_debug(const std::string &name) {
     glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tfbuf_.size() * sizeof(float), tfbuf_.data());
 }
 
-MeshTileRenderer::MeshTileRenderer(uint32_t ts): tile_size_(ts), ctx_(new RenderingContext(ts))
+MeshTileRenderer::MeshTileRenderer(const string &cfg_file, uint32_t ts): tile_size_(ts), ctx_(new RenderingContext(ts))
 {
-    ctx_->init() ;
+    ctx_->init(cfg_file) ;
 }
 
 MeshTileRenderer::~MeshTileRenderer() {

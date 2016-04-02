@@ -13,7 +13,7 @@ struct RenderingContext ;
 class MeshTileRenderer {
 public:
 
-    MeshTileRenderer(uint32_t tile_size = 256) ;
+    MeshTileRenderer(const std::string &cfg, uint32_t tile_size = 256) ;
     ~MeshTileRenderer() ;
 
     // will render a mesh tile encoded in protobuf string into an image and return the PNG encoded image bytes

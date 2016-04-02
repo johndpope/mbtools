@@ -56,11 +56,12 @@ struct RenderTileJob {
 class OGLRenderingLoop {
 
 public:
-    OGLRenderingLoop(): is_running_(true) {}
+    OGLRenderingLoop(const fs::path &rcfg): renderer_config_(rcfg), is_running_(false) {}
 
     void run() {
 
-        gl_.reset(new MeshTileRenderer()) ;
+        gl_.reset(new MeshTileRenderer(renderer_config_.native())) ;
+        is_running_ = true ;
 
         while (is_running_) {
             RenderTileJob job ;
@@ -90,6 +91,7 @@ public:
     Queue<RenderTileJob> job_queue_ ;
     std::shared_ptr<MeshTileRenderer> gl_ ;
     std::atomic<bool> is_running_ ;
+    fs::path renderer_config_ ;
 };
 
 
@@ -323,7 +325,6 @@ private:
     std::map<std::string, std::shared_ptr<AssetRequestHandler> > asset_request_handlers_ ;
     std::shared_ptr<OGLRenderingLoop> gl_ ;
     std::unique_ptr<std::thread> gl_thread_ ;
-
 };
 
 
@@ -331,7 +332,8 @@ MapServerHandlerFactory::MapServerHandlerFactory(const string &rootFolder)
 {
     fs::path rp(rootFolder) ;
 
-    gl_.reset(new OGLRenderingLoop()) ;
+    // start the rendering loop ( a configuration file config.xml is expected
+    gl_.reset(new OGLRenderingLoop(fs::path(rootFolder) / "config.xml")) ;
 
     // parse maps
 
@@ -398,13 +400,11 @@ std::shared_ptr<RequestHandler> MapServerHandlerFactory::create(const Request &r
     boost::smatch m ;
 
     if ( boost::regex_match(req.path_, m, TileRequestHandler::uri_pattern_) ) {
-        cout << m.str(1) + '_' + m.str(2) << endl ;
         auto handler = tile_request_handlers_.find(m.str(1) + '_' + m.str(2)) ;
         if ( handler == tile_request_handlers_.end() ) return nullptr ;
         else return handler->second ;
     }
     else if ( boost::regex_match(req.path_, m, boost::regex(R"(/map/([^/]+)/assets/.*)") ) ) {
-        cout << m.str(1) << endl ;
         auto handler = asset_request_handlers_.find(m.str(1)) ;
         if ( handler == asset_request_handlers_.end() ) return nullptr ;
         else return handler->second ;

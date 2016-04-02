@@ -6,7 +6,10 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/util/base64.hpp
 	${SRC_ROOT}/util/database.cpp
 	${SRC_ROOT}/util/database.hpp
-
+        ${SRC_ROOT}/util/xml_document.cpp
+        ${SRC_ROOT}/util/xml_document.hpp
+        ${SRC_ROOT}/util/xml_reader.cpp
+        ${SRC_ROOT}/util/xml_reader.hpp
 	${SRC_ROOT}/util/dictionary.cpp
 	${SRC_ROOT}/util/dictionary.hpp
 
