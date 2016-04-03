@@ -6,10 +6,7 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/util/base64.hpp
 	${SRC_ROOT}/util/database.cpp
 	${SRC_ROOT}/util/database.hpp
-        ${SRC_ROOT}/util/xml_document.cpp
-        ${SRC_ROOT}/util/xml_document.hpp
-        ${SRC_ROOT}/util/xml_reader.cpp
-        ${SRC_ROOT}/util/xml_reader.hpp
+
 	${SRC_ROOT}/util/dictionary.cpp
 	${SRC_ROOT}/util/dictionary.hpp
 
@@ -39,6 +36,18 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/http_parser.c
 	${SRC_ROOT}/server/http_parser.h
 	${SRC_ROOT}/server/request_handler_factory.hpp
+
+        ${SRC_ROOT}/server/shader_config.cpp
+        ${SRC_ROOT}/server/shader_config.hpp
+        ${SRC_ROOT}/server/map_server_handler_factory.cpp
+        ${SRC_ROOT}/server/map_server_handler_factory.hpp
+        ${SRC_ROOT}/server/gl_rendering_loop.hpp
+        ${SRC_ROOT}/server/tile_request_handler.hpp
+        ${SRC_ROOT}/server/tile_request_handler.cpp
+        ${SRC_ROOT}/server/asset_request_handler.hpp
+        ${SRC_ROOT}/server/asset_request_handler.cpp
+
+        ${SRC_ROOT}/3rdparty/pugixml/pugixml.cpp
 )
 
 

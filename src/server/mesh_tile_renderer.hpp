@@ -7,6 +7,7 @@
 #include <mutex>
 
 #include "geom_helpers.hpp"
+#include "dictionary.hpp"
 
 struct RenderingContext ;
 
@@ -17,12 +18,13 @@ public:
     ~MeshTileRenderer() ;
 
     // will render a mesh tile encoded in protobuf string into an image and return the PNG encoded image bytes
-    std::string render(uint32_t x, uint32_t y, uint32_t z, const std::string &tilebytes, const std::string &pname) ;
+    std::string render(uint32_t x, uint32_t y, uint32_t z, const std::string &tilebytes, const Dictionary &options) ;
 
 private:
 
     uint32_t tile_size_ ;
     std::shared_ptr<RenderingContext> ctx_ ;
+
 } ;
 
 #endif

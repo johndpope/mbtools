@@ -9,11 +9,6 @@ int main(int argc, char *argv[]) {
 
     std::thread t(&MapServer::run, srv.get()) ;
 
-
-    this_thread::sleep_for(std::chrono::seconds(10)) ;
-
-    srv->stop() ;
-
     t.join() ;
 
 

@@ -21,7 +21,6 @@
 class MapServer: public http::Server {
 public:
     MapServer(const std::string &root, const std::string &ports) ;
-
 };
 
 #endif

@@ -1,6 +1,8 @@
 #include "mesh_tile_renderer.hpp"
 #include "mesh.hpp"
 #include "mesh_tile.pb.h"
+#include "shader_config.hpp"
+#include "dictionary.hpp"
 
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/gzip_stream.h>
@@ -165,33 +167,44 @@ public:
 
     bool init(const string &) ;
     void release() ;
-    void init_buffers(const DataBuffers &data, const BBox &box) ;
-    void render(const std::string &name);
-    void render_debug(const std::string &name);
+    void init_buffers(const DataBuffers &data) ;
+    void init_default_uniforms(const BBox &box) ;
+    bool use_program(const Dictionary &params) ;
+    void render();
+
     void clear();
 private:
-
-    static GLuint create_shader(const char *shader_source, GLuint stype) ;
-    static bool link_program(GLuint prog) ;
-
-    bool init_shaders(const vector<ShaderProgram> &shaders) ;
 
     friend class MeshTileRenderer ;
 
     GLFWwindow* win_ = 0;
     GLuint fbo_ = 0, texture_id_ = 0;
     uint32_t ts_ ;
-    map<string, GLuint> programs_ ;
-    GLuint vao_, coords_, attr_, indices_, tf_ ;
+
+    GLuint vao_, coords_, attr_, indices_, tf_, pid_ ;
     GLuint elem_count_ ;
     vector<float> tfbuf_ ;
+    glsl::ProgramList programs_ ;
 };
+
+static void error_callback(int error, const char* description)
+{
+    std::cerr << "GLFW: (" << error << ") " << description << std::endl;
+}
 
 bool RenderingContext::init(const string &cfg) {
 
     if( !glfwInit() ) return false ;
 
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwSetErrorCallback(error_callback);
+
+    // With an intel card with this glxinfo I have replaced GLFW_OPENGL_COMPAT_PROFILE
+    // to GLFW_OPENGL_CORE_PROFILE
+    // OpenGL renderer string: Mesa DRI Intel(R) HD Graphics 5500 (Broadwell GT2)
+    // OpenGL core profile version string: 3.3 (Core Profile) Mesa 10.5.9
+    // OpenGL core profile shading language version string: 3.30
+
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -204,6 +217,9 @@ bool RenderingContext::init(const string &cfg) {
     }
 
     glfwMakeContextCurrent(win_);
+
+    // this is needed for non core profiles or instead use gl3w
+    glewExperimental=true;
 
     if( glewInit() != GLEW_OK ) return false ;
 
@@ -220,7 +236,8 @@ bool RenderingContext::init(const string &cfg) {
     // bind buffers
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 
-    init_shaders(g_programs) ;
+    if ( !programs_.load(cfg) ) return false ;
+    if ( !programs_.install() ) return false ;
 
     return true ;
 }
@@ -241,98 +258,11 @@ void RenderingContext::release() {
 }
 
 
-GLuint RenderingContext::create_shader(const char *shader_source, GLuint stype)
-{
-    GLuint shader_obj = glCreateShader(stype);
-
-    if ( shader_obj == 0) return 0 ;
-
-    const GLchar* p[1];
-    p[0] = shader_source ;
-    GLint lengths[1] = { (GLint)strlen(shader_source) };
-
-    glShaderSource(shader_obj, 1, p, lengths);
-
-    glCompileShader(shader_obj);
-
-    GLint success;
-    glGetShaderiv(shader_obj, GL_COMPILE_STATUS, &success);
-
-    if (!success) {
-        GLchar InfoLog[1024];
-        glGetShaderInfoLog(shader_obj, 1024, NULL, InfoLog);
-        fprintf(stderr, "Error compiling shader: '%s'\n", InfoLog);
-        return 0 ;
-    }
-
-    return shader_obj ;
-}
-
-bool RenderingContext::link_program(GLuint prog)
-{
-    GLchar error_log[1024] = { 0 };
-
-    glLinkProgram(prog) ;
-
-    GLint success;
-    glGetProgramiv(prog, GL_LINK_STATUS, &success);
-
-    if (success == 0) {
-        glGetProgramInfoLog(prog, sizeof(error_log), NULL, error_log);
-        fprintf(stderr, "Error linking shader program: '%s'\n", error_log);
-        return false ;
-    }
-
-    glValidateProgram(prog);
-    glGetProgramiv(prog, GL_VALIDATE_STATUS, &success);
-
-    if (!success) {
-        glGetProgramInfoLog(prog, sizeof(error_log), NULL, error_log);
-        fprintf(stderr, "Invalid shader program: '%s'\n", error_log);
-        return false ;
-    }
-
-    return true ;
-}
-
-
-bool RenderingContext::init_shaders(const vector<ShaderProgram> &shaders)
-{
-    for( const ShaderProgram &s: shaders ) {
-
-        GLuint pid = glCreateProgram(); ;
-        programs_[s.name_] = pid ;
-
-        if ( s.vertex_shader_ ) {
-            GLuint sid = create_shader(s.vertex_shader_, GL_VERTEX_SHADER);
-            if ( sid == 0 ) return false ;
-
-            glAttachShader(pid, sid);
-        }
-
-        if ( s.fragment_shader_ ) {
-            GLuint sid = create_shader(s.fragment_shader_, GL_FRAGMENT_SHADER);
-            if ( sid == 0 ) return false ;
-
-            glAttachShader(pid, sid);
-        }
-
-        const char* varyings[2] = { "Normal" };
-        glTransformFeedbackVaryings(pid, 1, varyings, GL_INTERLEAVED_ATTRIBS);
-
-        if ( !link_program(pid) )
-            return false ;
-
-
-    }
-
-    return true ;
-}
 
 #define POSITION_LOCATION    0
 #define ATTRIBUTE_LOCATION   1
 
-void RenderingContext::init_buffers(const DataBuffers &buf, const BBox &box) {
+void RenderingContext::init_buffers(const DataBuffers &buf) {
 
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
@@ -355,35 +285,26 @@ void RenderingContext::init_buffers(const DataBuffers &buf, const BBox &box) {
 
     uint k=0 ;
     for( const DataBuffers::Channel &c: buf.channels_) {
-        GLuint loc = ATTRIBUTE_LOCATION + k++ ;
-        glBindBuffer(GL_ARRAY_BUFFER, attr_);
-        glEnableVertexAttribArray(loc);
-        glVertexAttribPointer(loc, c.dim_, GL_FLOAT, GL_FALSE, 0, (GLvoid *)(c.offset_ * sizeof(float)));
+        GLint loc = glGetAttribLocation(pid_, c.name_.c_str()) ;
+        if ( loc != -1 ) {
+            glBindBuffer(GL_ARRAY_BUFFER, attr_);
+            glEnableVertexAttribArray(loc);
+            glVertexAttribPointer(loc, c.dim_, GL_FLOAT, GL_FALSE, 0, (GLvoid *)(c.offset_ * sizeof(float)));
+        }
     }
 
+}
+
+void RenderingContext::init_default_uniforms(const BBox &box)
+{
     float scale =  box.width() ;
     float ofx = box.minx_ ;
     float ofy = box.miny_  ;
 
-    float theta = M_PI/4 ;
-    float phi = M_PI/4 ;
-
-    float gx = cos(phi) * sin(theta) ;
-    float gy = sin(phi) * sin(theta) ;
-    float gz = cos(theta) ;
-
-    for ( auto pr: programs_ ) {
-        glUseProgram(pr.second) ;
-
-        GLint loc = glGetUniformLocation(pr.second, "offset") ;
-        if ( loc != -1 ) glUniform2f(loc, ofx, ofy) ;
-        loc = glGetUniformLocation(pr.second, "scale") ;
-        if ( loc != -1 ) glUniform1f(loc, scale) ;
-
-        loc = glGetUniformLocation(pr.second, "ldir") ;
-        if ( loc != -1 ) glUniform3f(loc, gx, gy, gz) ;
-    }
-
+    GLint loc = glGetUniformLocation(pid_, "offset") ;
+    if ( loc != -1 ) glUniform2f(loc, ofx, ofy) ;
+    loc = glGetUniformLocation(pid_, "scale") ;
+    if ( loc != -1 ) glUniform1f(loc, scale) ;
 }
 
 void RenderingContext::clear() {
@@ -393,38 +314,12 @@ void RenderingContext::clear() {
     glDeleteBuffers(1, &attr_) ;
 }
 
-void RenderingContext::render(const std::string &name) {
-
-    GLuint pid = programs_[name] ;
-
-    glUseProgram(pid) ;
+void RenderingContext::render() {
     glBindVertexArray(vao_);
     glDrawElements(GL_TRIANGLES, elem_count_, GL_UNSIGNED_INT, 0) ;
     glBindVertexArray(0) ;
-    glUseProgram(0) ;
-
-    glFlush() ;
-
 }
 
-void RenderingContext::render_debug(const std::string &name) {
-
-    GLuint pid = programs_[name] ;
-
-    glUseProgram(pid) ;
-    glBindVertexArray(vao_);
-    glEnable(GL_RASTERIZER_DISCARD);
-    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tf_);
-    glBeginTransformFeedback(GL_TRIANGLES);
-    glDrawElements(GL_TRIANGLES, elem_count_, GL_UNSIGNED_INT, 0) ;
-    glEndTransformFeedback();
-    glDisable(GL_RASTERIZER_DISCARD);
-    glBindVertexArray(0) ;
-    glUseProgram(0) ;
-
-    glFlush();
-    glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, tfbuf_.size() * sizeof(float), tfbuf_.data());
-}
 
 MeshTileRenderer::MeshTileRenderer(const string &cfg_file, uint32_t ts): tile_size_(ts), ctx_(new RenderingContext(ts))
 {
@@ -435,8 +330,23 @@ MeshTileRenderer::~MeshTileRenderer() {
     ctx_->release() ;
 }
 
+bool RenderingContext::use_program(const Dictionary &options) {
+
+    string name = options.get("program") ;
+    if ( name.empty() || programs_.programs_.count(name) == 0 ) return false ;
+
+    glsl::Program &prog = programs_.programs_[name] ;
+    pid_ = prog.id() ;
+
+    glUseProgram(pid_) ;
+
+    prog.set_uniforms(options) ;
+
+    return true ;
+}
+
 std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
-        const std::string &bytes, const std::string &prname)
+        const std::string &bytes, const Dictionary &options)
 {
 //    std::lock_guard<std::mutex> lock(mtx_) ;
 
@@ -446,20 +356,23 @@ std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    if ( !ctx_->use_program(options) ) return string() ;
+
     DataBuffers data ;
 
     if ( decode(bytes, data) ) {
 
         BBox box ;
         tms::tileBounds(x, y, z, box.minx_, box.miny_, box.maxx_, box.maxy_) ;
-        ctx_->init_buffers(data, box) ;
 
-        ctx_->render(prname) ;
-
+        ctx_->init_buffers(data) ;
+        ctx_->init_default_uniforms(box) ;
+        ctx_->render() ;
         ctx_->clear() ;
     }
 
-
+    glUseProgram(0) ;
+    glFlush() ;
 
     vector<uint8_t> pixels( tile_size_ * tile_size_ * 4 ) ;
 
