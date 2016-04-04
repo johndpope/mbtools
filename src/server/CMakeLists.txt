@@ -10,6 +10,9 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/util/dictionary.cpp
 	${SRC_ROOT}/util/dictionary.hpp
 
+	${SRC_ROOT}/util/logger.cpp
+	${SRC_ROOT}/util/logger.hpp
+
 	${SRC_ROOT}/server/map_server.cpp
 	${SRC_ROOT}/server/map_server.hpp
 

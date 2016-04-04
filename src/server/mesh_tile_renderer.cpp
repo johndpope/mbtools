@@ -119,47 +119,6 @@ static bool save_png(uint8_t *pixels, int w, int h, vector<uint8_t> &data)
 }
 /******************************************************************************************/
 
-struct ShaderProgram {
-    const char *name_ ;
-    const char *vertex_shader_ ;
-    const char *fragment_shader_ ;
-};
-
-vector<ShaderProgram> g_programs = {
-  { "hillshade",
-    R"(#version 330
-
-    uniform vec2 offset ;
-    uniform float scale ;
-
-    layout (location = 0) in vec2 coords;
-    layout (location = 2) in vec3 normals;
-
-    out vec3 Normal ;
-
-    void main()
-    {
-        vec2 cp = 2*(coords - offset)/scale - vec2(1, 1);
-        gl_Position = vec4(cp.xy, 0, 1) ;
-        Normal = normals ;
-    })",
-    R"(
-    #version 330
-
-    in vec3 Normal0;
-    out vec4 frag_color;
-
-    uniform vec3 ldir ;
-
-    void main()
-    {
-        float g = dot(ldir, Normal0) ;
-        frag_color = vec4(g, g, g, 1) ;
-    };
-    )"
-    }
-};
-
 class RenderingContext {
 public:
 
@@ -181,9 +140,8 @@ private:
     GLuint fbo_ = 0, texture_id_ = 0;
     uint32_t ts_ ;
 
-    GLuint vao_, coords_, attr_, indices_, tf_, pid_ ;
+    GLuint vao_, coords_, attr_, indices_, pid_ ;
     GLuint elem_count_ ;
-    vector<float> tfbuf_ ;
     glsl::ProgramList programs_ ;
 };
 
@@ -204,9 +162,10 @@ bool RenderingContext::init(const string &cfg) {
     // OpenGL core profile version string: 3.3 (Core Profile) Mesa 10.5.9
     // OpenGL core profile shading language version string: 3.30
 
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
     win_ = glfwCreateWindow(ts_, ts_, "tile", 0, 0);
@@ -257,10 +216,7 @@ void RenderingContext::release() {
     glfwTerminate();
 }
 
-
-
 #define POSITION_LOCATION    0
-#define ATTRIBUTE_LOCATION   1
 
 void RenderingContext::init_buffers(const DataBuffers &buf) {
 
@@ -283,16 +239,15 @@ void RenderingContext::init_buffers(const DataBuffers &buf) {
     glBindBuffer(GL_ARRAY_BUFFER, attr_);
     glBufferData(GL_ARRAY_BUFFER, buf.attr_.size() * sizeof(GLfloat), buf.attr_.data(), GL_STATIC_DRAW);
 
-    uint k=0 ;
+    // we have to iterate over channels and find the one with name matching an attribute in the current program
+
     for( const DataBuffers::Channel &c: buf.channels_) {
         GLint loc = glGetAttribLocation(pid_, c.name_.c_str()) ;
         if ( loc != -1 ) {
-            glBindBuffer(GL_ARRAY_BUFFER, attr_);
             glEnableVertexAttribArray(loc);
             glVertexAttribPointer(loc, c.dim_, GL_FLOAT, GL_FALSE, 0, (GLvoid *)(c.offset_ * sizeof(float)));
         }
     }
-
 }
 
 void RenderingContext::init_default_uniforms(const BBox &box)
@@ -332,7 +287,7 @@ MeshTileRenderer::~MeshTileRenderer() {
 
 bool RenderingContext::use_program(const Dictionary &options) {
 
-    string name = options.get("program") ;
+    string name = options.get("p") ;
     if ( name.empty() || programs_.programs_.count(name) == 0 ) return false ;
 
     glsl::Program &prog = programs_.programs_[name] ;
@@ -348,12 +303,6 @@ bool RenderingContext::use_program(const Dictionary &options) {
 std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
         const std::string &bytes, const Dictionary &options)
 {
-//    std::lock_guard<std::mutex> lock(mtx_) ;
-
-    // we need to do this since we are possibly in a different thread
-
-    glfwMakeContextCurrent(ctx_->win_);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if ( !ctx_->use_program(options) ) return string() ;

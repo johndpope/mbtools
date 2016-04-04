@@ -2,6 +2,7 @@
 #include "request.hpp"
 #include "reply.hpp"
 #include "base64.hpp"
+#include "logger.hpp"
 
 using namespace std ;
 namespace fs = boost::filesystem ;
@@ -37,6 +38,7 @@ VDA5OjExOjIzKzAzOjAw9nQtmAAAAABJRU5ErkJggg==" ;
 
 void TileRequestHandler::handle_request(const Request &request, Response &resp)
 {
+
     boost::smatch m ;
     boost::regex_match(request.path_, m, uri_pattern_) ;
 
@@ -52,6 +54,8 @@ void TileRequestHandler::handle_request(const Request &request, Response &resp)
         options = request.POST_ ;
 
     ty = pow(2, zoom) - 1 - ty ;
+
+    LOG_INFO_STREAM("Recieved request for tile: (" << tx << '/' << ty << '/' << zoom << ")") ;
 
     string encoding, mime ;
 

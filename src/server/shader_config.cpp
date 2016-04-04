@@ -200,13 +200,22 @@ static bool decode_iv(const string &val, GLint loc, size_t dim, size_t count) {
 
 bool Uniform::set_value(const string &val)
 {
-    static boost::regex rx(R"(([a-z1-4]+)(?:\[([1-9]+)\])?"))") ;
+    static boost::regex rx(R"(([a-z1-4]+)(?:\[([1-9]+)\])?)") ;
 
     boost::smatch sm ;
     if ( !boost::regex_match(type_, sm, rx) ) return false ;
 
     string atype = sm.str(1) ;
-    size_t asize = stoi(sm.str(2));
+    size_t asize = 1;
+
+    if ( !sm.str(2).empty() ) {
+        try {
+            asize = stoi(sm.str(2));
+        }
+        catch ( invalid_argument &) {
+            return false ;
+        }
+    }
 
     if ( atype == "float" || atype == "double" )
         return decode_fv(val, loc_, 1, asize) ;
@@ -267,7 +276,7 @@ bool Program::build() {
 
     // get uniforms location
 
-    for( auto u: uniforms_ )
+    for( auto &u: uniforms_ )
         u.setup(id_) ;
 
     return true ;
@@ -287,8 +296,9 @@ void Program::set_uniforms(const Dictionary &params)
 
 bool ProgramList::install() {
 
-    for( auto pit: programs_ ) {
-        if ( !pit.second.build() ) return false ;
+    for( auto &pit: programs_ ) {
+        if ( !pit.second.build() )
+            return false ;
     }
 
     return true ;
