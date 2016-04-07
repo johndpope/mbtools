@@ -1,11 +1,91 @@
 #include "asset_request_handler.hpp"
 #include "request.hpp"
 #include "reply.hpp"
+#include "gpx_reader.hpp"
+
+#include <zlib.h>
 #include <boost/regex.hpp>
 
 using namespace std ;
 namespace fs = boost::filesystem ;
 using namespace http ;
+
+#define windowBits 15
+#define GZIP_ENCODING 16
+
+static string compress(const string &bytes)
+{
+    z_stream zs;
+    memset(&zs, 0, sizeof(zs));
+
+    if ( deflateInit2 (&zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+                       windowBits | GZIP_ENCODING, 8,
+                       Z_DEFAULT_STRATEGY) != Z_OK )
+        return string() ;
+
+    zs.next_in = (Bytef*)bytes.data() ;
+    zs.avail_in = bytes.size() ;
+
+    int ret;
+    char outbuffer[32768];
+    std::string outstring;
+
+    // retrieve the compressed bytes blockwise
+    do {
+        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
+        zs.avail_out = sizeof(outbuffer);
+
+        ret = deflate(&zs, Z_FINISH);
+
+        if (outstring.size() < zs.total_out) {
+            // append the block to the output string
+            outstring.append(outbuffer,
+                             zs.total_out - outstring.size());
+        }
+    } while (ret == Z_OK);
+
+    deflateEnd(&zs);
+
+    return outstring ;
+}
+
+static string uncompress(const string &str)
+{
+    z_stream zs;
+    memset(&zs, 0, sizeof(zs));
+
+    if (inflateInit(&zs) != Z_OK)
+        return string() ;
+
+    zs.next_in = (Bytef*)str.data();
+    zs.avail_in = str.size();
+
+    int ret;
+    char outbuffer[32768];
+
+    std::string outstring;
+
+    // get the decompressed bytes blockwise using repeated calls to inflate
+
+    do {
+        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
+        zs.avail_out = sizeof(outbuffer);
+
+        ret = inflate(&zs, 0);
+
+        if (outstring.size() < zs.total_out) {
+            outstring.append(outbuffer, zs.total_out - outstring.size());
+        }
+
+    } while (ret == Z_OK);
+
+    inflateEnd(&zs);
+
+    if (ret != Z_STREAM_END) return string() ;
+
+    return outstring;
+}
+
 
 AssetRequestHandler::AssetRequestHandler(const string &url_prefix, const std::string &rs): rsdb_(rs), url_prefix_(url_prefix)
 {
@@ -21,6 +101,8 @@ void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
     boost::regex_match(req.path_, m, r) ;
 
     string key = m.str(1) ;
+
+    string cnv = req.GET_["cnv"] ;
 
     if ( db_ ) {
 
@@ -42,7 +124,19 @@ void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
                 const char *blob = res.getBlob(0, bs) ;
 
                 string content(blob, blob + bs) ;
-                resp.encode_file_data(content, "gzip", string(), mod_time) ;
+
+                if ( cnv.empty() )
+                    resp.encode_file_data(content, "gzip", string(), mod_time) ;
+                else if ( cnv == "geojson" ) {
+                    string uc = uncompress(content) ;
+                    FeatureCollection col ;
+                    if ( GPXReader::load_from_string(uc, col) ) {
+                        resp.encode_file_data(compress(col.toGeoJSON()), "gzip", string(), mod_time) ;
+                    }
+                    else
+                        resp = Response::stock_reply(Response::not_found) ;
+
+                }
             }
             else {
                 resp = Response::stock_reply(Response::not_found) ;
@@ -57,8 +151,21 @@ void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
     else {
         fs::path file(rsdb_ / key) ;
 
-        if ( fs::exists(file) )
-            resp.encode_file(file.native(), string(), string()) ;
+        if ( fs::exists(file) ) {
+
+            time_t mod_time = boost::filesystem::last_write_time(file.native());
+
+            if ( cnv.empty() )
+                resp.encode_file(file.native(), string(), string()) ;
+            else if ( cnv == "geojson" ) {
+                FeatureCollection col ;
+                if ( GPXReader::load_from_file(file.native(), col) ) {
+                    resp.encode_file_data(compress(col.toGeoJSON()), "gzip", string(), mod_time) ;
+                }
+                else
+                    resp = Response::stock_reply(Response::not_found) ;
+            }
+        }
         else
             resp = Response::stock_reply(Response::not_found) ;
 
