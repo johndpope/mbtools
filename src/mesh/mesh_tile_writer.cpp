@@ -209,7 +209,7 @@ bool MeshTileWriter::queryTile(uint32_t tx, uint32_t ty, uint32_t tz, uint32_t t
     tile_msg_.Clear() ;
 
     encodeMesh(tile_msg_, coords, normals, triangles) ;
-
+{
 
     ofstream strm("/tmp/oo.obj") ;
 
@@ -222,6 +222,14 @@ bool MeshTileWriter::queryTile(uint32_t tx, uint32_t ty, uint32_t tz, uint32_t t
         strm << "f " << triangles[i] + 1 << ' ' << triangles[i+1] + 1 << ' ' << triangles[i+2] + 1 << endl ;
     }
 
+    uint n = coords.size() ;
+    strm << "v " << box.minx_ << ' ' << box.miny_ << ' ' << 0 << endl ;
+    strm << "v " << box.minx_ << ' ' << box.maxy_ << ' ' << 0 << endl ;
+    strm << "v " << box.maxx_ << ' ' << box.maxy_ << ' ' << 0 << endl ;
+    strm << "v " << box.maxx_ << ' ' << box.miny_ << ' ' << 0 << endl ;
+    strm << "f " << n+1 << ' '  << n+2 << ' ' << n+3 << ' ' << n+4 << endl ;
+}
+    return true ;
 }
 
 string MeshTileWriter::toString(bool compress)

@@ -82,6 +82,8 @@ bool MeshTilesetWriter::writeTilesDB(const string &mesh_file, MapConfig &cfg)
             for( uint32_t x = x0 ; x<=x1 ; x++ )
                 for(uint32_t y = y0 ; y<=y1 ; y++ )
                 {
+                    if ( z == 13 && (x == 4602) && (y == (pow(2, z)-1 - 3075)))
+                        cout << "ok here" ;
                     if ( mt.queryTile(x, y, z) ) {
 
                         string data = mt.toString() ;

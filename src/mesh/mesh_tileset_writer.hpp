@@ -20,23 +20,4 @@ private:
     boost::filesystem::path tileset_ ;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif

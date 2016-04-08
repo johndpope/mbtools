@@ -81,12 +81,7 @@ bool MBTileWriter::writeTilesDB(const MapFile &map, MapConfig &cfg)
             for( uint32_t x = x0 ; x<=x1 ; x++ )
                 for(uint32_t y = y0 ; y<=y1 ; y++ )
                 {
-                    int yy = pow(2, z) - 1 - y ;
-                    cout << z << ' ' << x << ' ' << y << endl ;
 
-                    if ( z==12 && x==2301 && yy==1535) {
-                        cout << z << ' ' << x << ' ' << y << endl ;
-                    }
                     VectorTileWriter vt(x, y, z) ;
 
                     if ( map.queryTile(cfg, vt) ) {

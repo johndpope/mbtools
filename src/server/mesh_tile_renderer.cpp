@@ -254,7 +254,7 @@ void RenderingContext::init_default_uniforms(const BBox &box)
 {
     float scale =  box.width() ;
     float ofx = box.minx_ ;
-    float ofy = box.miny_  ;
+    float ofy = box.miny_ ;
 
     GLint loc = glGetUniformLocation(pid_, "offset") ;
     if ( loc != -1 ) glUniform2f(loc, ofx, ofy) ;
@@ -303,7 +303,8 @@ bool RenderingContext::use_program(const Dictionary &options) {
 std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
         const std::string &bytes, const Dictionary &options)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST) ;
+    glClear(GL_COLOR_BUFFER_BIT);
 
     if ( !ctx_->use_program(options) ) return string() ;
 
@@ -332,11 +333,12 @@ std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
     if ( save_png(pixels.data(), tile_size_, tile_size_, out) )
     {
         string s(out.begin(), out.end()) ;
-
+/*
         {
         ofstream strm("/tmp/oo.png", ios::binary) ;
         strm.write(s.data(), s.size()) ;
         }
+        */
         return std::move(s) ;
     }
 

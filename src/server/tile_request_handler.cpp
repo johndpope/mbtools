@@ -4,6 +4,8 @@
 #include "base64.hpp"
 #include "logger.hpp"
 
+#include <fstream>
+
 using namespace std ;
 namespace fs = boost::filesystem ;
 using namespace http ;
@@ -126,16 +128,31 @@ void TileRequestHandler::handle_request(const Request &request, Response &resp)
     }
     else { // tiles are stored int the filesystem as seperate files
 
+        // TODO fix to call renderer when extension is
         fs::path tile_path(tileset_) ;
         tile_path /= to_string(zoom) ;
         tile_path /= to_string(tx) ;
-        tile_path /= to_string(ty) + "." + extension ;
-
-//        resp.setHeader("Connection", "keep-alive") ;
-//        resp.setHeader("Access-Control-Allow-Origin", "*") ;
+        tile_path /= to_string(ty) + '.' + extension;
 
         if ( fs::exists( tile_path ) )
             resp.encode_file(tile_path.native(), encoding, mime) ;
+        else if ( extension == "png"  )
+        {
+            tile_path.replace_extension(".pbf") ;
+
+            if ( fs::exists(tile_path) ) {
+                ifstream strm(tile_path.native().c_str(), ios::binary) ;
+                std::stringstream buffer;
+                buffer << strm.rdbuf();
+                strm.close();
+                string content = gl_->addJob(tx, ty, zoom, buffer.str(), options)->get_future().get() ;
+                resp.encode_file_data(content, encoding, mime, mod_time) ;
+            }
+            else {
+                string empty_tile = base64_decode(g_empty_transparent_png_256) ;
+                resp.encode_file_data(empty_tile, encoding, mime, mod_time) ;
+            }
+        }
         else {
             string empty_tile ;
 

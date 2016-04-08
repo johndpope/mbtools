@@ -3,9 +3,11 @@
 #include "mesh/mesh_tileset_writer.hpp"
 
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 using namespace std ;
 namespace fs = boost::filesystem ;
+namespace po = boost::program_options;
 
 void printUsageAndExit()
 {
