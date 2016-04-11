@@ -1,154 +1,169 @@
-#if 0
+using namespace std ;
+#include "pugixml.hpp"
+#include "kml_reader.hpp"
 
-#include "DataImport.h"
-#include "MapFeature.h"
-#include "MapFeatureIndex.h"
+#include <iostream>
+#include <boost/algorithm/string.hpp>
 
-#include <QStringList>
-#include <QDebug>
-#include <QDomDocument>
-#include <QXmlDefaultHandler>
-#include <QFile>
-#include <QBuffer>
-#include <QStack>
+using namespace std ;
+using namespace geojson ;
 
-#include <minizip/unzip.h>
+static bool parse_coordinates(const std::string &str, PointList &coords) {
 
-#define dir_delimter '/'
-#define MAX_FILENAME 512
-#define READ_SIZE 8192
+    if ( str.empty() ) return false ;
 
-bool getKmzFileList(unzFile zipfile, QStringList &res)
-{
-    // Get info about the zip file
+    string trimmed = str ;
 
-    unz_global_info global_info;
+    boost::trim_if(trimmed, boost::is_any_of("\n\r\t ")) ;
 
-    if ( unzGetGlobalInfo( zipfile, &global_info ) != UNZ_OK ) return false ;
+    std::vector<string> tokens ;
+    boost::split(tokens, trimmed, boost::is_any_of(", \t\n\r"),boost::algorithm::token_compress_on);
 
-    // Loop to extract all files
-    uLong i;
+    if ( tokens.size() %3 ) return false ;
 
-    for ( i = 0; i < global_info.number_entry; ++i )
-    {
-        // Get info about current file.
-        unz_file_info file_info;
+    try {
+        for(int i=0 ; i<tokens.size() ; i+=3)
+        {
+            float lon = stof(tokens[i]) ;
+            float lat = stof(tokens[i+1]) ;
+            float ele = stof(tokens[i+2]) ;
 
-        char filename[ MAX_FILENAME ];
-
-        if ( unzGetCurrentFileInfo( zipfile,  &file_info, filename, MAX_FILENAME,  NULL, 0, NULL, 0 ) != UNZ_OK )
-            return false ;
-
-        QString qfileName = QString::fromUtf8(filename) ;
-
-        if ( qfileName.endsWith('/') || qfileName.endsWith('\\') ) ;
-        else
-            res.append(qfileName) ;
+            coords.push_back({lon, lat, ele}) ;
+        }
+    } catch ( std::invalid_argument ) {
+        return false ;
     }
 
     return true ;
 }
 
-QByteArray readKmlFile(unzFile zipfile, const QString &fileName)
-{
-    QByteArray res ;
+bool kml_load(const pugi::xml_document &doc, FeatureCollection &col) {
 
-    if ( unzLocateFile(zipfile, fileName.toUtf8().data(), 0) != UNZ_OK ) return res ;
-    if ( unzOpenCurrentFile( zipfile ) != UNZ_OK ) return res ;
+    // we do not parse metadata at the moment since geojson does not support them
 
-    int error = UNZ_OK ;
+    auto plc = doc.select_nodes("descendant::Placemark") ;
 
-    // Buffer to hold data read from the zip file.
+    for( auto xpm: plc) {
+        pugi::xml_node pm = xpm.node() ;
 
-    char read_buffer[ READ_SIZE ];
+        if ( pm.empty() ) continue ;
 
-    do
-    {
-        error = unzReadCurrentFile( zipfile, read_buffer, READ_SIZE );
-        if ( error < 0 ) {
-            unzCloseCurrentFile( zipfile );
-            return res ;
+        Feature f ;
+
+        string name = pm.child("name").text().as_string() ;
+        string desc = pm.child("description").text().as_string() ;
+
+        f.id_ = pm.attribute("id").as_string() ;
+        if ( !name.empty() ) f.properties_.add("name", name) ;
+        if ( !desc.empty() ) f.properties_.add("description", desc) ;
+
+        std::shared_ptr<GeometryCollection> gcol(new GeometryCollection) ;
+
+        for ( auto xpi: pm.select_nodes("descendant::Point")) {
+            pugi::xml_node node = xpi.node() ;
+
+            if ( !node.empty() ) {  // parse point geometry
+                PointList coordinates ;
+                if ( parse_coordinates(node.child("coordinates").text().as_string(), coordinates) ) {
+                    gcol->geometries_.push_back(std::make_shared<PointGeometry>(coordinates[0])) ;
+                }
+            }
         }
 
-        res.append(QByteArray(read_buffer, error)) ;
-    } while ( error > 0 );
+        for ( auto xpi: pm.select_nodes("descendant::LineString")) {
+            pugi::xml_node node = xpi.node() ;
 
-
-    unzCloseCurrentFile( zipfile );
-
-    return res ;
-}
-
-CollectionTreeNode *importKmz(const QString &fileName, quint64 folder_id, MapFeatureIndex *fidx)
-{
-    CollectionTreeNode *res = 0 ;
-
-    // Open the zip file
-    unzFile zipfile = unzOpen( fileName.toUtf8().data() );
-    if ( zipfile == NULL ) return 0 ;
-
-    QStringList files ;
-
-    if ( !getKmzFileList(zipfile, files) ) {
-        unzClose(zipfile) ;
-        return 0 ;
-    }
-
-    Q_FOREACH( const QString &kml_file, files) {
-        QByteArray data = readKmlFile(zipfile, kml_file) ;
-
-        if ( !data.isEmpty() )
-        {
-            QBuffer buffer(&data) ;
-            res = importKml(&buffer, folder_id, fidx) ;
+            if ( !node.empty() ) {  // parse line geometry
+                PointList coordinates ;
+                if ( parse_coordinates(node.child("coordinates").text().as_string(), coordinates) ) {
+                    gcol->geometries_.push_back(std::make_shared<LineStringGeometry>(coordinates)) ;
+                }
+            }
         }
+
+        for ( auto xpi: pm.select_nodes("descendant::Polygon")) {
+            pugi::xml_node node = xpi.node() ;
+
+            if ( !node.empty() ) {  // parse exterior/interior rings
+
+                std::shared_ptr<PolygonGeometry> pgeom(new PolygonGeometry) ;
+                PointList coordinates ;
+
+                pugi::xml_node ep = node.select_single_node("outerBoundaryIs/LinearRing/coordinates").node() ;
+                if ( parse_coordinates(ep.text().as_string(), coordinates) ) {
+                    pgeom->coordinates_.push_back(std::move(coordinates)) ;
+                }
+                else continue ;
+
+                for( auto ipx: node.select_nodes("innerBoundaryIs/LinearRing/coordinates") )
+                {
+                    PointList coordinates ;
+                    pugi::xml_node ip = ipx.node() ;
+
+                    if ( !ip.empty() ) {
+                        if ( parse_coordinates(ip.text().as_string(), coordinates) ) {
+                                pgeom->coordinates_.push_back(std::move(coordinates)) ;
+                        }
+                    }
+                }
+
+                gcol->geometries_.push_back(pgeom) ;
+            }
+        }
+
+        if ( gcol->geometries_.size() == 1 )
+            f.geometry_ = gcol->geometries_[0] ;
+        else
+            f.geometry_ = gcol ;
+
+        col.features_.push_back(std::move(f)) ;
+
     }
 
-    unzClose( zipfile );
 
-    return res ;
+
+    return true ;
 }
 
-CollectionTreeNode *importKml(const QString &fileName, quint64 folder_id, MapFeatureIndex *fidx)
+
+
+bool KMLReader::load_from_file(const std::string &file_name, FeatureCollection &col)
 {
-    QFile file(fileName) ;
-    if ( !file.open(QIODevice::ReadOnly) ) return 0 ;
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(file_name.c_str());
 
-    return importKml(&file, folder_id, fidx) ;
+    if ( !result ) {
+        cerr << "GPX file parsed with errors\n";
+        cerr << "error parsing file (" <<
+                file_name << "): " << result.description() << "\n";
+        return false ;
+    }
+    else
+        return kml_load(doc, col) ;
+
 }
 
-struct KmlPlacemark {
+bool KMLReader::load_from_string(const std::string &bytes, FeatureCollection &col)
+{
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_string(bytes.c_str());
 
-    KmlPlacemark(): type_(-1), is_outer_boundary_(true) {}
-    QString name_, style_, description_ ;
-        QVector<QPointF> geometry_ ;
-    QVector<float> altitude_ ;
-    int type_ ;
-    QString time_ ;
-    bool is_outer_boundary_ ;
+    if ( !result ) {
+        cerr << "GPX content parsed with errors\n";
+        cerr << result.description() << "\n";
+        return false ;
+    }
+    else
+        return kml_load(doc, col) ;
+}
 
-    bool parseCoordinates(const QString &coords) ;
 
-};
+#if 0
+
 
 bool KmlPlacemark::parseCoordinates(const QString &coords)
 {
-    QStringList tokens = coords.split(QRegExp("[\\s,]+"), QString::SkipEmptyParts) ;
 
-    if ( tokens.size() %3 ) return false ;
-
-    for(int i=0 ; i<tokens.size() ; i+=3)
-    {
-        bool ok ;
-        float lat = tokens.at(i).toFloat(&ok) ;
-        if ( !ok ) return false ;
-        float lon = tokens.at(i+1).toFloat(&ok) ;
-        if ( !ok ) return false ;
-        float ele = tokens.at(i+2).toFloat(&ok) ;
-        if ( !ok ) return false ;
-        geometry_.push_back(QPointF(lat, lon)) ;
-        altitude_.push_back(ele) ;
-    }
 
 
 }

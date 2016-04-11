@@ -13,7 +13,7 @@
 class MapServerHandlerFactory: public http::RequestHandlerFactory {
 public:
 
-    MapServerHandlerFactory(const std::string &rootFolder)  ;
+    MapServerHandlerFactory(const std::string &root_folders, bool with_gl=true)  ;
     ~MapServerHandlerFactory() {
         shutdown_gl_loop() ;
     }
@@ -22,8 +22,10 @@ public:
 private:
 
     void shutdown_gl_loop() {
-        gl_->stop() ;
-        gl_thread_->join() ;
+        if ( gl_ ) {
+            gl_->stop() ;
+            gl_thread_->join() ;
+        }
     }
 
     std::map<std::string, std::shared_ptr<TileRequestHandler> > tile_request_handlers_ ;

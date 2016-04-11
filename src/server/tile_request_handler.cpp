@@ -57,7 +57,7 @@ void TileRequestHandler::handle_request(const Request &request, Response &resp)
 
     ty = pow(2, zoom) - 1 - ty ;
 
-    LOG_INFO_STREAM("Recieved request for tile: (" << tx << '/' << ty << '/' << zoom << ")") ;
+    LOG_INFO_STREAM("Recieved request for tile: (" << tx << '/' << ty << '/' << zoom << ")" << "of map " << m.str(1) << "-" << m.str(2)) ;
 
     string encoding, mime ;
 
@@ -96,7 +96,7 @@ void TileRequestHandler::handle_request(const Request &request, Response &resp)
 
                 if ( extension == "pbf" || is_png(data, blobsize) )
                     content.assign(data, data + blobsize) ;
-                else {
+                else if ( gl_ ){
                     // this is probably a mesh tile and we need to render it to PNG
                     // we have to add a job to the OpenGL rendering loop and wait for it to become ready
                     content = gl_->addJob(tx, ty, zoom,
@@ -140,7 +140,7 @@ void TileRequestHandler::handle_request(const Request &request, Response &resp)
         {
             tile_path.replace_extension(".pbf") ;
 
-            if ( fs::exists(tile_path) ) {
+            if ( fs::exists(tile_path) && gl_ ) {
                 ifstream strm(tile_path.native().c_str(), ios::binary) ;
                 std::stringstream buffer;
                 buffer << strm.rdbuf();

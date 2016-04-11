@@ -3,8 +3,11 @@
 
 #include <string>
 #include <vector>
+#include <array>
 
 #include "dictionary.hpp"
+
+namespace geojson {
 
 struct FeatureGeometry {
     virtual std::string toGeoJSON() const = 0;
@@ -17,11 +20,13 @@ struct Feature {
     std::string toGeoJSON() const ;
 };
 
-using Point = std::pair<float, float> ;
+using Point = std::array<float, 3> ;
 using PointList = std::vector<Point> ;
 
 struct PointGeometry: public FeatureGeometry {
-    PointGeometry(float x, float y): coordinates_(std::make_pair(x, y)) {}
+    PointGeometry(float x, float y, float z=0): coordinates_{x, y, z} {}
+    PointGeometry(const Point &p): coordinates_(p) {}
+
     Point coordinates_ ;
     std::string toGeoJSON() const ;
 };
@@ -58,5 +63,6 @@ struct FeatureCollection {
     std::string toGeoJSON() const ;
 };
 
+}
 
 #endif

@@ -5,15 +5,13 @@
 #include <boost/optional.hpp>
 
 using namespace std ;
+using namespace geojson ;
 
 bool gpx_load(const pugi::xml_document &doc, FeatureCollection &col) {
 
     pugi::xml_node root = doc.child("gpx") ;
 
-    if ( root.empty() ) {
-        cerr << "Not a GPX file \n";
-        return false ;
-    }
+    if ( root.empty() ) return false ;
 
     // we do not parse metadata at the moment since geojson does not support them
 
@@ -49,8 +47,9 @@ bool gpx_load(const pugi::xml_document &doc, FeatureCollection &col) {
             for( pugi::xml_node &trkpt: trkseg.children("trkpt") ) {
                 float lat = trkpt.attribute("lat").as_float() ;
                 float lon = trkpt.attribute("lon").as_float() ;
+                float ele = trkpt.attribute("ele").as_float() ;
 
-                pl.push_back(make_pair(lon, lat)) ;
+                pl.push_back({lon, lat, ele}) ;
             }
 
             gcol->geometries_.push_back(std::make_shared<LineStringGeometry>(pl)) ;

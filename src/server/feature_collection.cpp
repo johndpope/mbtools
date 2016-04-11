@@ -3,9 +3,11 @@
 
 using namespace std ;
 
+namespace geojson {
+
 string PointGeometry::toGeoJSON() const {
     stringstream strm ;
-    strm << "{ \"type\":\"Point\",\"coordinates\":[" << coordinates_.first << "," << coordinates_.second << "]}" << std::setprecision(12) ;
+    strm << "{ \"type\":\"Point\",\"coordinates\":[" << coordinates_[0] << "," << coordinates_[1] << "," << coordinates_[2] <<  "]}" << std::setprecision(12) ;
     return strm.str() ;
 }
 
@@ -16,8 +18,29 @@ string LineStringGeometry::toGeoJSON() const {
     bool first = true ;
     for ( auto c: coordinates_) {
         if ( !first ) strm << ',' ;
-        strm << "[" << c.first << "," << c.second << "]" ;
+        strm << "[" << c[0] << "," << c[1] << ',' << c[2] << "]" ;
         first = false ;
+    }
+    strm << "]}" ;
+    return strm.str() ;
+}
+
+string PolygonGeometry::toGeoJSON() const {
+    stringstream strm ;
+    strm << "{ \"type\":\"Polygon\",\"coordinates\":[" << std::setprecision(12)  ;
+
+    bool first_list = true ;
+    for ( auto c_list: coordinates_) {
+        if ( !first_list ) strm << ',' ;
+        strm << "[" ;
+        bool first = true ;
+        for ( auto c: c_list) {
+            if ( !first ) strm << ',' ;
+            strm << "[" << c[0] << "," << c[1] << "," << c[2] << "]" ;
+            first = false ;
+        }
+        strm << "]" ;
+        first_list = false ;
     }
     strm << "]}" ;
     return strm.str() ;
@@ -91,4 +114,6 @@ string Feature::toGeoJSON() const {
     strm << "}" ;
 
     return strm.str() ;
+}
+
 }

@@ -2,6 +2,8 @@
 #include "request.hpp"
 #include "reply.hpp"
 #include "gpx_reader.hpp"
+#include "kml_reader.hpp"
+#include "logger.hpp"
 
 #include <zlib.h>
 #include <boost/regex.hpp>
@@ -104,6 +106,8 @@ void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
 
     string cnv = req.GET_["cnv"] ;
 
+    LOG_INFO_STREAM("Recieved request for " << req.path_) ;
+
     if ( db_ ) {
 
         // since we do not store timestamps per tile we use the modification time of the tileset
@@ -129,8 +133,11 @@ void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
                     resp.encode_file_data(content, "gzip", string(), mod_time) ;
                 else if ( cnv == "geojson" ) {
                     string uc = uncompress(content) ;
-                    FeatureCollection col ;
+                    geojson::FeatureCollection col ;
                     if ( GPXReader::load_from_string(uc, col) ) {
+                        resp.encode_file_data(compress(col.toGeoJSON()), "gzip", string(), mod_time) ;
+                    }
+                    else if ( KMLReader::load_from_string(uc, col) ) {
                         resp.encode_file_data(compress(col.toGeoJSON()), "gzip", string(), mod_time) ;
                     }
                     else
@@ -156,10 +163,13 @@ void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
             time_t mod_time = boost::filesystem::last_write_time(file.native());
 
             if ( cnv.empty() )
-                resp.encode_file(file.native(), string(), string()) ;
+               resp.encode_file(file.native(), string(), string()) ;
             else if ( cnv == "geojson" ) {
-                FeatureCollection col ;
+                geojson::FeatureCollection col ;
                 if ( GPXReader::load_from_file(file.native(), col) ) {
+                    resp.encode_file_data(compress(col.toGeoJSON()), "gzip", string(), mod_time) ;
+                }
+                else if ( KMLReader::load_from_file(file.native(), col) ) {
                     resp.encode_file_data(compress(col.toGeoJSON()), "gzip", string(), mod_time) ;
                 }
                 else

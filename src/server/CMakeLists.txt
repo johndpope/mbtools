@@ -20,7 +20,7 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/mesh_tile_renderer.hpp
 
 	${SRC_ROOT}/map/geom_helpers.cpp
-	${SRC_ROOT}/server/tile_server.cpp
+
 
 	${SRC_ROOT}/server/connection.cpp
 	${SRC_ROOT}/server/connection.hpp
@@ -55,12 +55,15 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/feature_collection.cpp
 	${SRC_ROOT}/server/feature_collection.hpp
 	${SRC_ROOT}/server/kml_reader.cpp
+	${SRC_ROOT}/server/kml_reader.hpp
 	${SRC_ROOT}/server/gpx_reader.cpp
 	${SRC_ROOT}/server/gpx_reader.hpp
 
 )
 
-
-ADD_EXECUTABLE(tileserver ${TILE_SERVER_SOURCES} ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
-TARGET_LINK_LIBRARIES(tileserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${PNG_LIBRARIES}
+ADD_LIBRARY(mapserver STATIC ${TILE_SERVER_SOURCES} ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
+TARGET_LINK_LIBRARIES(mapserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${PNG_LIBRARIES}
 ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr Xi pthread dl z)
+
+ADD_EXECUTABLE(tileserver ${SRC_ROOT}/server/tile_server.cpp)
+TARGET_LINK_LIBRARIES(tileserver mapserver)
