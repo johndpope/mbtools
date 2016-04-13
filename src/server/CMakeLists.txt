@@ -58,12 +58,17 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/kml_reader.hpp
 	${SRC_ROOT}/server/gpx_reader.cpp
 	${SRC_ROOT}/server/gpx_reader.hpp
+	${SRC_ROOT}/server/jp2_decoder.cpp
+	${SRC_ROOT}/server/jp2_decoder.hpp
 
 )
 
 ADD_LIBRARY(mapserver STATIC ${TILE_SERVER_SOURCES} ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})
 TARGET_LINK_LIBRARIES(mapserver ${SQLITE3_LIBRARY} ${Boost_LIBRARIES} ${PROTOBUF_LIBRARIES} ${PNG_LIBRARIES}
-${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} X11 Xxf86vm Xrandr Xi pthread dl z)
+${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${OPENJPEG_LIBRARIES} X11 Xxf86vm Xrandr Xi pthread dl z)
 
 ADD_EXECUTABLE(tileserver ${SRC_ROOT}/server/tile_server.cpp)
 TARGET_LINK_LIBRARIES(tileserver mapserver)
+
+ADD_EXECUTABLE(testjpeg ${SRC_ROOT}/server/test_jpeg.cpp)
+TARGET_LINK_LIBRARIES(testjpeg mapserver)
