@@ -60,6 +60,10 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/gpx_reader.hpp
 	${SRC_ROOT}/server/jp2_decoder.cpp
 	${SRC_ROOT}/server/jp2_decoder.hpp
+	${SRC_ROOT}/server/raster_tile_cache.cpp
+	${SRC_ROOT}/server/raster_tile_cache.hpp
+	${SRC_ROOT}/server/raster_tile_source.cpp
+	${SRC_ROOT}/server/raster_tile_source.hpp
 
 )
 

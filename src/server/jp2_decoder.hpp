@@ -5,33 +5,29 @@
 // currently only supporting single band 8 bit data (grayscale)
 
 #include <stdio.h>
-#include <cstdint>
+
 #include <string>
 
+#include "raster_tile_source.hpp"
+#include "raster_tile_cache.hpp"
 
-class JP2Decoder {
+class JP2Decoder: public RasterTileSource {
 public:
 
-    JP2Decoder() ;
+    JP2Decoder(RasterTileCache *cache) ;
 
     // open file and read stream headers
     bool open(const std::string &file_name) ;
-    bool read(uint64_t tile, char *buffer) ;
 
-public:
+    // read a tile into memory
+   RasterTileData read_tile(uint32_t ti, uint32_t tj) ;
 
-    uint32_t image_width_ ;
-    uint32_t image_height_ ;
-
-    uint32_t tile_width_ ;
-    uint32_t tile_height_ ;
-    uint32_t n_tiles_x_ ;
-    uint32_t n_tiles_y_ ;
-    uint32_t resolutions_ ;
-    float georef_[6] ;
+private:
 
     bool is_valid_ ;
+    uint32_t resolutions_ ;
     std::string file_name_ ;
+
 } ;
 
 

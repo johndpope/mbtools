@@ -22,7 +22,7 @@ static void warning_callback(const char *msg, void *user) {
 
 static void info_callback(const char *msg, void *user) {
     string *fname = (string *)user ;
-    LOG_INFO_STREAM(msg << ":" << *fname) ;
+ //   LOG_INFO_STREAM(msg << ":" << *fname) ;
 }
 
 static const unsigned char jpc_header[] = {0xff,0x4f};
@@ -219,11 +219,12 @@ opj_stream_t* create_read_stream(JP2OpenJPEGFile &jpf, uint64_t sz)
 }
 
 
-JP2Decoder::JP2Decoder(): is_valid_(false) {
+namespace fs = boost::filesystem ;
+
+JP2Decoder::JP2Decoder(RasterTileCache *cache): RasterTileSource(cache)
+{
 
 }
-
-namespace fs = boost::filesystem ;
 
 bool JP2Decoder::open(const string &file_name)
 {
@@ -347,16 +348,17 @@ bool JP2Decoder::open(const string &file_name)
 
 }
 
-
-bool JP2Decoder::read(uint64_t tile, char *buffer)
+RasterTileData JP2Decoder::read_tile(uint32_t ti, uint32_t tj)
 {
-    if ( !is_valid_ ) return false ;
+    RasterTileData empty ;
+
+    if ( !is_valid_ ) return empty ;
 
     FILE *fp = fopen(file_name_.c_str(), "rb") ;
 
     if ( !fp ) {
         LOG_FATAL_STREAM("cannot open JP2 file: " << file_name_) ;
-        return false;
+        return empty;
     }
 
     opj_codec_t*    jp_codec = NULL;
@@ -375,7 +377,7 @@ bool JP2Decoder::read(uint64_t tile, char *buffer)
 
     if( jp_stream == NULL ) {
         LOG_FATAL_STREAM("create read stream failed: " << file_name_) ;
-        return false ;
+        return empty ;
     }
 
     jp_codec = opj_create_decompress(OPJ_CODEC_J2K);
@@ -383,7 +385,7 @@ bool JP2Decoder::read(uint64_t tile, char *buffer)
     if( jp_codec == nullptr )  {
         LOG_FATAL_STREAM("opj_create_decompress() failed: " << file_name_) ;
         opj_stream_destroy(jp_stream) ;
-        return false ;
+        return empty ;
     }
 
     opj_set_info_handler(jp_codec, info_callback, (void *)&file_name_);
@@ -399,7 +401,7 @@ bool JP2Decoder::read(uint64_t tile, char *buffer)
         opj_end_decompress(jp_codec, jp_stream);
         opj_destroy_codec(jp_codec) ;
         opj_stream_destroy(jp_stream) ;
-        return false ;
+        return empty ;
     }
 
     if( !opj_read_header(jp_stream, jp_codec, &jp_image) )
@@ -409,9 +411,10 @@ bool JP2Decoder::read(uint64_t tile, char *buffer)
         opj_end_decompress(jp_codec, jp_stream);
         opj_destroy_codec(jp_codec) ;
         opj_stream_destroy(jp_stream) ;
-        return false ;
+        return empty ;
     }
 
+    uint64_t tile = ti * n_tiles_x_ + tj ;
 
     if ( !opj_get_decoded_tile(jp_codec, jp_stream, jp_image, tile) )
     {
@@ -420,24 +423,35 @@ bool JP2Decoder::read(uint64_t tile, char *buffer)
         opj_image_destroy(jp_image);
         opj_destroy_codec(jp_codec) ;
         opj_stream_destroy(jp_stream) ;
-        return false ;
+        return empty ;
     }
 
     uint32_t tw = jp_image->comps[0].w  ;
     uint32_t th = jp_image->comps[0].h  ;
 
+    uint32_t stride = tile_width_ * 4 ;
+    uint64_t ts = stride * tile_height_ ;
+    RasterTileData tile_data{ new uint8_t [ts], stride, tile_height_} ;
+
+    uint8_t *buffer = tile_data.data_.get() ;
+    memset(buffer, 0, ts) ;
+
+    // TODO: support color format
+
     for( uint32_t i=0 ; i<th ; i++)
     {
         OPJ_INT32 *src_ptr = jp_image->comps[0].data + i * tw ;
-        uint8_t *dst_ptr = (uint8_t *)buffer + i * tile_width_ ;
+        uint8_t *dst_ptr = (uint8_t *)buffer + i * stride ;
 
         for( uint32_t j=0 ; j<tw ; j++ ) {
-            *dst_ptr = (uint8_t)*src_ptr ;
-            dst_ptr ++ ;
-            src_ptr ++ ;
-        }
-
+            uint8_t g = (uint8_t)*src_ptr++ ;
+            *dst_ptr++ = g ;
+            *dst_ptr++ = g ;
+            *dst_ptr++ = g ;
+            *dst_ptr++ = 255 ;
+       }
     }
+/*
 
     stringstream pgm_header ;
     pgm_header << "P5 " << tile_width_ << ' ' << tile_height_ << ' ' << 255 << endl ;
@@ -447,17 +461,18 @@ bool JP2Decoder::read(uint64_t tile, char *buffer)
     ostrm << pgm_header.str() ;
     for( uint32_t i=0 ; i<tile_height_ ; i++)
     {
-        char *src_ptr = buffer + i * tile_width_ ;
+        uint8_t *src_ptr = buffer + i * tile_width_ ;
 
-        ostrm.write(src_ptr, tile_width_) ;
+        ostrm.write((const char *)src_ptr, tile_width_) ;
     }
 }
+*/
     opj_end_decompress(jp_codec, jp_stream);
     opj_image_destroy(jp_image);
     opj_destroy_codec(jp_codec) ;
     opj_stream_destroy(jp_stream) ;
 
-    return true ;
+    return tile_data ;
     /*
 
         if (! opj_get_decoded_tile(jp_codec, jp_stream, jp_image, 0 ) ) {
@@ -466,3 +481,4 @@ bool JP2Decoder::read(uint64_t tile, char *buffer)
 */
 
 }
+
