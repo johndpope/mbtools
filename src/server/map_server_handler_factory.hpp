@@ -28,7 +28,7 @@ private:
         }
     }
 
-    std::map<std::string, std::shared_ptr<TileRequestHandler> > tile_request_handlers_ ;
+    std::map<std::string, std::shared_ptr<http::RequestHandler> > tile_request_handlers_ ;
     std::map<std::string, std::shared_ptr<AssetRequestHandler> > asset_request_handlers_ ;
     std::shared_ptr<GLRenderingLoop> gl_ ;
     std::unique_ptr<std::thread> gl_thread_ ;

@@ -129,7 +129,7 @@ static uint64_t jp2_find_code_stream( FILE* fp, uint64_t &s_length )
 
         while ( read_box(fp, btype, box_len, box_offset, data_offset, uuid) ) {
 
-            cout << btype << endl ;
+//            cout << btype << endl ;
             if( btype == "asoc" || btype == "jp2h" || btype == "res " ) {
 
                 string sbtype ;
@@ -218,7 +218,6 @@ opj_stream_t* create_read_stream(JP2OpenJPEGFile &jpf, uint64_t sz)
     return stream;
 }
 
-
 namespace fs = boost::filesystem ;
 
 JP2Decoder::JP2Decoder(RasterTileCache *cache): RasterTileSource(cache)
@@ -226,71 +225,76 @@ JP2Decoder::JP2Decoder(RasterTileCache *cache): RasterTileSource(cache)
 
 }
 
+struct opj_context {
+    FILE *fp_ ;
+    opj_codec_t*    codec_ = nullptr;
+    opj_stream_t *  stream_ = nullptr;
+    opj_image_t *   image_ = nullptr;
+
+    ~opj_context() {
+        if ( fp_ ) fclose(fp_) ;
+        if ( codec_ && stream_ ) opj_end_decompress(codec_, stream_);
+        if ( stream_ ) opj_stream_destroy(stream_) ; stream_ = nullptr ;
+        if ( codec_ ) opj_destroy_codec(codec_) ; codec_ = nullptr ;
+        if ( image_ ) opj_image_destroy(image_) ; image_ = nullptr ;
+    }
+
+};
+
 bool JP2Decoder::open(const string &file_name)
 {
-    FILE *fp = fopen(file_name.c_str(), "rb") ;
+    opj_context ctx ;
 
-    if ( !fp ) {
+    ctx.fp_ = fopen(file_name.c_str(), "rb") ;
+
+    if ( !ctx.fp_ ) {
         LOG_FATAL_STREAM("cannot open JP2 file: " << file_name) ;
         return false;
     }
 
-    opj_codestream_info_v2_t *jp_info = NULL ;
-    opj_codec_t*    jp_codec = NULL;
-    opj_stream_t *  jp_stream = NULL;
-    opj_image_t *   jp_image = NULL;
-
     uint64_t code_stream_length = 0 ;
-    uint64_t code_stream_start = jp2_find_code_stream(fp, code_stream_length) ;
+    uint64_t code_stream_start = jp2_find_code_stream(ctx.fp_, code_stream_length) ;
 
     JP2OpenJPEGFile jfp ;
 
-    jfp.fp_ = fp ;
+    jfp.fp_ = ctx.fp_ ;
     jfp.offset_ = code_stream_start ;
 
-    jp_stream = create_read_stream(jfp, code_stream_length);
+    ctx.stream_ = create_read_stream(jfp, code_stream_length);
 
-    if( jp_stream == NULL ) {
+    if( ctx.stream_ == NULL ) {
         LOG_FATAL_STREAM("create read stream failed: " << file_name) ;
         return false ;
     }
 
-    jp_codec = opj_create_decompress(OPJ_CODEC_J2K);
+    ctx.codec_ = opj_create_decompress(OPJ_CODEC_J2K);
 
-    if( jp_codec == nullptr )  {
+    if (  ctx.codec_ == nullptr )  {
         LOG_FATAL_STREAM("opj_create_decompress() failed: " << file_name) ;
-        opj_stream_destroy(jp_stream) ;
         return false ;
     }
 
-    opj_set_info_handler(jp_codec, info_callback, (void *)&file_name);
-    opj_set_warning_handler(jp_codec, warning_callback, (void *)&file_name);
-    opj_set_error_handler(jp_codec, error_callback, (void *)&file_name);
+    opj_set_info_handler(ctx.codec_, info_callback, (void *)&file_name);
+    opj_set_warning_handler(ctx.codec_, warning_callback, (void *)&file_name);
+    opj_set_error_handler(ctx.codec_, error_callback, (void *)&file_name);
 
     opj_dparameters_t parameters;
     opj_set_default_decoder_parameters(&parameters);
 
-    if (! opj_setup_decoder(jp_codec, &parameters))
+    if (!opj_setup_decoder(ctx.codec_, &parameters))
     {
         LOG_FATAL_STREAM("opj_setup_decoder() failed: " << file_name) ;
-        opj_end_decompress(jp_codec, jp_stream);
-        opj_destroy_codec(jp_codec) ;
-        opj_stream_destroy(jp_stream) ;
         return false ;
     }
 
-    if( !opj_read_header(jp_stream, jp_codec, &jp_image) )
+    if( !opj_read_header(ctx.stream_, ctx.codec_, &ctx.image_) )
     {
         LOG_FATAL_STREAM("opj_read_header() failed" << file_name) ;
-        opj_image_destroy(jp_image);
-        opj_end_decompress(jp_codec, jp_stream);
-        opj_destroy_codec(jp_codec) ;
-        opj_stream_destroy(jp_stream) ;
         return false ;
     }
 
     /* Extract some info from the code stream */
-    jp_info = opj_get_cstr_info(jp_codec);
+    opj_codestream_info_v2_t *jp_info = opj_get_cstr_info(ctx.codec_);
 
     resolutions_ = jp_info->m_default_tile_info.tccp_info[0].numresolutions;
     tile_width_ =jp_info->tdx ;
@@ -301,15 +305,11 @@ bool JP2Decoder::open(const string &file_name)
 
     opj_destroy_cstr_info(&jp_info);
 
-    image_width_ = jp_image->x1 - jp_image->x0 ;
-    image_height_ = jp_image->y1 - jp_image->y0 ;
+    image_width_ = ctx.image_->x1 - ctx.image_->x0 ;
+    image_height_ = ctx.image_->y1 - ctx.image_->y0 ;
 
-    if ( tox != 0 || toy != 0 || jp_image->numcomps != 1 || jp_image->comps[0].prec != 8 ) {
+    if ( tox != 0 || toy != 0 || ctx.image_->numcomps != 1 || ctx.image_->comps[0].prec != 8 ) {
         LOG_FATAL_STREAM("not supported image format: " << file_name) ;
-        opj_image_destroy(jp_image);
-        opj_end_decompress(jp_codec, jp_stream);
-        opj_destroy_codec(jp_codec) ;
-        opj_stream_destroy(jp_stream) ;
         return false ;
     }
 
@@ -320,118 +320,87 @@ bool JP2Decoder::open(const string &file_name)
 
     if ( !fs::exists(wp) ) {
         LOG_FATAL_STREAM("Missing world file: " << wp.native()) ;
-        opj_end_decompress(jp_codec, jp_stream);
-        opj_image_destroy(jp_image);
-        opj_destroy_codec(jp_codec) ;
-        opj_stream_destroy(jp_stream) ;
         return false ;
     }
 
     ifstream strm(wp.native().c_str()) ;
     for(size_t i=0 ; i<6 ; i++ ) strm >> georef_[i] ;
 
-    opj_end_decompress(jp_codec, jp_stream);
-    opj_image_destroy(jp_image);
-    opj_destroy_codec(jp_codec) ;
-    opj_stream_destroy(jp_stream) ;
-
-
     is_valid_ = true ;
     file_name_ = file_name ;
     return true ;
-    /*
-
-        if (! opj_get_decoded_tile(jp_codec, jp_stream, jp_image, 0 ) ) {
-            return false ;
-        }
-*/
-
 }
 
 RasterTileData JP2Decoder::read_tile(uint32_t ti, uint32_t tj)
 {
+    opj_context ctx ;
+
     RasterTileData empty ;
 
     if ( !is_valid_ ) return empty ;
 
-    FILE *fp = fopen(file_name_.c_str(), "rb") ;
+    ctx.fp_ = fopen(file_name_.c_str(), "rb") ;
 
-    if ( !fp ) {
+    if ( !ctx.fp_ ) {
         LOG_FATAL_STREAM("cannot open JP2 file: " << file_name_) ;
         return empty;
     }
 
-    opj_codec_t*    jp_codec = NULL;
-    opj_stream_t *  jp_stream = NULL;
-    opj_image_t *   jp_image = NULL;
-
     uint64_t code_stream_length = 0 ;
-    uint64_t code_stream_start = jp2_find_code_stream(fp, code_stream_length) ;
+    uint64_t code_stream_start = jp2_find_code_stream(ctx.fp_, code_stream_length) ;
 
     JP2OpenJPEGFile jfp ;
 
-    jfp.fp_ = fp ;
+    jfp.fp_ = ctx.fp_ ;
     jfp.offset_ = code_stream_start ;
 
-    jp_stream = create_read_stream(jfp, code_stream_length);
+    ctx.stream_ = create_read_stream(jfp, code_stream_length);
 
-    if( jp_stream == NULL ) {
+    if( ctx.stream_ == NULL ) {
         LOG_FATAL_STREAM("create read stream failed: " << file_name_) ;
         return empty ;
     }
 
-    jp_codec = opj_create_decompress(OPJ_CODEC_J2K);
+    ctx.codec_ = opj_create_decompress(OPJ_CODEC_J2K);
 
-    if( jp_codec == nullptr )  {
+    if( ctx.codec_ == nullptr )  {
         LOG_FATAL_STREAM("opj_create_decompress() failed: " << file_name_) ;
-        opj_stream_destroy(jp_stream) ;
         return empty ;
     }
 
-    opj_set_info_handler(jp_codec, info_callback, (void *)&file_name_);
-    opj_set_warning_handler(jp_codec, warning_callback, (void *)&file_name_);
-    opj_set_error_handler(jp_codec, error_callback, (void *)&file_name_);
+    opj_set_info_handler(ctx.codec_, info_callback, (void *)&file_name_);
+    opj_set_warning_handler(ctx.codec_, warning_callback, (void *)&file_name_);
+    opj_set_error_handler(ctx.codec_, error_callback, (void *)&file_name_);
 
     opj_dparameters_t parameters;
     opj_set_default_decoder_parameters(&parameters);
 
-    if (! opj_setup_decoder(jp_codec, &parameters))
+    if (! opj_setup_decoder(ctx.codec_, &parameters))
     {
         LOG_FATAL_STREAM("opj_setup_decoder() failed: " << file_name_) ;
-        opj_end_decompress(jp_codec, jp_stream);
-        opj_destroy_codec(jp_codec) ;
-        opj_stream_destroy(jp_stream) ;
         return empty ;
     }
 
-    if( !opj_read_header(jp_stream, jp_codec, &jp_image) )
+    if( !opj_read_header(ctx.stream_, ctx.codec_, &ctx.image_) )
     {
         LOG_FATAL_STREAM("opj_read_header() failed" << file_name_) ;
-        opj_image_destroy(jp_image);
-        opj_end_decompress(jp_codec, jp_stream);
-        opj_destroy_codec(jp_codec) ;
-        opj_stream_destroy(jp_stream) ;
         return empty ;
     }
 
     uint64_t tile = ti * n_tiles_x_ + tj ;
 
-    if ( !opj_get_decoded_tile(jp_codec, jp_stream, jp_image, tile) )
+    if ( !opj_get_decoded_tile(ctx.codec_, ctx.stream_, ctx.image_, tile) )
     {
         LOG_FATAL_STREAM("opj_get_decoded_tile() failed" << file_name_) ;
-        opj_end_decompress(jp_codec, jp_stream);
-        opj_image_destroy(jp_image);
-        opj_destroy_codec(jp_codec) ;
-        opj_stream_destroy(jp_stream) ;
         return empty ;
     }
 
-    uint32_t tw = jp_image->comps[0].w  ;
-    uint32_t th = jp_image->comps[0].h  ;
+    uint32_t tw = ctx.image_->comps[0].w  ;
+    uint32_t th = ctx.image_->comps[0].h  ;
 
     uint32_t stride = tile_width_ * 4 ;
     uint64_t ts = stride * tile_height_ ;
-    RasterTileData tile_data{ new uint8_t [ts], stride, tile_height_} ;
+    RasterTileData tile_data{ std::shared_ptr<uint8_t>(new uint8_t [ts], std::default_delete<uint8_t []>()), stride, tile_height_} ;
 
     uint8_t *buffer = tile_data.data_.get() ;
     memset(buffer, 0, ts) ;
@@ -440,7 +409,7 @@ RasterTileData JP2Decoder::read_tile(uint32_t ti, uint32_t tj)
 
     for( uint32_t i=0 ; i<th ; i++)
     {
-        OPJ_INT32 *src_ptr = jp_image->comps[0].data + i * tw ;
+        OPJ_INT32 *src_ptr = ctx.image_->comps[0].data + i * tw ;
         uint8_t *dst_ptr = (uint8_t *)buffer + i * stride ;
 
         for( uint32_t j=0 ; j<tw ; j++ ) {
@@ -451,34 +420,8 @@ RasterTileData JP2Decoder::read_tile(uint32_t ti, uint32_t tj)
             *dst_ptr++ = 255 ;
        }
     }
-/*
-
-    stringstream pgm_header ;
-    pgm_header << "P5 " << tile_width_ << ' ' << tile_height_ << ' ' << 255 << endl ;
-{
-    ofstream ostrm("/tmp/oo.pgm", ios::binary) ;
-
-    ostrm << pgm_header.str() ;
-    for( uint32_t i=0 ; i<tile_height_ ; i++)
-    {
-        uint8_t *src_ptr = buffer + i * tile_width_ ;
-
-        ostrm.write((const char *)src_ptr, tile_width_) ;
-    }
-}
-*/
-    opj_end_decompress(jp_codec, jp_stream);
-    opj_image_destroy(jp_image);
-    opj_destroy_codec(jp_codec) ;
-    opj_stream_destroy(jp_stream) ;
 
     return tile_data ;
-    /*
-
-        if (! opj_get_decoded_tile(jp_codec, jp_stream, jp_image, 0 ) ) {
-            return false ;
-        }
-*/
 
 }
 

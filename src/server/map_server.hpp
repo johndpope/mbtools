@@ -8,6 +8,7 @@
 //
 // http://localhost:<port>/map/<mapname>/assets/* (map specific assets such as style file)
 // http://localhost:<port>/map/<mapname>/tiles/<tileset>/*/*/*.pbf (vector tiles)
+// http://localhost:<port>/map/<mapname>/tiles/<tileset>/*/*/*.png (tiles renderered on the fly or provided from local storage)
 // http://localhost:<port>/assets/* (global assets such as fonts, glyphs, js, css)
 
 // On the local filesystem the server expects a fixed structure of file/folder under a root directory provided in the constructor
@@ -15,6 +16,7 @@
 // <root>/maps/
 // <root>/maps/<map1>/, <root>/maps/<map2>/ ...
 // <root>/maps/<map1>/tiles/<tileset>/<z>/<x>/<y>.(pbf|png) or <root>/maps/<map1>/<tileset>.mbtiles
+// <root>/maps/<map1>/tiles/<tileset>.jp2 (raster image in Jpeg2000 format)
 // <root>/maps/<map1>/assets/* or <root>/maps/<map1>/assets.sqlite
 // <root>/assets/* or <root>/assets.sqlite
 //

@@ -4,12 +4,20 @@
 #include <cstdint>
 #include <memory>
 
+template< typename T >
+struct array_deleter
+{
+  void operator ()( T const * p)
+  {
+    delete[] p;
+  }
+};
 
 struct RasterTileData {
 
     RasterTileData() {}
 
-    RasterTileData(uint8_t *buffer, uint32_t stride, uint32_t height): height_(height), data_(buffer), stride_(stride) {}
+    RasterTileData(const std::shared_ptr<uint8_t> &buffer, uint32_t stride, uint32_t height): height_(height), data_(buffer), stride_(stride) {}
 
     std::shared_ptr<uint8_t> data_ ;
     uint32_t stride_ ;

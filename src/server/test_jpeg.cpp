@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 
 //    decoder.read(120, 120, 2000, 2000, data, 2000*4) ;
 
-     decoder.read(0, 0, 80, 80, 256, 256, data, 256*4) ;
+     decoder.read(0, 0, 800, 800, 256, 256, data, 256*4) ;
 
       //write_pgm("/tmp/out.pgm", 256, 256, data ) ;
 

@@ -8,6 +8,7 @@
 #include <memory>
 #include <functional>
 #include <unordered_map>
+#include <mutex>
 
 #include "raster_tile_source.hpp"
 #include "logger.hpp"
@@ -34,9 +35,12 @@ public:
     // Obtain value of the cached function for k
     value_type fetch(uint32_t ti, uint32_t tj, RasterTileSource *decoder )
     {
+        std::lock_guard<std::mutex> guard(mtx_) ; // TODO: this effectively serializes request, make better syncronization
+
         key_type key(ti, tj, decoder) ;
         // Attempt to find existing record
-        const typename key_to_value_type::iterator it = key_to_value_.find(key) ;
+
+        key_to_value_type::const_iterator it = key_to_value_.find(key) ;
 
         if ( it == key_to_value_.end() )  {
             LOG_TRACE_STREAM("loading new tile from source: " << ti << ' ' << tj ) ;
@@ -46,6 +50,7 @@ public:
             return insert(key, val);
 
         } else {
+
             key_tracker_.splice( key_tracker_.end(), key_tracker_,  (*it).second.second ) ;
 
             // Return the retrieved value
@@ -106,6 +111,7 @@ private:
     size_t size_ ;
     key_tracker_type key_tracker_;
     key_to_value_type key_to_value_ ;
+    std::mutex mtx_ ;
 
 };
 

@@ -1,5 +1,6 @@
 #include "map_server_handler_factory.hpp"
 #include "request.hpp"
+#include "raster_request_handler.hpp"
 
 #include <boost/range/iterator_range.hpp>
 #include <boost/algorithm/string.hpp>
@@ -40,9 +41,17 @@ MapServerHandlerFactory::MapServerHandlerFactory(const string &root_folders, boo
                         for( auto &ts: boost::make_iterator_range(fs::directory_iterator(tiles_folder), {} ) ) {
 
                             string tileset_name = ts.path().stem().string() ;
+                            string extension = ts.path().extension().string() ;
                             string map_source = ts.path().native() ;
 
-                            tile_request_handlers_[name + '_' + tileset_name] = make_shared<TileRequestHandler>(name, map_source, gl_) ;
+                            if ( fs::is_regular_file(ts.path()) ) {
+                                if ( extension == ".jp2" )
+                                    tile_request_handlers_[name + '_' + tileset_name] = make_shared<RasterRequestHandler>(name, map_source) ;
+                                else if ( extension == ".mbtiles" )
+                                    tile_request_handlers_[name + '_' + tileset_name] = make_shared<TileRequestHandler>(name, map_source, gl_) ;
+                            }
+                            else
+                                tile_request_handlers_[name + '_' + tileset_name] = make_shared<TileRequestHandler>(name, map_source, gl_) ;
                         }
                     }
 

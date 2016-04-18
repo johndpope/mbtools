@@ -129,9 +129,9 @@ void scale_image(uint8_t *src_buffer, uint32_t src_w, uint32_t src_h, uint32_t s
 
         // mirror boundaries
         qr[-1] = qr[0] ;  qr[-2] = qr[1] ; qr[src_w] = qr[src_w-1] ; qr[src_w +1] = qr[src_w-2] ;
-        qg[-1] = qg[0] ;  qg[-2] = qr[1] ; qg[src_w] = qg[src_w-1] ; qg[src_w +1] = qg[src_w-2] ;
-        qb[-1] = qb[0] ;  qb[-2] = qr[1] ; qb[src_w] = qb[src_w-1] ; qb[src_w +1] = qb[src_w-2] ;
-        qa[-1] = qa[0] ;  qa[-2] = qr[1] ; qa[src_w] = qa[src_w-1] ; qa[src_w +1] = qa[src_w-2] ;
+        qg[-1] = qg[0] ;  qg[-2] = qg[1] ; qg[src_w] = qg[src_w-1] ; qg[src_w +1] = qg[src_w-2] ;
+        qb[-1] = qb[0] ;  qb[-2] = qb[1] ; qb[src_w] = qb[src_w-1] ; qb[src_w +1] = qb[src_w-2] ;
+        qa[-1] = qa[0] ;  qa[-2] = qa[1] ; qa[src_w] = qa[src_w-1] ; qa[src_w +1] = qa[src_w-2] ;
 
         scale_line_cubic(qr, src_w, pr, dst_w, 0) ;
         scale_line_cubic(qg, src_w, pg, dst_w, 1) ;
@@ -168,11 +168,11 @@ void scale_image(uint8_t *src_buffer, uint32_t src_w, uint32_t src_h, uint32_t s
             qa[i] = buffer1[i * dst_stride + j*4+3] ;
         }
 
-        // mirror boundaries
-        qr[-1] = qr[0] ;  qr[-2] = qr[1] ; qr[src_w] = qr[src_w-1] ; qr[src_w +1] = qr[src_w-2] ;
-        qg[-1] = qg[0] ;  qg[-2] = qr[1] ; qg[src_w] = qg[src_w-1] ; qg[src_w +1] = qg[src_w-2] ;
-        qb[-1] = qb[0] ;  qb[-2] = qr[1] ; qb[src_w] = qb[src_w-1] ; qb[src_w +1] = qb[src_w-2] ;
-        qa[-1] = qa[0] ;  qa[-2] = qr[1] ; qa[src_w] = qa[src_w-1] ; qa[src_w +1] = qa[src_w-2] ;
+        // mirror boundaries //?
+        qr[-1] = qr[0] ;  qr[-2] = qr[1] ; qr[src_h] = qr[src_h-1] ; qr[src_h +1] = qr[src_h-2] ;
+        qg[-1] = qg[0] ;  qg[-2] = qg[1] ; qg[src_h] = qg[src_h-1] ; qg[src_h +1] = qg[src_h-2] ;
+        qb[-1] = qb[0] ;  qb[-2] = qb[1] ; qb[src_h] = qb[src_h-1] ; qb[src_h +1] = qb[src_h-2] ;
+        qa[-1] = qa[0] ;  qa[-2] = qa[1] ; qa[src_h] = qa[src_h-1] ; qa[src_h +1] = qa[src_h-2] ;
 
         scale_line_cubic(qr, src_h, pr, dst_h, 0) ;
         scale_line_cubic(qg, src_h, pg, dst_h, 0) ;
@@ -218,7 +218,7 @@ bool RasterTileSource::read(int32_t ox, int32_t oy, uint32_t wx, uint32_t wy, ui
 
             // do the final pixel transfer
 
-            copy_pixels(tile.data_.get(), tile.stride_, sr.x_, sr.y_, sr.width_, sr.height_,
+            copy_pixels((uint8_t *)tile.data_.get(), tile.stride_, sr.x_, sr.y_, sr.width_, sr.height_,
                         buffer, stride, dr.x_, dr.y_ ) ;
 
             LOG_INFO_STREAM(i << ' ' << j) ;
@@ -248,11 +248,11 @@ bool RasterTileSource::read(float src_ox, float src_oy, float src_wx, float src_
         {
             int32_t buf_offset, src_offset ;
 
-         //   double src_y  =  (i + 0.5) * src_y_inc + src_oy;
-         //   double src_x = 0.5 * src_x_inc + src_ox ;
+            double src_y  =  (i + 0.5) * src_y_inc + src_oy;
+            double src_x = 0.5 * src_x_inc + src_ox ;
 
-            double src_y  =  i * src_y_inc + src_oy;
-            double src_x = src_ox ;
+         //   double src_y  =  i * src_y_inc + src_oy;
+         //   double src_x = src_ox ;
 
             int32_t isrc_y = (int32_t) src_y ;
             int32_t ti = isrc_y/tile_height_ ;
@@ -284,7 +284,7 @@ bool RasterTileSource::read(float src_ox, float src_oy, float src_wx, float src_
                     if ( !tile.data_ ) return false ;
                 }
 
-                uint8_t *src_ptr = tile.data_.get() + src_offset * tile.stride_ + 4*(isrc_x  - tj * tile_width_) ;
+                uint8_t *src_ptr = (uint8_t *)tile.data_.get() + src_offset * tile.stride_ + 4*(isrc_x  - tj * tile_width_) ;
                 uint8_t *dst_ptr = buffer + buf_offset + j*4 ;
 
                 *dst_ptr++ = *src_ptr++ ;
@@ -298,16 +298,22 @@ bool RasterTileSource::read(float src_ox, float src_oy, float src_wx, float src_
     else {
 
         uint32_t padding = 0 ;
-        int32_t isrc_ox = (int32_t)src_ox - padding, isrc_oy = (int32_t)src_oy - padding ;
-        int32_t isrc_wx = (int32_t)src_wx + 2 * padding, isrc_wy = (int32_t)src_wy + 2 * padding ;
+        int32_t isrc_ox = round(src_ox), isrc_oy = round(src_oy) ;
 
-        uint8_t *src_buffer = new uint8_t [isrc_wx * isrc_wy * 4] ;
+        uint32_t isrc_wx = uint8_t(src_wx) ;
+        uint32_t isrc_wy = uint8_t(src_wy) ;
+
+//        cout << src_ox << ' ' << src_oy << ' ' << src_wx << ' ' << src_wy << endl ;
+//        cout << isrc_ox << ' ' << isrc_oy << ' ' << isrc_wx << ' ' << isrc_wy << endl ;
+
+        std::unique_ptr<uint8_t []> src_buffer(new uint8_t [isrc_wx * isrc_wy * 4]) ;
+        memset(src_buffer.get(), 0, isrc_wx * isrc_wy * 4) ;
 
         // get the request source raster region
 
-        if ( !read(isrc_ox, isrc_oy, isrc_wx, isrc_wy, src_buffer, isrc_wx * 4) ) return false ;
+        if ( !read(isrc_ox, isrc_oy, isrc_wx, isrc_wy, src_buffer.get(), isrc_wx * 4) ) return false ;
 
-        scale_image(src_buffer, isrc_wx, isrc_wy, 4 *isrc_wx, buffer, dst_wx, dst_wy, stride) ;
+        scale_image(src_buffer.get(), isrc_wx, isrc_wy, 4 *isrc_wx, buffer, dst_wx, dst_wy, stride) ;
     }
     return true ;
 }
