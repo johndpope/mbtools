@@ -4,6 +4,8 @@
 #include "rectangle.hpp"
 
 #include <cstring>
+#include <cmath>
+
 using namespace std;
 
 static void copy_pixels(const uint8_t *src_buf, uint32_t src_stride,
@@ -56,60 +58,48 @@ static short cubic_kernel[] = {
     -5,  -4,  -4,  -3,  -3,  -2,  -2,  -2,  -1,  -1,  -1,  -1,   0,   0,   0,   0,   0
 } ;
 
-static void scale_line_cubic(uint8_t *src, uint32_t src_len, uint8_t *dst, uint32_t dst_len, uint32_t step)
+// 1D cubic interpolation. x coordinate is quantized to 256 bins and spline coefficients to 12 bits
+
+static void scale_line_cubic(uint8_t *src, float offset, float scale, uint8_t *dst, uint32_t dst_len)
 {
-    int32_t x, ii,dii, ff, dff, len ;
     uint64_t val ;
+    int32_t ii = offset * 256 ;
+    int32_t dii = scale * 256 ;
 
-    len = dst_len ;
-    dst_len -- ;
-    src_len-- ;
-    ii = 0 ;
-    ff = dst_len/2 ;
-    x = src_len*256 ;
-    dii = x/dst_len ;
-    dff = x%dst_len ;
-
-    for( x=0 ; x<len ; x++ )
+    for( uint32_t x=0 ; x<dst_len ; x++ )
     {
         val = (uint64_t)src[-1]*cubic_kernel[256+ii] ;
         val += (uint64_t)src[0]*cubic_kernel[ii] ;
         val += (uint64_t)src[1]*cubic_kernel[256-ii] ;
         val += (uint64_t)src[2]*cubic_kernel[512-ii] ;
-
-        if ( ii==0 ) val += (uint64_t)src[-2]*cubic_kernel[512+ii] ;
+        if ( ii == 0 ) val += (uint64_t)src[-2]*cubic_kernel[512+ii] ;
 
         val = (val + 2048) >> 12 ;
         if ( val<0 ) val = 0 ;
         if ( val>255 ) val = 255 ;
         dst[x] = val ;
 
-        if ( (ff+=dff) >= dst_len) {
-            ff -= dst_len ;
-            ii++ ;
-        }
         if ((ii+=dii) >= 256)
         {
             do {
                 ii -= 256 ; src++ ;
             } while ( ii>=256 ) ;
         }
-
     }
 }
 
 // fast bicubic rescaling by means of separable image sampling
 
-void scale_image(uint8_t *src_buffer, uint32_t src_w, uint32_t src_h, uint32_t src_stride,
+void scale_image(uint8_t *src_buffer, float src_offset_x, float src_offset_y, float scale_x, float scale_y, uint32_t src_w, uint32_t src_h, uint32_t src_stride,
                  uint8_t *dst_buffer, uint32_t dst_w, uint32_t dst_h, uint32_t dst_stride)
 {
     int i,j ;
 
     uint8_t *buffer1 = new uint8_t [dst_stride * src_h] ; // hold the intermediate buffer
-    uint8_t *q = new uint8_t [4*(src_w + 4)], *ptr = q + 2;
-    uint8_t *qr = ptr ; ptr += src_w + 4 ;
-    uint8_t *qg = ptr ; ptr += src_w + 4 ;
-    uint8_t *qb = ptr ; ptr += src_w + 4 ;
+    uint8_t *q = new uint8_t [4*src_w], *ptr = q ;
+    uint8_t *qr = ptr ; ptr += src_w ;
+    uint8_t *qg = ptr ; ptr += src_w ;
+    uint8_t *qb = ptr ; ptr += src_w ;
     uint8_t *qa = ptr ;
 
     uint8_t *p = new uint8_t [dst_w * 4] ; ptr = p ;
@@ -127,16 +117,10 @@ void scale_image(uint8_t *src_buffer, uint32_t src_w, uint32_t src_h, uint32_t s
             qr[j] =  *ptr++ ; qg[j] =  *ptr++ ; qb[j] =  *ptr++ ; qa[j] =  *ptr++ ;
         }
 
-        // mirror boundaries
-        qr[-1] = qr[0] ;  qr[-2] = qr[1] ; qr[src_w] = qr[src_w-1] ; qr[src_w +1] = qr[src_w-2] ;
-        qg[-1] = qg[0] ;  qg[-2] = qg[1] ; qg[src_w] = qg[src_w-1] ; qg[src_w +1] = qg[src_w-2] ;
-        qb[-1] = qb[0] ;  qb[-2] = qb[1] ; qb[src_w] = qb[src_w-1] ; qb[src_w +1] = qb[src_w-2] ;
-        qa[-1] = qa[0] ;  qa[-2] = qa[1] ; qa[src_w] = qa[src_w-1] ; qa[src_w +1] = qa[src_w-2] ;
-
-        scale_line_cubic(qr, src_w, pr, dst_w, 0) ;
-        scale_line_cubic(qg, src_w, pg, dst_w, 1) ;
-        scale_line_cubic(qb, src_w, pb, dst_w, 2) ;
-        scale_line_cubic(qa, src_w, pa, dst_w, 3) ;
+        scale_line_cubic(qr+3, src_offset_x, scale_x, pr, dst_w) ;
+        scale_line_cubic(qg+3, src_offset_x, scale_x, pg, dst_w) ;
+        scale_line_cubic(qb+3, src_offset_x, scale_x, pb, dst_w) ;
+        scale_line_cubic(qa+3, src_offset_x, scale_x, pa, dst_w) ;
 
         ptr = buffer1 + i * dst_stride ;
 
@@ -147,10 +131,10 @@ void scale_image(uint8_t *src_buffer, uint32_t src_w, uint32_t src_h, uint32_t s
 
     delete [] q ; delete [] p ;
 
-    q = new uint8_t [4*(src_h + 4)] ; ptr = q + 2;
-    qr = ptr ; ptr += src_h + 4 ;
-    qg = ptr ; ptr += src_h + 4 ;
-    qb = ptr ; ptr += src_h + 4 ;
+    q = new uint8_t [4*src_h] ; ptr = q ;
+    qr = ptr ; ptr += src_h ;
+    qg = ptr ; ptr += src_h ;
+    qb = ptr ; ptr += src_h ;
     qa = ptr ;
 
     p = new uint8_t [dst_h * 4] ; ptr = p ;
@@ -168,16 +152,10 @@ void scale_image(uint8_t *src_buffer, uint32_t src_w, uint32_t src_h, uint32_t s
             qa[i] = buffer1[i * dst_stride + j*4+3] ;
         }
 
-        // mirror boundaries //?
-        qr[-1] = qr[0] ;  qr[-2] = qr[1] ; qr[src_h] = qr[src_h-1] ; qr[src_h +1] = qr[src_h-2] ;
-        qg[-1] = qg[0] ;  qg[-2] = qg[1] ; qg[src_h] = qg[src_h-1] ; qg[src_h +1] = qg[src_h-2] ;
-        qb[-1] = qb[0] ;  qb[-2] = qb[1] ; qb[src_h] = qb[src_h-1] ; qb[src_h +1] = qb[src_h-2] ;
-        qa[-1] = qa[0] ;  qa[-2] = qa[1] ; qa[src_h] = qa[src_h-1] ; qa[src_h +1] = qa[src_h-2] ;
-
-        scale_line_cubic(qr, src_h, pr, dst_h, 0) ;
-        scale_line_cubic(qg, src_h, pg, dst_h, 0) ;
-        scale_line_cubic(qb, src_h, pb, dst_h, 0) ;
-        scale_line_cubic(qa, src_h, pa, dst_h, 0) ;
+        scale_line_cubic(qr+3, src_offset_y, scale_y, pr, dst_h) ;
+        scale_line_cubic(qg+3, src_offset_y, scale_y, pg, dst_h) ;
+        scale_line_cubic(qb+3, src_offset_y, scale_y, pb, dst_h) ;
+        scale_line_cubic(qa+3, src_offset_y, scale_y, pa, dst_h) ;
 
         for( i=0 ; i<dst_h ; i++ ) {
             dst_buffer[i * dst_stride + 4*j] = pr[i] ;
@@ -251,9 +229,6 @@ bool RasterTileSource::read(float src_ox, float src_oy, float src_wx, float src_
             double src_y  =  (i + 0.5) * src_y_inc + src_oy;
             double src_x = 0.5 * src_x_inc + src_ox ;
 
-         //   double src_y  =  i * src_y_inc + src_oy;
-         //   double src_x = src_ox ;
-
             int32_t isrc_y = (int32_t) src_y ;
             int32_t ti = isrc_y/tile_height_ ;
 
@@ -280,7 +255,6 @@ bool RasterTileSource::read(float src_ox, float src_oy, float src_wx, float src_
                 else {
                     tile = ctile = cache_->fetch(ti, tj, this) ;
                     cti = ti ; ctj = tj ;
-                    cout << cti << ' ' << ctj << endl ;
                     if ( !tile.data_ ) return false ;
                 }
 
@@ -297,23 +271,25 @@ bool RasterTileSource::read(float src_ox, float src_oy, float src_wx, float src_
     }
     else {
 
-        uint32_t padding = 0 ;
-        int32_t isrc_ox = round(src_ox), isrc_oy = round(src_oy) ;
+        // cubic bilinear interpolation.
+        // first crop the area of the image padded and then scale it.
 
-        uint32_t isrc_wx = uint8_t(src_wx) ;
-        uint32_t isrc_wy = uint8_t(src_wy) ;
+        uint32_t padding = 3 ;
+        int32_t isrc_ox = floor(src_ox) - padding, isrc_oy = floor(src_oy) - padding ;
 
-//        cout << src_ox << ' ' << src_oy << ' ' << src_wx << ' ' << src_wy << endl ;
-//        cout << isrc_ox << ' ' << isrc_oy << ' ' << isrc_wx << ' ' << isrc_wy << endl ;
+        uint32_t isrc_wx = floor(src_wx) + 2*padding ;
+        uint32_t isrc_wy = floor(src_wy) + 2*padding ;
 
-        std::unique_ptr<uint8_t []> src_buffer(new uint8_t [isrc_wx * isrc_wy * 4]) ;
-        memset(src_buffer.get(), 0, isrc_wx * isrc_wy * 4) ;
+        std::unique_ptr<uint8_t []> src_buffer(new uint8_t [isrc_wx*isrc_wy* 4]) ;
+        memset(src_buffer.get(), 0, isrc_wx*isrc_wy* 4) ;
 
         // get the request source raster region
 
-        if ( !read(isrc_ox, isrc_oy, isrc_wx, isrc_wy, src_buffer.get(), isrc_wx * 4) ) return false ;
+        if ( !read(isrc_ox, isrc_oy, isrc_wx, isrc_wy, src_buffer.get(), isrc_wx* 4) ) return false ;
 
-        scale_image(src_buffer.get(), isrc_wx, isrc_wy, 4 *isrc_wx, buffer, dst_wx, dst_wy, stride) ;
+        scale_image(src_buffer.get(), src_ox - isrc_ox - padding, src_oy - isrc_oy - padding, src_x_inc, src_y_inc,
+                    isrc_wx, isrc_wy, 4 *isrc_wx, buffer, dst_wx, dst_wy, stride) ;
     }
+
     return true ;
 }

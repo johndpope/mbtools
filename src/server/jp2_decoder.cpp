@@ -308,7 +308,7 @@ bool JP2Decoder::open(const string &file_name)
     image_width_ = ctx.image_->x1 - ctx.image_->x0 ;
     image_height_ = ctx.image_->y1 - ctx.image_->y0 ;
 
-    if ( tox != 0 || toy != 0 || ctx.image_->numcomps != 1 || ctx.image_->comps[0].prec != 8 ) {
+    if ( tox != 0 || toy != 0 || ( ctx.image_->numcomps != 1 && ctx.image_->numcomps != 3 ) || ctx.image_->comps[0].prec != 8 ) {
         LOG_FATAL_STREAM("not supported image format: " << file_name) ;
         return false ;
     }
@@ -405,20 +405,46 @@ RasterTileData JP2Decoder::read_tile(uint32_t ti, uint32_t tj)
     uint8_t *buffer = tile_data.data_.get() ;
     memset(buffer, 0, ts) ;
 
-    // TODO: support color format
+    if ( ctx.image_->numcomps == 1) {
+        for( uint32_t i=0 ; i<th ; i++)
+        {
+            OPJ_INT32 *src_ptr = ctx.image_->comps[0].data + i * tw ;
+            uint8_t *dst_ptr = (uint8_t *)buffer + i * stride ;
 
-    for( uint32_t i=0 ; i<th ; i++)
-    {
-        OPJ_INT32 *src_ptr = ctx.image_->comps[0].data + i * tw ;
-        uint8_t *dst_ptr = (uint8_t *)buffer + i * stride ;
+            for( uint32_t j=0 ; j<tw ; j++ ) {
+                uint8_t g = (uint8_t)*src_ptr++ ;
+                *dst_ptr++ = g ;
+                *dst_ptr++ = g ;
+                *dst_ptr++ = g ;
+                *dst_ptr++ = 255 ;
+            }
+        }
+    }
+    else if ( ctx.image_->numcomps == 3 ) {
+        for( int k=0 ; k<3 ; k++) {
+            for( uint32_t i=0 ; i<th ; i++)
+            {
+                OPJ_INT32 *src_ptr = ctx.image_->comps[k].data + i * tw ;
+                uint8_t *dst_ptr = (uint8_t *)buffer + i * stride + k ;
 
-        for( uint32_t j=0 ; j<tw ; j++ ) {
-            uint8_t g = (uint8_t)*src_ptr++ ;
-            *dst_ptr++ = g ;
-            *dst_ptr++ = g ;
-            *dst_ptr++ = g ;
-            *dst_ptr++ = 255 ;
-       }
+                for( uint32_t j=0 ; j<tw ; j++ ) {
+                    uint8_t g = (uint8_t)*src_ptr++ ;
+                    *dst_ptr = g ;
+                    dst_ptr += 4 ;
+                }
+            }
+        }
+
+        // alpha channel
+        for( uint32_t i=0 ; i<th ; i++)
+        {
+            uint8_t *dst_ptr = (uint8_t *)buffer + i * stride + 3 ;
+
+            for( uint32_t j=0 ; j<tw ; j++ ) {
+                *dst_ptr = 255 ;
+                dst_ptr += 4 ;
+            }
+        }
     }
 
     return tile_data ;

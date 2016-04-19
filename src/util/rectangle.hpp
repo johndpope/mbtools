@@ -69,18 +69,18 @@ inline Rect Rect::translated(int32_t ox, int32_t oy) const {
 
 
 inline bool Rect::contains(int32_t px, int32_t py) const {
-    return (x_ <= px && y_ <= py ) && ( px < x_ + width_ && py < y_ + height_);
+    return (x_ <= px && y_ <= py ) && ( px < x_ + (int32_t)width_ && py < y_ + (int32_t)height_);
 }
 
 inline bool Rect::contains(const Rect& r) const
 {
-    return ( contains(r.x_, r.y_) && contains(r.x_ + r.width_ -1, r.y_ + r.height_ - 1) );
+    return ( contains(r.x_, r.y_) && contains(r.x_ + (int32_t)r.width_ -1, r.y_ + (int32_t)r.height_ - 1) );
 }
 
 inline bool Rect::intersects(const Rect& r) const
 {
-    return ( std::max(x_, r.x_) < std::min(x_ + width_ - 1, r.x_ + r.width_ - 1) &&
-             std::max(y_, r.y_) < std::min(y_ + height_ - 1, r.y_ + r.height_ - 1) )  ;
+    return ( std::max(x_, r.x_) < std::min(x_ + (int32_t)width_ - 1, r.x_ + (int32_t)r.width_ - 1) &&
+             std::max(y_, r.y_) < std::min(y_ + (int32_t)height_ - 1, r.y_ + (int32_t)r.height_ - 1) )  ;
 }
 
 inline void Rect::include(int32_t px, int32_t py)
