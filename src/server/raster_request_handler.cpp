@@ -12,14 +12,12 @@ using namespace std ;
 namespace fs = boost::filesystem ;
 using namespace http ;
 
-const boost::regex RasterRequestHandler::uri_pattern_(R"(/map/([^/]+)/tiles/([^/]+)/(\d+)/(\d+)/(\d+)\.png)") ;
-
 const uint64_t raster_tile_cache_size = 20*1024*1024 ;
 
 RasterTileCache RasterRequestHandler::tile_cache_(raster_tile_cache_size) ;
 
-RasterRequestHandler::RasterRequestHandler(const string &id, const string &tileSet):
-    tileset_(tileSet), map_id_(id), provider_(&tile_cache_)
+RasterRequestHandler::RasterRequestHandler(const string &id, const string &tileSet): TileRequestHandler(id, tileSet),
+    provider_(&tile_cache_)
 {
     if ( !provider_.open(tileset_.native()) ) {
         LOG_FATAL_STREAM("Error opening raster tileset: " << tileset_) ;
@@ -83,15 +81,15 @@ static const char *g_empty_transparent_png_256 =
 void RasterRequestHandler::handle_request(const Request &request, Response &resp)
 {
         boost::smatch m ;
-        boost::regex_match(request.path_, m, uri_pattern_) ;
+        boost::regex_match(request.path_.substr(key_.length()), m, uri_pattern_) ;
 
-        int zoom = stoi(m.str(3)) ;
-        int tx = stoi(m.str(4)) ;
-        int ty = stoi(m.str(5)) ;
+        int zoom = stoi(m.str(1)) ;
+        int tx = stoi(m.str(2)) ;
+        int ty = stoi(m.str(3)) ;
 
         ty = pow(2, zoom) - 1 - ty ;
 
-        LOG_INFO_STREAM("Recieved request for raster tile: (" << tx << '/' << ty << '/' << zoom << ")" << "of map " << m.str(1) << "-" << m.str(2)) ;
+        LOG_INFO_STREAM("Recieved request for raster tile: (" << tx << '/' << ty << '/' << zoom << ")" << "of map " << key_) ;
 
         time_t mod_time = boost::filesystem::last_write_time(tileset_.native());
 

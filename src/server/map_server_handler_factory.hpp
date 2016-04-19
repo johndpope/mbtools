@@ -4,7 +4,7 @@
 #include "request_handler_factory.hpp"
 #include "request_handler.hpp"
 #include "gl_rendering_loop.hpp"
-#include "tile_request_handler.hpp"
+#include "vector_tile_request_handler.hpp"
 #include "asset_request_handler.hpp"
 
 #include <map>
@@ -13,7 +13,7 @@
 class MapServerHandlerFactory: public http::RequestHandlerFactory {
 public:
 
-    MapServerHandlerFactory(const std::string &root_folders, bool with_gl=true)  ;
+    MapServerHandlerFactory(const std::string &root_folders)  ;
     ~MapServerHandlerFactory() {
         shutdown_gl_loop() ;
     }

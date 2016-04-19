@@ -11,6 +11,7 @@ public:
 
     AssetRequestHandler(const std::string &url_prefix, const std::string &rsdb) ;
     void handle_request(const http::Request &request, http::Response &resp) ;
+    bool matches(const std::string &req_path) ;
 
 private:
 

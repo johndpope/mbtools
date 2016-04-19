@@ -2,6 +2,7 @@
 #define __GL_RENDERING_LOOP_HPP__
 
 #include "mesh_tile_renderer.hpp"
+#include "shader_config.hpp"
 #include "queue.hpp"
 
 #include <boost/filesystem.hpp>
@@ -13,11 +14,13 @@
 class GLRenderingLoop {
 
 public:
-    GLRenderingLoop(const boost::filesystem::path &rcfg): renderer_config_(rcfg), is_running_(false) {}
+    GLRenderingLoop(): is_running_(false) {}
 
     // main rendering loop that processes a queue of jobs
-    void run() {
-        gl_.reset(new MeshTileRenderer(renderer_config_.native())) ;
+    void run(const glsl::ProgramList &programs) {
+        gl_.reset(new MeshTileRenderer(programs)) ;
+        if ( !gl_->init() ) return ;
+
         is_running_ = true ;
 
         while (is_running_) {
@@ -31,6 +34,8 @@ public:
                 return ;
             }
         }
+
+        is_running_ = false ;
     }
 
     // add new job to the queue and obtain a promise to the result that you can wait upon

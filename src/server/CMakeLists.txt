@@ -47,6 +47,8 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/gl_rendering_loop.hpp
 	${SRC_ROOT}/server/tile_request_handler.hpp
 	${SRC_ROOT}/server/tile_request_handler.cpp
+	${SRC_ROOT}/server/vector_tile_request_handler.hpp
+	${SRC_ROOT}/server/vector_tile_request_handler.cpp
 	${SRC_ROOT}/server/asset_request_handler.hpp
 	${SRC_ROOT}/server/asset_request_handler.cpp
 
@@ -66,6 +68,8 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/raster_tile_source.hpp
 	${SRC_ROOT}/server/raster_request_handler.cpp
 	${SRC_ROOT}/server/raster_request_handler.hpp
+	${SRC_ROOT}/server/gl_tile_request_handler.cpp
+	${SRC_ROOT}/server/gl_tile_request_handler.hpp
 
 )
 

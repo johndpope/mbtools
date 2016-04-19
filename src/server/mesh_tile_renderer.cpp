@@ -18,17 +18,6 @@
 
 using namespace std ;
 
-struct DataBuffers {
-
-    struct Channel {
-        string name_ ;
-        uint32_t dim_, offset_ ;
-    };
-
-    vector<Channel> channels_ ;
-    vector<float> coords_, attr_ ;
-    vector<GLuint> indices_ ;
-};
 
 // decode protobuf object and serialize data tp buffers
 
@@ -121,28 +110,10 @@ static bool save_png(uint8_t *pixels, int w, int h, vector<uint8_t> &data)
 
 class RenderingContext {
 public:
-
-    RenderingContext(uint32_t ts): ts_(ts) {}
-
-    bool init(const string &) ;
-    void release() ;
-    void init_buffers(const DataBuffers &data) ;
-    void init_default_uniforms(const BBox &box) ;
-    bool use_program(const Dictionary &params) ;
-    void render();
-
-    void clear();
-private:
-
-    friend class MeshTileRenderer ;
-
     GLFWwindow* win_ = 0;
-    GLuint fbo_ = 0, texture_id_ = 0;
-    uint32_t ts_ ;
 
-    GLuint vao_, coords_, attr_, indices_, pid_ ;
-    GLuint elem_count_ ;
-    glsl::ProgramList programs_ ;
+    bool init(uint32_t ts) ;
+    void release() ;
 };
 
 static void error_callback(int error, const char* description)
@@ -150,7 +121,7 @@ static void error_callback(int error, const char* description)
     std::cerr << "GLFW: (" << error << ") " << description << std::endl;
 }
 
-bool RenderingContext::init(const string &cfg) {
+bool RenderingContext::init(uint32_t ts) {
 
     if( !glfwInit() ) return false ;
 
@@ -162,13 +133,13 @@ bool RenderingContext::init(const string &cfg) {
     // OpenGL core profile version string: 3.3 (Core Profile) Mesa 10.5.9
     // OpenGL core profile shading language version string: 3.30
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
-//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-    win_ = glfwCreateWindow(ts_, ts_, "tile", 0, 0);
+    win_ = glfwCreateWindow(ts, ts, "tile", 0, 0);
 
     if ( !win_ )     {
         glfwTerminate();
@@ -181,6 +152,15 @@ bool RenderingContext::init(const string &cfg) {
     glewExperimental=true;
 
     if( glewInit() != GLEW_OK ) return false ;
+
+    return true ;
+}
+
+bool MeshTileRenderer::init() {
+
+    ctx_.reset(new RenderingContext) ;
+
+    if ( !ctx_->init(tile_size_) ) return false ;
 
     // create a framebuffer object
     glGenFramebuffers(1, &fbo_);
@@ -195,13 +175,18 @@ bool RenderingContext::init(const string &cfg) {
     // bind buffers
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 
-    if ( !programs_.load(cfg) ) return false ;
     if ( !programs_.install() ) return false ;
 
     return true ;
 }
 
 void RenderingContext::release() {
+    glfwDestroyWindow(win_);
+    glfwTerminate();
+}
+
+
+void MeshTileRenderer::release() {
     if ( texture_id_ )
         glDeleteTextures(1, &texture_id_ );
 
@@ -210,15 +195,11 @@ void RenderingContext::release() {
     // clean up FBO
     if ( fbo_ ) glDeleteFramebuffers(1, &fbo_);
     fbo_ = 0;
-
-    glfwDestroyWindow(win_);
-
-    glfwTerminate();
 }
 
 #define POSITION_LOCATION    0
 
-void RenderingContext::init_buffers(const DataBuffers &buf) {
+void MeshTileRenderer::init_buffers(const DataBuffers &buf) {
 
     glGenVertexArrays(1, &vao_);
     glBindVertexArray(vao_);
@@ -250,7 +231,7 @@ void RenderingContext::init_buffers(const DataBuffers &buf) {
     }
 }
 
-void RenderingContext::init_default_uniforms(const BBox &box)
+void MeshTileRenderer::init_default_uniforms(const BBox &box)
 {
     float scale =  box.width() ;
     float ofx = box.minx_ ;
@@ -262,30 +243,28 @@ void RenderingContext::init_default_uniforms(const BBox &box)
     if ( loc != -1 ) glUniform1f(loc, scale) ;
 }
 
-void RenderingContext::clear() {
+void MeshTileRenderer::clear() {
     glDeleteVertexArrays(1, &vao_) ;
     glDeleteBuffers(1, &coords_) ;
     glDeleteBuffers(1, &indices_) ;
     glDeleteBuffers(1, &attr_) ;
 }
 
-void RenderingContext::render() {
+void MeshTileRenderer::render() {
     glBindVertexArray(vao_);
     glDrawElements(GL_TRIANGLES, elem_count_, GL_UNSIGNED_INT, 0) ;
     glBindVertexArray(0) ;
 }
 
 
-MeshTileRenderer::MeshTileRenderer(const string &cfg_file, uint32_t ts): tile_size_(ts), ctx_(new RenderingContext(ts))
-{
-    ctx_->init(cfg_file) ;
+MeshTileRenderer::MeshTileRenderer(const glsl::ProgramList &programs, uint32_t ts): tile_size_(ts), programs_(programs) {
 }
 
 MeshTileRenderer::~MeshTileRenderer() {
-    ctx_->release() ;
+    release() ;
 }
 
-bool RenderingContext::use_program(const Dictionary &options) {
+bool MeshTileRenderer::use_program(const Dictionary &options) {
 
     string name = options.get("p") ;
     if ( name.empty() || programs_.programs_.count(name) == 0 ) return false ;
@@ -306,7 +285,7 @@ std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
     glDisable(GL_DEPTH_TEST) ;
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if ( !ctx_->use_program(options) ) return string() ;
+    if ( !use_program(options) ) return string() ;
 
     DataBuffers data ;
 
@@ -315,10 +294,10 @@ std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
         BBox box ;
         tms::tileBounds(x, y, z, box.minx_, box.miny_, box.maxx_, box.maxy_) ;
 
-        ctx_->init_buffers(data) ;
-        ctx_->init_default_uniforms(box) ;
-        ctx_->render() ;
-        ctx_->clear() ;
+        init_buffers(data) ;
+        init_default_uniforms(box) ;
+        render() ;
+        clear() ;
     }
 
     glUseProgram(0) ;
@@ -338,7 +317,7 @@ std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
         ofstream strm("/tmp/oo.png", ios::binary) ;
         strm.write(s.data(), s.size()) ;
         }
-        */
+*/
         return std::move(s) ;
     }
 

@@ -29,6 +29,7 @@ public:
 
     /// Handle a request and produce a reply.
     virtual void handle_request(const Request& req, Response& rep) = 0;
+    virtual bool matches(const std::string &req_path) = 0;
 };
 
 } // namespace http

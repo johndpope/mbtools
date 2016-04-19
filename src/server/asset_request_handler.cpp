@@ -4,6 +4,7 @@
 #include "gpx_reader.hpp"
 #include "kml_reader.hpp"
 #include "logger.hpp"
+#include <boost/algorithm/string.hpp>
 
 #include <zlib.h>
 #include <boost/regex.hpp>
@@ -95,14 +96,13 @@ AssetRequestHandler::AssetRequestHandler(const string &url_prefix, const std::st
         db_.reset(new SQLite::Database(rsdb_.native())) ;
 }
 
+bool AssetRequestHandler::matches(const string &req_path) {
+    return ( boost::starts_with(req_path, url_prefix_) ) ;
+}
+
 void AssetRequestHandler::handle_request(const Request &req, Response &resp) {
 
-    boost::regex r("/" + url_prefix_ + "/(.*)") ;
-
-    boost::smatch m ;
-    boost::regex_match(req.path_, m, r) ;
-
-    string key = m.str(1) ;
+    string key = req.path_.substr(url_prefix_.length()) ; ;
 
     string cnv = req.GET_["cnv"] ;
 
