@@ -70,7 +70,8 @@ SET ( TILE_SERVER_SOURCES
 	${SRC_ROOT}/server/raster_request_handler.hpp
 	${SRC_ROOT}/server/gl_tile_request_handler.cpp
 	${SRC_ROOT}/server/gl_tile_request_handler.hpp
-
+	${SRC_ROOT}/server/png_writer.cpp
+	${SRC_ROOT}/server/png_writer.hpp
 )
 
 ADD_LIBRARY(mapserver STATIC ${TILE_SERVER_SOURCES} ${MT_PROTO_SOURCES} ${MT_PROTO_HEADERS})

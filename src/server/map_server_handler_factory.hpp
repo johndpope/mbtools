@@ -13,7 +13,7 @@
 class MapServerHandlerFactory: public http::RequestHandlerFactory {
 public:
 
-    MapServerHandlerFactory(const std::string &root_folders)  ;
+    MapServerHandlerFactory(const std::string &root_folders, bool enable_gl=false)  ;
     ~MapServerHandlerFactory() {
         shutdown_gl_loop() ;
     }

@@ -82,14 +82,15 @@ int main(int argc, char *argv[])
 
     setupDirs(argc, argv) ;
 
-    std::shared_ptr<MapServer> server(new MapServer(application_data_dirs_.join(";").toUtf8().constData(), "5000")) ;
-    std::thread t(&MapServer::run, server.get()) ;
 
-    MainWindow win(argc, argv);
+//    std::shared_ptr<MapServer> server(new MapServer(application_data_dirs_.join(";").toUtf8().constData(), "5000")) ;
+//    std::thread t(&MapServer::run, server.get()) ;
+
+     MainWindow win(argc, argv);
     win.show() ;
 
     app.exec();
 
-    server->stop() ;
-    t.join() ;
+ //   server->stop() ;
+ //   t.join() ;
 }

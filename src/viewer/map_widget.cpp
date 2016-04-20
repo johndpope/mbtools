@@ -11,8 +11,8 @@ MapWidget::MapWidget(): QGraphicsWebView() {
     QWebSettings::globalSettings()->setAttribute(QWebSettings::WebGLEnabled, true);
     QWebSettings::globalSettings()->setAttribute(QWebSettings::AcceleratedCompositingEnabled, true);
 
-   QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
-   QWebSettings::globalSettings()->setAttribute(QWebSettings::TiledBackingStoreEnabled, true);
+//   QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+//  QWebSettings::globalSettings()->setAttribute(QWebSettings::TiledBackingStoreEnabled, true);
 
 
    const char * html1 = R"(

@@ -52,11 +52,10 @@ private:
     std::shared_ptr<RenderingContext> ctx_ ; // platform specific GL context initialization
 
     GLuint fbo_ = 0, texture_id_ = 0;
-    uint32_t ts_ ;
-
     GLuint vao_, coords_, attr_, indices_, pid_ ;
     GLuint elem_count_ ;
     glsl::ProgramList programs_ ;
+
 
 } ;
 

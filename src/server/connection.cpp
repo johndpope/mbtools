@@ -62,8 +62,14 @@ void Connection::handle_read(const boost::system::error_code& e,
             else {
                 std::shared_ptr<RequestHandler> handler = handler_factory_->create(request_) ;
 
-                if ( handler )
-                    handler->handle_request(request_, reply_);
+                if ( handler ) {
+                    try {
+                        handler->handle_request(request_, reply_);
+                    }
+                    catch ( ... ) {
+                        reply_ = Response::stock_reply(Response::internal_server_error);
+                    }
+                }
                 else
                     reply_ = Response::stock_reply(Response::not_found);
 

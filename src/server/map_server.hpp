@@ -23,7 +23,7 @@
 
 class MapServer: public http::Server {
 public:
-    MapServer(const std::string &root_list, const std::string &ports) ;
+    MapServer(const std::string &root_list, const std::string &ports, bool enable_gl = false) ;
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include "mesh_tile.pb.h"
 #include "shader_config.hpp"
 #include "dictionary.hpp"
+#include "png_writer.hpp"
 
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/gzip_stream.h>
@@ -61,52 +62,7 @@ bool decode( const string &data, DataBuffers &buf ) {
 }
 
 
-static void png_write_callback(png_structp  png_ptr, png_bytep data, png_size_t length) {
-    std::vector<uint8_t> *p = (std::vector<uint8_t>*)png_get_io_ptr(png_ptr);
-    p->insert(p->end(), data, data + length);
-}
-
-static bool save_png(uint8_t *pixels, int w, int h, vector<uint8_t> &data)
-{
-    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-
-    if ( !png ) return false;
-
-    png_infop info = png_create_info_struct(png);
-
-    if (!info) {
-        png_destroy_write_struct(&png, &info);
-        return false;
-    }
-
-    png_set_IHDR(png, info, w, h, 8 /* depth */, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-    png_colorp palette = (png_colorp)png_malloc(png, PNG_MAX_PALETTE_LENGTH * sizeof(png_color));
-
-    if (!palette) {
-        png_destroy_write_struct(&png, &info);
-        return false;
-    }
-
-    png_set_PLTE(png, info, palette, PNG_MAX_PALETTE_LENGTH);
-    png_set_packing(png);
-
-    png_bytepp rows = (png_bytepp)png_malloc(png, h * sizeof(png_bytep));
-
-    for (int i = 0; i < h; ++i)
-        rows[i] = (png_bytep)(pixels + (h - i) * w * 4);
-
-    png_set_rows(png, info, &rows[0]);
-    png_set_write_fn(png, (png_voidp)&data, png_write_callback, NULL);
-    png_write_png(png, info, PNG_TRANSFORM_IDENTITY, NULL);
-    png_free(png, palette);
-    png_destroy_write_struct(&png, &info);
-
-    delete[] rows;
-
-    return true ;
-}
-/******************************************************************************************/
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class RenderingContext {
 public:
@@ -156,6 +112,8 @@ bool RenderingContext::init(uint32_t ts) {
     return true ;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool MeshTileRenderer::init() {
 
     ctx_.reset(new RenderingContext) ;
@@ -169,7 +127,7 @@ bool MeshTileRenderer::init() {
     // create a texture object
     glGenTextures(1, &texture_id_);
     glBindTexture(GL_TEXTURE_2D, texture_id_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, ts_, ts_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tile_size_, tile_size_, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id_, 0);
 
     // bind buffers
@@ -229,6 +187,7 @@ void MeshTileRenderer::init_buffers(const DataBuffers &buf) {
             glVertexAttribPointer(loc, c.dim_, GL_FLOAT, GL_FALSE, 0, (GLvoid *)(c.offset_ * sizeof(float)));
         }
     }
+
 }
 
 void MeshTileRenderer::init_default_uniforms(const BBox &box)
@@ -312,12 +271,6 @@ std::string MeshTileRenderer::render(uint32_t x, uint32_t y, uint32_t z,
     if ( save_png(pixels.data(), tile_size_, tile_size_, out) )
     {
         string s(out.begin(), out.end()) ;
-/*
-        {
-        ofstream strm("/tmp/oo.png", ios::binary) ;
-        strm.write(s.data(), s.size()) ;
-        }
-*/
         return std::move(s) ;
     }
 

@@ -3,6 +3,7 @@
 #include "reply.hpp"
 #include "base64.hpp"
 #include "logger.hpp"
+#include "png_writer.hpp"
 #include <boost/algorithm/string.hpp>
 
 #include <fstream>
@@ -18,23 +19,13 @@ VectorTileRequestHandler::VectorTileRequestHandler(const string &id, const strin
 }
 
 
-const char *g_empty_transparent_png_256 =
-"iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABGdBTUEAALGPC/xhBQAAAAFzUkdC\
-AK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dE\
-AP8A/wD/oL2nkwAAAAlwSFlzAAAASAAAAEgARslrPgAAARVJREFUeNrtwTEBAAAAwqD1T+1rCKAA\
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHgDATwAAdgpQwQAAAAldEVYdGRhdGU6Y3JlYXRlADIw\
-MTYtMDQtMDFUMDk6MTE6MjMrMDM6MDCHKZUkAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE2LTA0LTAx\
-VDA5OjExOjIzKzAzOjAw9nQtmAAAAABJRU5ErkJggg==" ;
-
 void VectorTileRequestHandler::handle_request(const Request &request, Response &resp)
 {
 
     boost::smatch m ;
-    boost::regex_match(request.path_.substr(key_.length()), m, uri_pattern_) ;
+    string sq = request.path_.substr(key_.length()) ;
+
+    assert(boost::regex_match(sq, m, uri_pattern_)) ;
 
     int zoom = stoi(m.str(1)) ;
     int tx = stoi(m.str(2)) ;
@@ -43,7 +34,7 @@ void VectorTileRequestHandler::handle_request(const Request &request, Response &
 
     ty = pow(2, zoom) - 1 - ty ;
 
-    LOG_INFO_STREAM("Recieved request for tile: (" << tx << '/' << ty << '/' << zoom << ")" << "of map " << key_) ;
+    LOG_INFO_STREAM("Recieved request for tile: (" << tx << '/' << ty << '/' << zoom << ")" << " of key " << key_) ;
 
     string encoding, mime ;
 
